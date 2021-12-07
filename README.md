@@ -3,7 +3,7 @@ C++ code written as part of the UQ SMP project "Efficient code for calculation o
 
 Project supervisor is A/Prof Taras Plakhotnik.
 
-##Introduction
+## Introduction
 
 The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The code uses the SMARTIES v1.01 MATLAB package, with some modifications made to support multiprecision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids, with the modified code lent to me by Plakhotnik. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that has numeric computation and scientific computing support. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
 
