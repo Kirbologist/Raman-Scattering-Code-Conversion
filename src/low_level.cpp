@@ -71,40 +71,45 @@ namespace Raman{
     return output;
   }
 
-  typename LowLevel<Real>::stPinmTaunm* LowLevel<Real>::vshPinmTaunm_mp(
+  template <class Real>
+  typename LowLevel<Real>::stPinmTaunm* LowLevel<Real>::vshPinmTaunm(
       size_t n_max, const ArrayXr<Real>& theta) {
     if ((theta < 0.0).any())
-      cout << "Warning: theta must be >= 0 in vshPinmTaunm..." < endl;
+      cout << "Warning: theta must be >= 0 in vshPinmTaunm..." << endl;
     int n_rows = size(theta), n_cols, P = (n_max + 1)*(n_max + 1);
     stPinmTaunm* output = new stPinmTaunm();
-    output->pi_nm(n_rows, P);
-    output->tau_nm(n_rows, P);
-    ArrayXr<Real> A_m_sin_mm1 = ArrayXr<Real>::Constant(n_rows, sqrt(0.5));
-    ArrayXr<Real> mu_c = cos(theta), mu_s = sin(theta);
+    output->pi_nm = ArrayXXr<Real>::Zero(n_rows, P);
+    output->tau_nm = ArrayXXr<Real>::Zero(n_rows, P);
+    ArrayXr<Real> A_m_sin_mm1 = ArrayXr<Real>::Ones(n_rows);
+    ArrayXr<Real> mu_c = cos(theta), mu_s = sin(theta), n_vec_real;
     ArrayXi n_vec, p_vec, p_vec_n;
 
-    for (int m = 1; m < n_max; m++) {
-      A_m_sin_mm1 *= sqrt(static_cast<Real>(2*m + 1) / (2*m + 2))*mu_s;
+    for (int m = 1; m <= n_max; m++) {
+      A_m_sin_mm1 *= sqrt(static_cast<Real>(2*m - 1)/(2*m))*
+          (m > 1 ? mu_s : ArrayXr<Real>::Ones(n_rows));
       n_cols = n_max - m + 2;
       ArrayXXr<Real> pi_aux(n_rows, n_cols);
       pi_aux.col(0) = ArrayXr<Real>::Zero(n_rows);
       pi_aux.col(1) = m*A_m_sin_mm1;
 
-      for (int j = 2, n = m; j < n_cols; j++, n++)
-        pi_aux.col(j) = (1/sqrt((j - 2) * (n + m)) * ((2*n - 1)*mu_c*
-            pi_aux.col(j - 1) - sqrt((j - 2)*(n - 1 + m)) * pi_aux.col(j - 2));
+      for (int j = 2, n = m + 1; j < n_cols; j++, n++)
+        pi_aux.col(j) = (1/sqrt((n - m) * (n + m))) * ((2*n - 1)*mu_c*
+            pi_aux.col(j - 1) - sqrt((n - 1 - m)*(n - 1 + m)) * pi_aux.col(j - 2));
 
       n_vec = ArrayXi::LinSpaced(n_cols - 1, m, n_max);
+      n_vec_real = n_vec.template cast<Real>();
       p_vec = n_vec*(n_vec + 1) + m;
       p_vec_n = p_vec - 2*m;
 
-      output->pi_nm(all, p_vec) = pi_aux(all, seq(1, last));
-      output->pi_nm(all, p_vec_n) = pow(-1, (m + 1) % 2) * pi_aux(all, seq(1, last));
+      for (int n = 0; n < n_cols - 1; n++) {
+        (output->pi_nm).col(p_vec(n)) = pi_aux.col(n + 1);
+        (output->pi_nm).col(p_vec_n(n)) = pow(-1, (m + 1) % 2) * pi_aux.col(n + 1);
 
-      output->tau_nm(all, p_vec) = pi_aux(all, seq(0, last-1)) *
-          (-sqrt((n_vec - m) * (n_vec.template case<Real>() + m))/m)
-          + (mu_c*(n_vec.template case<Real>()/m))*pi_aux(all, seq(1, last));
-      output->tau_nm(all, p_vec) = pow(-1, m % 2)*output->tau_nm(all, p_vec);
+        (output->tau_nm).col(p_vec(n)) = pi_aux.col(n) *
+            (-sqrt((n_vec_real(n) - m) * (n_vec_real(n) + m))/m)
+            + (mu_c*(n_vec_real(n)/m))*pi_aux.col(n + 1);
+        (output->tau_nm).col(p_vec_n(n)) = pow(-1, m % 2)*(output->tau_nm).col(p_vec(n));
+      }
     }
 
     ArrayXXr<Real> p_nm1(n_rows, n_max + 1), t_nm1(n_rows, n_max + 1);
@@ -114,16 +119,19 @@ namespace Raman{
     t_nm1.col(1) = -mu_s;
 
     for (int n = 1; n < n_max; n++) {
-      p_nm1.col(n + 1) = (2*n + 1)/static_cast<Real>(n)*mu_c * p_nm1.col(n) -
-          (n - 1)/n*p_nm1.col(n - 1);
+      p_nm1.col(n + 1) = static_cast<Real>(2*n + 1)/(n + 1)*mu_c * p_nm1.col(n) -
+          static_cast<Real>(n)/(n + 1)*p_nm1.col(n - 1);
       t_nm1.col(n + 1) = mu_c*t_nm1.col(n) - (n+1)*mu_s*p_nm1.col(n);
     }
 
-    output->p_n0 = p_nm1(all, seq(1, last));
-    n_vec = ArrayXi::LinSpaced(0, n_max);
+    output->p_n0 = p_nm1;
+    n_vec = ArrayXi::LinSpaced(n_max + 1, 0, n_max);
     p_vec = n_vec*(n_vec + 1);
-    output->pi_nm(all, p_vec) = ArrayXXr<Real>::Zero(n_rows, n_max + 1);
-    output->tau_nm(all, p_vec) = t_nm1(all, seq(1, last));
+
+    for (int n = 0; n <= n_max; n++) {
+      output->pi_nm.col(p_vec(n)) = ArrayXr<Real>::Zero(n_rows);
+      output->tau_nm.col(p_vec(n)) = t_nm1.col(n);
+    }
 
     return output;
   }
