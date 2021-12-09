@@ -30,5 +30,5 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
 ## Copyright Disclaimer
 
-SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015); neither me, Plakhotnik, nor any other party who contributed to this project wrote any of the original code. The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
+SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015); neither me, nor T. Plakhotnik wrote any of the original code. The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
 https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
