@@ -16,6 +16,12 @@ namespace Raman {
   }
 
   template<class Real>
+  complex<Real> mp_im_unit(void) {
+    complex<Real> i(0.0, 1.0);
+    return i;
+  }
+
+  template<class Real>
   RowArrayXr<Real> arr_bessel_j(RowArrayXr<Real>& nu, Real x) {
     RowArrayXr<Real> output(1, nu.size());
     for (int i = 0; i < nu.size(); i++)

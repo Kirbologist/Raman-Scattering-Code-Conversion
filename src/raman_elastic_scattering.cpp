@@ -6,12 +6,10 @@ using namespace Eigen;
 using namespace Raman;
 
 int main(int argc, char** argv) {
-  Array<double, 5, 1> x;
-  x = {1, 2, 3, 4, 5};
-  Array<double, 1, 4> n;
-  n = {6, 7, 8, 9};
-  //Array<complex<double>, Dynamic, Dynamic> test = LowLevel<double>::vshRBchi(n, x);
-  ArrayXXc<double>* test = LowLevel<double>::vshRBpsi(n, x);
-  cout << *test << endl;
+  HighLevel<double>::stIncPar* test = HighLevel<double>::vshMakeIncidentParams(sIncType::KxEz, 3);
+  LowLevel<double>::stIncEabnm* test2 =  LowLevel<double>::vshGetIncidentCoeffs(3, *test);
+  cout << "a_nm" << test2->a_nm << endl << "b_nm" << test2->b_nm << endl;
+  delete test;
+  delete test2;
   return 0;
 }
