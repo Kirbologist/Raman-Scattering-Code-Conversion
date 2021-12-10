@@ -10,6 +10,8 @@ using namespace std;
 using namespace Eigen;
 
 namespace Raman {
+  using RowArrayXi = Array<int, 1, Dynamic>;
+
   template <class Real>
   using ArrayXXr = Array<Real, Dynamic, Dynamic>;
 
@@ -27,6 +29,9 @@ namespace Raman {
 
   template <class Real>
   using RowArrayXc = Array<complex<Real>, 1, Dynamic>;
+
+  template <class Real>
+  using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
 }
 
 #endif

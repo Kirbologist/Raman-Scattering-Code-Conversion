@@ -18,10 +18,10 @@ namespace Raman {
   complex<Real> mp_im_unit(void);
 
   template<class Real>
-  RowArrayXr<Real> arr_bessel_j(RowArrayXr<Real>& nu, Real x);
+  ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x);
 
   template<class Real>
-  RowArrayXr<Real> arr_bessel_y(RowArrayXr<Real>& nu, Real x);
+  ArrayXr<Real> arr_bessel_y(ArrayXr<Real>& nu, Real x);
 
   const double PI = mp_pi<double>(), EPS = mp_eps<double>();
   const complex<double> I = mp_im_unit<double>();

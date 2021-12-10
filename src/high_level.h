@@ -9,7 +9,7 @@ using namespace std;
 namespace Raman {
   enum sIncType {KxEz, KxEy, KyEx, KyEz, KzEx, KzEy, GENERAL};
 
-  template <typename Real>
+  template <class Real>
   class HighLevel {
   public:
     struct stIncPar {

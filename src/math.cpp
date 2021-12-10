@@ -22,21 +22,21 @@ namespace Raman {
   }
 
   template<class Real>
-  RowArrayXr<Real> arr_bessel_j(RowArrayXr<Real>& nu, Real x) {
-    RowArrayXr<Real> output(1, nu.size());
+  ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
+    ArrayXr<Real> output(1, nu.size());
     for (int i = 0; i < nu.size(); i++)
       output(i) = cyl_bessel_j(nu(i), x);
     return output;
   }
 
   template<class Real>
-  RowArrayXr<Real> arr_bessel_y(RowArrayXr<Real>& nu, Real x) {
-    RowArrayXr<Real> output(1, nu.size());
+  ArrayXr<Real> arr_bessel_y(ArrayXr<Real>& nu, Real x) {
+    ArrayXr<Real> output(1, nu.size());
     for (int i = 0; i < nu.size(); i++)
       output(i) = cyl_neumann(nu(i), x);
     return output;
   }
 
-  template RowArrayXr<double> arr_bessel_j(RowArrayXr<double>& nu, double x);
-  template RowArrayXr<double> arr_bessel_y(RowArrayXr<double>& nu, double x);
+  template ArrayXr<double> arr_bessel_j(ArrayXr<double>& nu, double x);
+  template ArrayXr<double> arr_bessel_y(ArrayXr<double>& nu, double x);
 }

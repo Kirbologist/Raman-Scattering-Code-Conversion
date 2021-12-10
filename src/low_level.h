@@ -8,9 +8,10 @@ using namespace Eigen;
 using namespace std;
 
 namespace Raman {
-  enum scheme {GAUSS, RECTANGLE, PTS};
+  enum sInt {GAUSS, RECTANGLE, PTS};
+  enum sBessel {J, H1};
 
-  template <typename Real>
+  template <class Real>
   class LowLevel {
   public:
     struct stGLQuad {
@@ -22,6 +23,20 @@ namespace Raman {
       size_t nNbTheta;
       ArrayXr<Real> theta;
       ArrayXr<Real> wTheta;
+    };
+
+    struct stEAllPhi {
+      RowArrayXr<Real> theta;
+      RowArrayXr<Real> r_of_theta;
+      ArrayXXc<Real>* CErm;
+      ArrayXXc<Real>* CEtm;
+      ArrayXXc<Real>* CEfm;
+    };
+
+    struct stZnAll {
+      ArrayXXc<Real> Z0;
+      ArrayXXc<Real> Z1;
+      ArrayXXc<Real> Z2;
     };
 
     struct stIncEabnm {
@@ -37,18 +52,24 @@ namespace Raman {
 
     static stGLQuad* auxInitLegendreQuad(size_t N1, Real a = -1.0, Real b = 1.0);
 
-    static stRtfunc* auxPrepareIntegrals(size_t nNint, scheme scheme_type);
+    static stRtfunc* auxPrepareIntegrals(size_t nNint, sInt type);
 
-    static stIncEabnm* vshGetIncidentCoeffs(int n_max, typename HighLevel<Real>::stIncPar& angles);
+    static stEAllPhi* vshEgenThetaAllPhi(ArrayXr<Real>& lambda,
+        ArrayXr<Real>& epsilon, ArrayXXc<Real>& p_nm, ArrayXXc<Real>& q_nm,
+        RowArrayXr<Real>& rt, RowArrayXr<Real>& theta, sBessel type, stPinmTaunm* stPT = nullptr);
+
+    static stIncEabnm* vshGetIncidentCoeffs(int n_max, typename HighLevel<Real>::stIncPar* angles);
 
     static stPinmTaunm* vshPinmTaunm(size_t n_ax, const ArrayXr<Real>& theta);
 
-    static ArrayXXc<Real>* vshRBchi(const RowArrayXr<Real> n, const ArrayXr<Real>& x);
+    static ArrayXXc<Real>* vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x);
 
-    static ArrayXXc<Real>* vshRBpsi(const RowArrayXr<Real> n, const ArrayXr<Real>& x);
+    static ArrayXXc<Real>* vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x);
 
   private:
     LowLevel() {};
+
+    static stZnAll* vshGetZnAll(size_t n_n_max, ArrayXr<Real>& rho, sBessel type);
   };
 }
 
