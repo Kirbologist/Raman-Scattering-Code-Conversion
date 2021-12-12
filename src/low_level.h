@@ -3,6 +3,7 @@
 
 #include "raman_elastic_scattering.h"
 #include "high_level.h"
+#include <Eigen/CXX11/Tensor>
 
 using namespace Eigen;
 using namespace std;
@@ -25,10 +26,21 @@ namespace Raman {
       ArrayXr<Real> wTheta;
     };
 
+    struct stFpovx {
+      Tensor<Real, 3> Fpovx;
+      ArrayXXr<Real> rb_chi;
+      ArrayXXr<Real> rb_psi;
+    };
+
+    struct stFprow {
+      ArrayXXr<Real> S;
+      ArrayXXr<Real> loss_prec_S;
+    };
+
     struct stEAllPhi {
       RowArrayXr<Real> theta;
       RowArrayXr<Real> r_of_theta;
-      ArrayXXc<Real>* CErm;
+      ArrayXXc<Real>* CErm; // Why not just make this a tensor
       ArrayXXc<Real>* CEtm;
       ArrayXXc<Real>* CEfm;
     };
@@ -54,6 +66,11 @@ namespace Raman {
 
     static stRtfunc* auxPrepareIntegrals(size_t nNint, sInt type);
 
+    static stFpovx* sphGetFpovx(size_t n_n_max, Real s, ArrayXr<Real>& x);
+
+    static stFprow* sphGetFpRow(int n, Real s, ArrayXr<Real>& x);
+
+    // Untested
     static stEAllPhi* vshEgenThetaAllPhi(ArrayXr<Real>& lambda,
         ArrayXr<Real>& epsilon, ArrayXXc<Real>& p_nm, ArrayXXc<Real>& q_nm,
         RowArrayXr<Real>& rt, RowArrayXr<Real>& theta, sBessel type, stPinmTaunm* stPT = nullptr);
@@ -69,7 +86,10 @@ namespace Raman {
   private:
     LowLevel() {};
 
+    // Untested
     static stZnAll* vshGetZnAll(size_t n_n_max, ArrayXr<Real>& rho, sBessel type);
+
+    static ArrayXXr<Real>* sphGetUforFp(int n);
   };
 }
 

@@ -10,14 +10,14 @@ namespace Raman{
   typename LowLevel<Real>::stGLQuad* LowLevel<Real>::auxInitLegendreQuad(
       size_t N1, Real a, Real b) {
     int N = N1 - 1, N2 = N1 + 1;
-    ArrayXr<Real> xu(N1, 1), y(N1, 1), y0(N1, 1), Lp(N1, 1);
+    ArrayXr<Real> xu, y, y0(N1), Lp;
     ArrayXXr<Real> L(N1, N2);
 
     xu = ArrayXr<Real>::LinSpaced(N1, -1, 1);
     y = cos((2*ArrayXr<Real>::LinSpaced(N1, 0, N) + 1)*PI/(2*N + 2)) +
         (0.27/N1)*sin(PI*xu*N/N2);
-    y0 = 2*ArrayXr<Real>::Ones(N1);
-    L.col(0) = ArrayXr<Real>::Ones(N1);
+    y0.fill(2);
+    L.col(0).setOnes();
 
     int n_iter = 0;
     while ((n_iter < 15) && EPS <
@@ -72,6 +72,176 @@ namespace Raman{
     return output;
   }
 
+/**
+  template <class Real>
+  typename LowLevel<Real>::stFpovx* LowLevel<Real>::sphGetFpovx(
+      size_t n_n_max, Real s, ArrayXr<Real>& x) {
+    size_t num_x = x.size();
+
+    stFpovx* output = new stFpovx();
+    output->rb_chi = vshRBchi(ArrayXr<Real>::LinSpaced(n_n_max + 1, 0, n_n_max), s*x);
+    output->rb_psi = vshRBpsi(ArrayXr<Real>::LinSpaced(n_n_max + 1, 0, n_n_max), x);
+    Tensor<Real, 3> Fpovx(n_n_max + 1, n_n_max + 1, num_x);
+  }
+  */
+
+  template <class Real>
+  typename LowLevel<Real>::stFprow* LowLevel<Real>::sphGetFpRow(
+      int n, Real s, ArrayXr<Real>& x) {
+    int num_x = x.size();
+    RowArrayXr<Real> x_squared = pow(x, 2).transpose();
+    ArrayXXr<Real>* u = sphGetUforFp(n);
+    Real alpha_bar_k = 1;
+    int q_min;
+    int q_int;
+
+    ArrayXXr<Real> S = ArrayXXr<Real>::Zero(n - 3, num_x);
+    ArrayXXr<Real> max_term_S = ArrayXXr<Real>::Zero(n - 3, num_x);
+    ArrayXXr<Real> loss_prec_S = ArrayXXr<Real>::Zero(n - 3, num_x);
+
+    ArrayXXr<Real> beta = ArrayXXr<Real>::Zero(n, n - 1);
+    beta(0, 0) = 1;
+    beta(1, 0) = beta(0, 0) * (s - 1) * (s + 1);
+    beta(0, 1) = 1;
+    beta(1, 1) = beta(0, 1) * (s - 1) * (s + 1) * 2;
+    beta(2, 1) = beta(1, 1) * (s - 1) * (s + 1) / 2;
+
+    RowArrayXr<Real> alpha_q(num_x), current_term(num_x);
+    RowArrayXi counter(num_x);
+    RowArrayXb x_not_converged(num_x), test(num_x);
+    int b, num_to_test = 3;
+    Real gamma_qnk;
+
+    // Will cause index out of bounds errors if n is even
+    for (int k = n - 4; k >= 0; k -= 2) {
+      q_min = (n - k)/2 - 1; // expression is mathematically always an integer
+      q_int = n - k;
+      alpha_bar_k = -alpha_bar_k/(n - k - 2);
+      beta(0, q_int - 2) = 1;
+      for (int j = 1; j < q_int; j++)
+        beta(j, q_int - 2) = beta(j - 1, q_int - 2)*(s - 1)*(s + 1)*(q_int - j)/j;
+      beta(0, q_int - 1) = 1;
+      for (int j = 1; j <= q_int; j++)
+        beta(j, q_int - 1) = beta(j - 1, q_int - 1)*(s - 1)*(s + 1)*(q_int - j + 1)/j;
+
+      alpha_q.fill(alpha_bar_k);
+      x_not_converged.fill(true);
+      current_term.setZero();
+      counter.setZero();
+      test.fill(false);
+
+      for (int q = q_min; q < q_int; q++) {
+        b = n - k - q - 1;
+        gamma_qnk = 0;
+        for (int j = max(0, 2 * q + k - n + 1); j <= q; j++)
+          gamma_qnk += beta(j, q - 1) * (*u)(q - j, b);
+
+        if (abs(s) < 2) {
+          current_term = alpha_q * gamma_qnk;
+          S.row(k) += current_term;
+          max_term_S.row(k) = max_term_S.row(k).max(abs(current_term));
+        } else {
+          test.fill(false);
+          for (int i = 0; i < num_x; i++) {
+            if (x_not_converged(i)) {
+              current_term(i) = alpha_q(i) * gamma_qnk;
+              test(i) = abs(current_term(i)) > EPS * abs(S(k, i));
+            }
+          }
+          if (test.sum() > 0) {
+            if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite...
+              cout << "Problem (1) in sphGetFpovx..." << endl;
+            for (int i = 0; i < num_x; i++) {
+              if (test(i)) {
+                S(k, i) += current_term(i);
+                max_term_S(k, i) = max(abs(current_term(i)), max_term_S(k, i));
+              }
+            }
+          }
+
+          counter += 1 - test.template cast<int>();
+          counter *= 1 - test.template cast<int>();
+          x_not_converged = (counter < num_to_test);
+          if (!(x_not_converged.any()))
+            break;
+        }
+
+        alpha_q *= -x_squared / (2*(q + 1));
+      }
+
+      x_not_converged.fill(true);
+      counter.setZero();
+
+      Real c_qqnk = static_cast<Real>(1)/(2*k + 1), c_iqnk;
+      int q = q_int;
+      while (true) {
+        gamma_qnk = c_iqnk = c_qqnk;
+        for (int i = q - 1; i >= 0; i--) {
+          c_iqnk *= pow(s, 2)*(i + 1)*(2*i + 1 - 2*n)/(q - i)/(2*k + 2*q - 2*i + 1);
+          gamma_qnk += c_iqnk;
+        }
+
+        test.fill(false);
+        for (int i = 0; i < num_x; i++) {
+          if (x_not_converged(i)) {
+            current_term(i) = alpha_q(i) * gamma_qnk;
+            test(i) = abs(current_term(i)) > EPS * abs(S(k, i));
+          }
+        }
+        if (test.sum() > 0) {
+          if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite...
+            cout << "Problem (2) in sphGetFpovx..." << endl;
+          for (int i = 0; i < num_x; i++) {
+            if (test(i)) {
+              S(k, i) += current_term(i);
+              max_term_S(k, i) = max(abs(current_term(i)), max_term_S(k, i));
+            }
+          }
+        }
+
+        counter += 1 - test.template cast<int>();
+        counter *= 1 - test.template cast<int>();
+        x_not_converged = (counter < num_to_test);
+
+        if (!(x_not_converged.any()))
+          break;
+
+        for (int i = 0; i < num_x; i++) {
+          if (x_not_converged(i))
+            alpha_q(i) *= -x_squared(i) / (2*(q + 1));
+        }
+
+        c_qqnk /= (2*q + 1 - 2*n);
+        q++;
+      }
+
+      loss_prec_S.row(k) = abs(max_term_S.row(k) / S.row(k));
+      S.row(k) *= -pow(s, k + 1);
+    }
+    delete u;
+
+    stFprow* output = new stFprow();
+    output->S = S;
+    output->loss_prec_S = loss_prec_S;
+    return output;
+  }
+
+  template <class Real>
+  ArrayXXr<Real>* LowLevel<Real>::sphGetUforFp(int n) {
+    int b_max = n/2;
+    ArrayXXr<Real>* u = new ArrayXXr<Real>(b_max + 2, b_max + 1);
+    (*u).setZero();
+    (*u)(0, 0) = 1;
+    for (int b = 0; b < b_max; b++) {
+      (*u)(0, b + 1) = (2*n - 1)*(*u)(0, b) - (2*n - 1)*(*u)(1, b);
+      for (int r = 1; r <= b + 1; r++) {
+        (*u)(r, b + 1) = (2*n - 1 - 4*r)*(*u)(r, b) - (2*n - 1 - 2*r)*(*u)(r + 1, b) + 2*r*(*u)(r - 1, b);
+      }
+    }
+    return u;
+  }
+
+  // Many versions in original code
   template <class Real>
   typename LowLevel<Real>::stEAllPhi* LowLevel<Real>::vshEgenThetaAllPhi(
       ArrayXr<Real>& lambda, ArrayXr<Real>& epsilon, ArrayXXc<Real>& p_nm,
@@ -139,16 +309,16 @@ namespace Raman{
     ArrayXi n_vec, p_vec;
     ArrayXr<Real> pi_nm, tau_nm, d_nm;
     VectorXc<Real> vec_n_dep, vec_n_dep2, mu_n_divd;
-    ArrayXXc<Real> Er_sum, Et_sum, Ef_sum, q_nm_for_Z1, ip_nm_for_Z0, q_nm_for_Z2,
-        tmp1, tmp2;
+    ArrayXXc<Real> Er_sum(n_nb_lambda, n_nb_theta);
+    ArrayXXc<Real> Et_sum(n_nb_lambda, n_nb_theta);
+    ArrayXXc<Real> Ef_sum(n_nb_lambda, n_nb_theta);
+    ArrayXXc<Real> q_nm_for_Z1, ip_nm_for_Z0, q_nm_for_Z2, tmp1, tmp2;
     for (int m = -n_n_max; m <= n_n_max; m++) {
       n_vec = ArrayXi::LinSpaced(n_n_max - abs(m) + 1, abs(m), n_n_max);
       p_vec = n_vec*(n_vec + 1) + m;
       pi_nm = stPT->pi_nm(all, p_vec);
       tau_nm = stPT->tau_nm(all, p_vec);
-      d_nm = m ? pi_nm*(sin(theta)/m).transpose().replicate(1, n_n_max - abs(m) + 1) : stPT->p_n0;
-
-      Er_sum = Et_sum = Ef_sum = ArrayXXc<Real>::Zero(n_nb_lambda, n_nb_theta);
+      d_nm = m ? pi_nm.colwise()*(sin(theta)/m).transpose() : stPT->p_n0;
 
       if (isinf(rt(0))) {
         q_nm_for_Z1 = ArrayXXc<Real>::Zero(n_nb_lambda, n_nb_theta);
@@ -183,18 +353,19 @@ namespace Raman{
       output->CEtm[m + n_n_max] = pow(-1, m) * Et_sum;
       output->CEfm[m + n_n_max] = pow(-1, m) * Ef_sum;
     }
+    delete stPT;
+    delete st_zn_all_col;
 
     return output;
   }
 
+  // Many versions in original code
   template <class Real>
   typename LowLevel<Real>::stZnAll* LowLevel<Real>::vshGetZnAll(size_t n_n_max,
       ArrayXr<Real>& rho, sBessel type) {
     if ((rho == 0).any())
       cout << "Warning: rho = 0 arguments not allowed in vshZnAll..." << endl;
 
-    //RowArrayXi wasn't supported for some reason
-    RowArrayXr<Real> n = RowArrayXr<Real>::LinSpaced(n_n_max, 1, n_n_max);
     ArrayXr<Real> nu = ArrayXr<Real>::LinSpaced(n_n_max + 1, 0.5, n_n_max + 0.5);
     ArrayXc<Real> f(rho.size(), n_n_max + 1);
 
@@ -218,12 +389,13 @@ namespace Raman{
       }
     }
 
-    f *= sqrt((PI/2) / rho.replicate(1, n_n_max + 1));
+    f.colwise() *= sqrt((PI/2) / rho);
 
+    RowArrayXc<Real> n = RowArrayXc<Real>::LinSpaced(n_n_max, 1, n_n_max);
     stZnAll* output = new stZnAll();
     output->Z0 = f(all, seq(1, last));
-    output->Z1 = output->Z0 * 1/rho.replicate(1, n_n_max);
-    output->Z2 = f(all, seq(0, last - 1)) - output->Z1 * n.replicate(rho.size(), 1);
+    output->Z1 = (output->Z0).colwise() / rho.template cast<complex<Real>>();
+    output->Z2 = f(all, seq(0, last - 1)) - (output->Z1).rowwise() * n;
     return output;
   }
 
@@ -280,7 +452,7 @@ namespace Raman{
           (m > 1 ? mu_s : ArrayXr<Real>::Ones(n_rows));
       n_cols = n_max - m + 2;
       ArrayXXr<Real> pi_aux(n_rows, n_cols);
-      pi_aux.col(0) = ArrayXr<Real>::Zero(n_rows);
+      pi_aux.col(0).setZero();
       pi_aux.col(1) = m*A_m_sin_mm1;
 
       for (size_t j = 2, n = m + 1; j < n_cols; j++, n++)
@@ -304,9 +476,9 @@ namespace Raman{
     }
 
     ArrayXXr<Real> p_nm1(n_rows, n_max + 1), t_nm1(n_rows, n_max + 1);
-    p_nm1.col(0) = ArrayXr<Real>::Ones(n_rows);
+    p_nm1.col(0).setOnes();
     p_nm1.col(1) = mu_c;
-    t_nm1.col(0) = ArrayXr<Real>::Zero(n_rows);
+    t_nm1.col(0).setZero();
     t_nm1.col(1) = -mu_s;
 
     for (size_t n = 1; n < n_max; n++) {
@@ -320,7 +492,7 @@ namespace Raman{
     p_vec = n_vec*(n_vec + 1);
 
     for (size_t n = 0; n <= n_max; n++) {
-      output->pi_nm.col(p_vec(n)) = ArrayXr<Real>::Zero(n_rows);
+      output->pi_nm.col(p_vec(n)).setZero();
       output->tau_nm.col(p_vec(n)) = t_nm1.col(n);
     }
 

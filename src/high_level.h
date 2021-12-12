@@ -20,8 +20,10 @@ namespace Raman {
       ArrayXi abs_m_vec;
     };
 
+    // Untested
     static stIncPar* vshMakeIncidentParams(sIncType type, size_t n_max);
 
+    // Untested
     static stIncPar* vshMakeIncidentParams(sIncType type, size_t n_max,
         Real theta_p, Real phi_p, Real alpha_p);
 

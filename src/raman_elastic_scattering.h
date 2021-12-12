@@ -12,6 +12,8 @@ using namespace Eigen;
 namespace Raman {
   using RowArrayXi = Array<int, 1, Dynamic>;
 
+  using RowArrayXb = Array<bool, 1, Dynamic>;
+
   template <class Real>
   using ArrayXXr = Array<Real, Dynamic, Dynamic>;
 

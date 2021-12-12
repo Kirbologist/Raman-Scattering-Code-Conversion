@@ -13,10 +13,12 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - vshPinmTaunm
   - vshGetIncidentCoeffs
   - vshEgenThetaAllPhi
+  - vshGetZnAll
 - Functions that take 'scheme/mode' argument of type string now take them as enum types instead. This causes these functions to theoretically behave slightly differently for non-standard values of the 'scheme/mode' argument, although such behaviour shouldn't be able to manifest at compile-time. Functions that are affected by this include:
   - auxPrepareIntegrals
   - vshMakeIncidentParams
   - vshEgenThetaAllPhi
+  - vshGetZnAll
 
 ## Dependencies
 

@@ -6,10 +6,9 @@ using namespace Eigen;
 using namespace Raman;
 
 int main(int argc, char** argv) {
-  HighLevel<double>::stIncPar* test = HighLevel<double>::vshMakeIncidentParams(sIncType::KxEz, 3);
-  LowLevel<double>::stIncEabnm* test2 =  LowLevel<double>::vshGetIncidentCoeffs(3, test);
-  cout << "a_nm" << test2->a_nm << endl << "b_nm" << test2->b_nm << endl;
+  ArrayXr<double> x = ArrayXr<double>::LinSpaced(5, 1, 5);
+  LowLevel<double>::stFprow* test = LowLevel<double>::sphGetFpRow(9, 0.5, x);
+  cout << "S:" << test->S << endl << "loss prec S:" << test->loss_prec_S << endl;
   delete test;
-  delete test2;
   return 0;
 }
