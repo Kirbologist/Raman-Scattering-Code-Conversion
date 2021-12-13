@@ -23,7 +23,7 @@ namespace Raman {
 
   template<class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
-    ArrayXr<Real> output(1, nu.size());
+    ArrayXr<Real> output(nu.size());
     for (int i = 0; i < nu.size(); i++)
       output(i) = cyl_bessel_j(nu(i), x);
     return output;
@@ -31,7 +31,7 @@ namespace Raman {
 
   template<class Real>
   ArrayXr<Real> arr_bessel_y(ArrayXr<Real>& nu, Real x) {
-    ArrayXr<Real> output(1, nu.size());
+    ArrayXr<Real> output(nu.size());
     for (int i = 0; i < nu.size(); i++)
       output(i) = cyl_neumann(nu(i), x);
     return output;

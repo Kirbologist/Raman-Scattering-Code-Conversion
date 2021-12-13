@@ -72,18 +72,33 @@ namespace Raman{
     return output;
   }
 
-/**
   template <class Real>
   typename LowLevel<Real>::stFpovx* LowLevel<Real>::sphGetFpovx(
-      size_t n_n_max, Real s, ArrayXr<Real>& x) {
-    size_t num_x = x.size();
+      int n_n_max, Real s, ArrayXr<Real>& x) {
+    int num_x = x.size();
 
     stFpovx* output = new stFpovx();
-    output->rb_chi = vshRBchi(ArrayXr<Real>::LinSpaced(n_n_max + 1, 0, n_n_max), s*x);
-    output->rb_psi = vshRBpsi(ArrayXr<Real>::LinSpaced(n_n_max + 1, 0, n_n_max), x);
-    Tensor<Real, 3> Fpovx(n_n_max + 1, n_n_max + 1, num_x);
+    output->rb_chi = vshRBchi(ArrayXr<double>::LinSpaced(n_n_max + 1, 0, n_n_max), x);
+    output->rb_psi = vshRBpsi(ArrayXr<double>::LinSpaced(n_n_max + 1, 0, n_n_max), s*x);
+    output->Fpovx = new ArrayXXc<Real>[n_n_max + 1]();
+    for (int i = 0; i <= n_n_max; i++)
+      output->Fpovx[i] = ArrayXXc<Real>::Zero(n_n_max + 1, num_x);
+
+    stFprow* FpRow = sphGetFpRow(n_n_max, s, x);
+    output->Fpovx[n_n_max].topRows(n_n_max - 3) = (FpRow->S).rowwise() / x.transpose();
+    delete FpRow;
+
+    for (int k = n_n_max; k >= 0; k--) {
+      for (int i = k % 2; i <= min(k + 2, n_n_max); i += 2)
+        (output->Fpovx[i]).row(k) = (output->rb_chi->col(i) * output->rb_psi->col(k)).transpose();
+      if (k > 0) {
+        for (int n = k + 3; n < n_n_max; n += 2)
+          (output->Fpovx[n]).row(k - 1) = ((output->Fpovx[n + 1]).row(k) + (output->Fpovx[n - 1]).row(k)) *
+              (2*k + 1) / (2*n + 1) / s - (output->Fpovx[n]).row(k + 1);
+      }
+    }
+    return output;
   }
-  */
 
   template <class Real>
   typename LowLevel<Real>::stFprow* LowLevel<Real>::sphGetFpRow(
@@ -99,7 +114,8 @@ namespace Raman{
     ArrayXXr<Real> max_term_S = ArrayXXr<Real>::Zero(n - 3, num_x);
     ArrayXXr<Real> loss_prec_S = ArrayXXr<Real>::Zero(n - 3, num_x);
 
-    ArrayXXr<Real> beta = ArrayXXr<Real>::Zero(n, n - 1);
+    // Original code dynamically increased the array size as needed
+    ArrayXXr<Real> beta = ArrayXXr<Real>::Zero(n + 1 - (n % 2), n - (n % 2));
     beta(0, 0) = 1;
     beta(1, 0) = beta(0, 0) * (s - 1) * (s + 1);
     beta(0, 1) = 1;
@@ -112,7 +128,6 @@ namespace Raman{
     int b, num_to_test = 3;
     Real gamma_qnk;
 
-    // Will cause index out of bounds errors if n is even
     for (int k = n - 4; k >= 0; k -= 2) {
       q_min = (n - k)/2 - 1; // expression is mathematically always an integer
       q_int = n - k;
@@ -148,7 +163,7 @@ namespace Raman{
               test(i) = abs(current_term(i)) > EPS * abs(S(k, i));
             }
           }
-          if (test.sum() > 0) {
+          if (test.any()) {
             if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite...
               cout << "Problem (1) in sphGetFpovx..." << endl;
             for (int i = 0; i < num_x; i++) {
@@ -188,7 +203,7 @@ namespace Raman{
             test(i) = abs(current_term(i)) > EPS * abs(S(k, i));
           }
         }
-        if (test.sum() > 0) {
+        if (test.any()) {
           if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite...
             cout << "Problem (2) in sphGetFpovx..." << endl;
           for (int i = 0; i < num_x; i++) {
@@ -260,7 +275,9 @@ namespace Raman{
     stEAllPhi* output = new stEAllPhi();
     output->theta = theta;
     output->r_of_theta = rt;
-    ArrayXXc<Real> CErm[2*n_n_max + 1], CEtm[2*n_n_max + 1], CEfm[2*n_n_max + 1];
+    ArrayXXc<Real>* CErm = new ArrayXXc<Real>[2*n_n_max + 1]();
+    ArrayXXc<Real>* CEtm = new ArrayXXc<Real>[2*n_n_max + 1]();
+    ArrayXXc<Real>* CEfm = new ArrayXXc<Real>[2*n_n_max + 1]();
 
     if (!rt(0)) {
       for (int m = -n_n_max; m <= n_n_max; m++) {

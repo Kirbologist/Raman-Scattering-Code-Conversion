@@ -27,9 +27,9 @@ namespace Raman {
     };
 
     struct stFpovx {
-      Tensor<Real, 3> Fpovx;
-      ArrayXXr<Real> rb_chi;
-      ArrayXXr<Real> rb_psi;
+      ArrayXXc<Real>* Fpovx;
+      ArrayXXc<Real>* rb_chi;
+      ArrayXXc<Real>* rb_psi;
     };
 
     struct stFprow {
@@ -66,7 +66,7 @@ namespace Raman {
 
     static stRtfunc* auxPrepareIntegrals(size_t nNint, sInt type);
 
-    static stFpovx* sphGetFpovx(size_t n_n_max, Real s, ArrayXr<Real>& x);
+    static stFpovx* sphGetFpovx(int n_n_max, Real s, ArrayXr<Real>& x);
 
     static stFprow* sphGetFpRow(int n, Real s, ArrayXr<Real>& x);
 
