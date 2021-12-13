@@ -27,7 +27,7 @@ namespace Raman {
     };
 
     struct stFpovx {
-      ArrayXXc<Real>* Fpovx;
+      ArrayXXc<Real>* Fpovx; // array of Arrays
       ArrayXXc<Real>* rb_chi;
       ArrayXXc<Real>* rb_psi;
     };
@@ -37,12 +37,20 @@ namespace Raman {
       ArrayXXr<Real> loss_prec_S;
     };
 
+    struct stBessel {
+      ArrayXXc<Real>* xi_psi; // array of Arrays
+      ArrayXXc<Real>* psi_psi; // array of Arrays
+      ArrayXXc<Real>* chi_n;
+      ArrayXXc<Real>* psi_n;
+      ArrayXXc<Real>* psi_k;
+    };
+
     struct stEAllPhi {
       RowArrayXr<Real> theta;
       RowArrayXr<Real> r_of_theta;
-      ArrayXXc<Real>* CErm; // Why not just make this a tensor
-      ArrayXXc<Real>* CEtm;
-      ArrayXXc<Real>* CEfm;
+      ArrayXXc<Real>* CErm; // array of Arrays
+      ArrayXXc<Real>* CEtm; // array of Arrays
+      ArrayXXc<Real>* CEfm; // array of Arrays
     };
 
     struct stZnAll {
@@ -69,6 +77,8 @@ namespace Raman {
     static stFpovx* sphGetFpovx(int n_n_max, Real s, ArrayXr<Real>& x);
 
     static stFprow* sphGetFpRow(int n, Real s, ArrayXr<Real>& x);
+
+    static stBessel* sphGetXiPsi(int n_n_max, Real s, ArrayXr<Real>& x, int N_B);
 
     // Untested
     static stEAllPhi* vshEgenThetaAllPhi(ArrayXr<Real>& lambda,

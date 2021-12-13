@@ -256,6 +256,34 @@ namespace Raman{
     return u;
   }
 
+  template <class Real>
+  typename LowLevel<Real>::stBessel* LowLevel<Real>::sphGetXiPsi(
+      int n_n_max, Real s, ArrayXr<Real>& x, int N_B) {
+    stBessel* output = new stBessel();
+    stFpovx* chi_psi_prod = sphGetFpovx(N_B + 1, s, x);
+    output->psi_psi = new ArrayXXc<Real>[n_n_max + 2]();
+    for (int i = 0; i < n_n_max + 2; i++)
+      output->psi_psi[i] = ArrayXXc<Real>::Zero(n_n_max + 2, x.size());
+    output->psi_n = vshRBpsi(ArrayXr<Real>::LinSpaced(n_n_max + 2, 0, n_n_max + 1), x);
+
+    for (int n = 0; n < n_n_max + 2; n++) {
+      for (int k = n % 2; k < n_n_max + 2; k += 2)
+        output->psi_psi[n].row(k) = (chi_psi_prod->rb_psi->col(k) * output->psi_n->col(n)).transpose();
+    }
+
+    output->xi_psi = new ArrayXXc<Real>[n_n_max + 2]();
+    for (int i = 0; i < n_n_max + 2; i++)
+      output->xi_psi[i] = output->psi_psi[i] + I*chi_psi_prod->Fpovx[i](seq(0, n_n_max + 1), all);
+    output->chi_n = new ArrayXXc<Real>();
+    output->psi_k = new ArrayXXc<Real>();
+    *(output->chi_n) = chi_psi_prod->rb_chi->leftCols(n_n_max + 2);
+    *(output->psi_k) = chi_psi_prod->rb_psi->leftCols(n_n_max + 2);
+    delete[] chi_psi_prod->Fpovx;
+    delete chi_psi_prod->rb_chi;
+    delete chi_psi_prod->rb_psi;
+    return output;
+  }
+
   // Many versions in original code
   template <class Real>
   typename LowLevel<Real>::stEAllPhi* LowLevel<Real>::vshEgenThetaAllPhi(
