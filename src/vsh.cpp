@@ -187,7 +187,7 @@ namespace Raman {
 
   // Many versions in original code
   template <class Real>
-  stZnAll<Real>* vshGetZnAll(size_t n_n_max, ArrayXr<Real>& rho, sBessel type) {
+  stZnAll<Real>* vshGetZnAll(size_t n_n_max, const ArrayXr<Real>& rho, sBessel type) {
     if ((rho == 0).any())
       cout << "Warning: rho = 0 arguments not allowed in vshZnAll..." << endl;
 
@@ -227,8 +227,8 @@ namespace Raman {
   // Many versions in original code
   template <class Real>
   stEAllPhi<Real>* vshEgenThetaAllPhi(
-      ArrayXr<Real>& lambda, ArrayXr<Real>& epsilon, ArrayXXc<Real>& p_nm,
-      ArrayXXc<Real>& q_nm, RowArrayXr<Real>& rt, RowArrayXr<Real>& theta,
+      const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
+      const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
       sBessel type, stPinmTaunm<Real>* stPT) {
     int n_p_max = p_nm.cols(), n_n_max = static_cast<int>(round(sqrt(n_p_max) - 1)),
         n_nb_lambda = lambda.size();
@@ -346,7 +346,7 @@ namespace Raman {
 
   // Many versions in original code
   template <class Real>
-  ArrayXXc<Real>* vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
+  ArrayXXc<Real>& vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
     ArrayXXc<Real>* chi_x = new ArrayXXc<Real>(x.size(), n.size());
     ArrayXr<Real> yx;
     n += 0.5;
@@ -356,12 +356,12 @@ namespace Raman {
         cout << "Warning: Bessel (y) calculation went beyond precision in vshRBchi()" << endl;
       (*chi_x).row(i) = sqrt(static_cast<complex<Real>>(x(i)*PI/2))*yx;
     }
-    return chi_x;
+    return *chi_x;
   }
 
   // Many versions in original code
   template <class Real>
-  ArrayXXc<Real>* vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
+  ArrayXXc<Real>& vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
     ArrayXXc<Real>* psi_x = new ArrayXXc<Real>(x.size(), n.size());
     ArrayXr<Real> jx;
     n += 0.5;
@@ -371,17 +371,17 @@ namespace Raman {
         cout << "Warning: Bessel (j) calculation went beyond precision in vshRBpsi()" << endl;
       (*psi_x).row(i) = sqrt(static_cast<complex<Real>>(x(i)*PI/2))*jx;
     }
-    return psi_x;
+    return *psi_x;
   }
 
   template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t);
   template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t, double, double, double);
   template stPinmTaunm<double>* vshPinmTaunm(size_t, const ArrayXr<double>&);
   template stIncEabnm<double>* vshGetIncidentCoeffs(int, stIncPar<double>*);
-  template stZnAll<double>* vshGetZnAll(size_t, ArrayXr<double>&, sBessel);
-  template stEAllPhi<double>* vshEgenThetaAllPhi(ArrayXr<double>&,
-      ArrayXr<double>&, ArrayXXc<double>&, ArrayXXc<double>&,
-      RowArrayXr<double>&, RowArrayXr<double>&, sBessel, stPinmTaunm<double>*);
-  template ArrayXXc<double>* vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
-  template ArrayXXc<double>* vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
+  template stZnAll<double>* vshGetZnAll(size_t, const ArrayXr<double>&, sBessel);
+  template stEAllPhi<double>* vshEgenThetaAllPhi(const ArrayXr<double>&,
+      const ArrayXr<double>&, const ArrayXXc<double>&, const ArrayXXc<double>&,
+      const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, stPinmTaunm<double>*);
+  template ArrayXXc<double>& vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
+  template ArrayXXc<double>& vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
 }

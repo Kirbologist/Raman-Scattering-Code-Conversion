@@ -1,4 +1,4 @@
-UNSUPPORTED_FLAG=-I/lib/include/eigen3/unsupported
+#UNSUPPORTED_FLAG=-I/lib/include/eigen3/unsupported
 EIGEN_FLAG=
 GMP_FLAG=
 MPFR_FLAG=

@@ -22,7 +22,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stFprow<Real>* sphGetFpRow(int n, Real s, ArrayXr<Real>& x) {
+  stFprow<Real>* sphGetFpRow(int n, Real s, const ArrayXr<Real>& x) {
     int num_x = x.size();
     RowArrayXr<Real> x_squared = x.pow(2).transpose();
     ArrayXXr<Real>* u = sphGetUforFp<Real>(n);
@@ -162,7 +162,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, ArrayXr<Real>& x) {
+  stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, const ArrayXr<Real>& x) {
     int num_x = x.size();
 
     stFpovx<Real>* output = new stFpovx<Real>();
@@ -178,7 +178,7 @@ namespace Raman {
 
     for (int k = n_n_max; k >= 0; k--) {
       for (int i = k % 2; i <= min(k + 2, n_n_max); i += 2)
-        (output->Fpovx[i]).row(k) = (output->rb_chi->col(i) * output->rb_psi->col(k)).transpose();
+        (output->Fpovx[i]).row(k) = (output->rb_chi.col(i) * output->rb_psi.col(k)).transpose();
       if (k > 0) {
         for (int n = k + 3; n < n_n_max; n += 2)
           (output->Fpovx[n]).row(k - 1) = ((output->Fpovx[n + 1]).row(k) + (output->Fpovx[n - 1]).row(k)) *
@@ -189,7 +189,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, ArrayXr<Real>& x, int N_B) {
+  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B) {
     stBessel<Real>* output = new stBessel<Real>();
     stFpovx<Real>* chi_psi_prod = sphGetFpovx<Real>(N_B + 1, s, x);
     output->psi_psi = new ArrayXXc<Real>[n_n_max + 2]();
@@ -199,19 +199,16 @@ namespace Raman {
 
     for (int n = 0; n < n_n_max + 2; n++) {
       for (int k = n % 2; k < n_n_max + 2; k += 2)
-        output->psi_psi[n].row(k) = (chi_psi_prod->rb_psi->col(k) * output->psi_n->col(n)).transpose();
+        output->psi_psi[n].row(k) = (chi_psi_prod->rb_psi.col(k) * output->psi_n.col(n)).transpose();
     }
 
     output->xi_psi = new ArrayXXc<Real>[n_n_max + 2]();
     for (int i = 0; i < n_n_max + 2; i++)
       output->xi_psi[i] = output->psi_psi[i] + I*chi_psi_prod->Fpovx[i](seq(0, n_n_max + 1), all);
-    output->chi_n = new ArrayXXc<Real>();
-    output->psi_k = new ArrayXXc<Real>();
-    *(output->chi_n) = chi_psi_prod->rb_chi->leftCols(n_n_max + 2);
-    *(output->psi_k) = chi_psi_prod->rb_psi->leftCols(n_n_max + 2);
+    output->chi_n = chi_psi_prod->rb_chi.leftCols(n_n_max + 2);
+    output->psi_k = chi_psi_prod->rb_psi.leftCols(n_n_max + 2);
     delete[] chi_psi_prod->Fpovx;
-    delete chi_psi_prod->rb_chi;
-    delete chi_psi_prod->rb_psi;
+    delete chi_psi_prod;
     return output;
   }
 
@@ -264,26 +261,23 @@ namespace Raman {
   }
 
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, ArrayXr<Real>& x, int N_B) {
+  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B) {
     stBesselProducts<Real>* output = new stBesselProducts<Real>();
     stBessel<Real>* prods = sphGetXiPsi<Real>(n_n_max, s, x, N_B);
     output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi, n_n_max);
     output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi, n_n_max);
 
-    ArrayXXc<Real> psi_n_p1_psi_n = ((*(prods->psi_n))(all, seq(2, last)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
-    ArrayXXc<Real> psi_n_psi_n_p1 = ((*(prods->psi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(2, last))).transpose();
-    ArrayXXc<Real> xi_n_p1_psi_n = psi_n_p1_psi_n + I*((*(prods->chi_n))(all, seq(2, last)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
-    ArrayXXc<Real> xi_n_psi_n_p1 = psi_n_psi_n_p1 + I*((*(prods->chi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(2, last))).transpose();
+    ArrayXXc<Real> psi_n_p1_psi_n = (prods->psi_n(all, seq(2, last)) * prods->psi_k(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> psi_n_psi_n_p1 = (prods->psi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(2, last))).transpose();
+    ArrayXXc<Real> xi_n_p1_psi_n = psi_n_p1_psi_n + I*(prods->chi_n(all, seq(2, last)) * prods->psi_k(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> xi_n_psi_n_p1 = psi_n_psi_n_p1 + I*(prods->chi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(2, last))).transpose();
     output->st_psi_psi_all->for_diag_Lt1 = s*psi_n_psi_n_p1 - psi_n_p1_psi_n;
     output->st_xi_psi_all->for_diag_Lt1 = s*xi_n_psi_n_p1 - xi_n_p1_psi_n;
-    ArrayXXc<Real> psi_n_psi_n = ((*(prods->psi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
-    ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*((*(prods->chi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> psi_n_psi_n = (prods->psi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*(prods->chi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(1, last - 1))).transpose();
 
     delete[] prods->xi_psi;
     delete[] prods->psi_psi;
-    delete prods->chi_n;
-    delete prods->psi_n;
-    delete prods->psi_k;
     delete prods;
 
     ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(n_n_max, 2, n_n_max + 1);
@@ -309,10 +303,11 @@ namespace Raman {
       type = PTS;
     } else {
       type = GAUSS;
-      output = auxPrepareIntegrals<Real>(2*n_Nb_theta, type);
-      output->theta = output->theta(seq(0, n_Nb_theta - 1));
-      output->w_theta = output->w_theta(seq(0, n_Nb_theta - 1))*2;
+      stRtfunc<Real>* tmp = auxPrepareIntegrals<Real>(2*n_Nb_theta, type);
+      output->theta = tmp->theta(seq(0, n_Nb_theta - 1));
+      output->w_theta = tmp->w_theta(seq(0, n_Nb_theta - 1))*2;
       output->n_Nb_theta = n_Nb_theta;
+      delete tmp;
     }
 
     output->a = a;
@@ -331,10 +326,10 @@ namespace Raman {
   }
 
   template ArrayXXr<double>* sphGetUforFp(int);
-  template stFprow<double>* sphGetFpRow(int, double, ArrayXr<double>&);
-  template stFpovx<double>* sphGetFpovx(int, double, ArrayXr<double>&);
-  template stBessel<double>* sphGetXiPsi(int, double, ArrayXr<double>&, int);
+  template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);
+  template stFpovx<double>* sphGetFpovx(int, double, const ArrayXr<double>&);
+  template stBessel<double>* sphGetXiPsi(int, double, const ArrayXr<double>&, int);
   template stBesselPrimes<double>* sphGetBesselProductsPrimes(ArrayXXc<double>*, int);
-  template stBesselProducts<double>* sphGetModifiedBesselProducts(int, double, ArrayXr<double>&, int);
+  template stBesselProducts<double>* sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
   template stRtfunc<double>* sphMakeGeometry(size_t, double, double, ArrayXr<double>*);
 }

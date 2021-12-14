@@ -16,29 +16,29 @@ namespace Raman {
 
   template <class Real>
   struct stFpovx {
-    ArrayXXc<Real>* Fpovx; // array of Arrays
-    ArrayXXc<Real>* rb_chi;
-    ArrayXXc<Real>* rb_psi;
+    ArrayXXc<Real>* Fpovx;
+    ArrayXXc<Real> rb_chi;
+    ArrayXXc<Real> rb_psi;
   };
 
   template <class Real>
   struct stBessel {
-    ArrayXXc<Real>* xi_psi; // array of Arrays
-    ArrayXXc<Real>* psi_psi; // array of Arrays
-    ArrayXXc<Real>* chi_n;
-    ArrayXXc<Real>* psi_n;
-    ArrayXXc<Real>* psi_k;
+    ArrayXXc<Real>* xi_psi;
+    ArrayXXc<Real>* psi_psi;
+    ArrayXXc<Real> chi_n;
+    ArrayXXc<Real> psi_n;
+    ArrayXXc<Real> psi_k;
   };
 
   template <class Real>
   struct stBesselPrimes {
-    ArrayXXc<Real>* xi_psi; // array of Arrays
-    ArrayXXc<Real>* xi_prime_psi; // array of Arrays
-    ArrayXXc<Real>* xi_psi_prime; // array of Arrays
-    ArrayXXc<Real>* xi_prime_psi_prime; // array of Arrays
-    ArrayXXc<Real>* xi_psi_over_sxx; // array of Arrays
-    ArrayXXc<Real>* xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx; // array of Arrays
-    ArrayXXc<Real>* xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx; // array of Arrays
+    ArrayXXc<Real>* xi_psi;
+    ArrayXXc<Real>* xi_prime_psi;
+    ArrayXXc<Real>* xi_psi_prime;
+    ArrayXXc<Real>* xi_prime_psi_prime;
+    ArrayXXc<Real>* xi_psi_over_sxx;
+    ArrayXXc<Real>* xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
+    ArrayXXc<Real>* xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
     ArrayXXc<Real> for_diag_Lt1;
     ArrayXXc<Real> for_diag_Lt2;
     ArrayXXc<Real> for_diag_Lt3;
@@ -77,19 +77,19 @@ namespace Raman {
   ArrayXXr<Real>* sphGetUforFp(int n);
 
   template <class Real>
-  stFprow<Real>* sphGetFpRow(int n, Real s, ArrayXr<Real>& x);
+  stFprow<Real>* sphGetFpRow(int n, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, ArrayXr<Real>& x);
+  stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, ArrayXr<Real>& x, int N_B);
+  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B);
 
   template <class Real>
   stBesselPrimes<Real>* sphGetBesselProductsPrimes(ArrayXXc<Real>* prods, int N);
 
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, ArrayXr<Real>& x, int N_B);
+  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B);
 
   // Untested
   template <class Real>

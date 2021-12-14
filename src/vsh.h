@@ -42,9 +42,9 @@ namespace Raman {
   struct stEAllPhi {
     RowArrayXr<Real> theta;
     RowArrayXr<Real> r_of_theta;
-    ArrayXXc<Real>* CErm; // array of Arrays
-    ArrayXXc<Real>* CEtm; // array of Arrays
-    ArrayXXc<Real>* CEfm; // array of Arrays
+    ArrayXXc<Real>* CErm;
+    ArrayXXc<Real>* CEtm;
+    ArrayXXc<Real>* CEfm;
   };
 
   // Untested
@@ -64,20 +64,20 @@ namespace Raman {
 
   // Untested
   template<class Real>
-  stZnAll<Real>* vshGetZnAll(size_t n_n_max, ArrayXr<Real>& rho, sBessel type);
+  stZnAll<Real>* vshGetZnAll(size_t n_n_max, const ArrayXr<Real>& rho, sBessel type);
 
   // Untested
   template<class Real>
-  stEAllPhi<Real>* vshEgenThetaAllPhi(ArrayXr<Real>& lambda,
-      ArrayXr<Real>& epsilon, ArrayXXc<Real>& p_nm, ArrayXXc<Real>& q_nm,
-      RowArrayXr<Real>& rt, RowArrayXr<Real>& theta, sBessel type,
-      stPinmTaunm<Real>* stPT = nullptr);
+  stEAllPhi<Real>* vshEgenThetaAllPhi(
+      const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
+      const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
+      sBessel type, stPinmTaunm<Real>* stPT = nullptr);
 
   template<class Real>
-  ArrayXXc<Real>* vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x);
+  ArrayXXc<Real>& vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x);
 
   template<class Real>
-  ArrayXXc<Real>* vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x);
+  ArrayXXc<Real>& vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x);
 }
 
 #endif
