@@ -37,6 +37,35 @@ namespace Raman {
       ArrayXXr<Real> loss_prec_S;
     };
 
+    struct stBesselPrimes {
+      ArrayXXc<Real>* xi_psi; // array of Arrays
+      ArrayXXc<Real>* xi_prime_psi; // array of Arrays
+      ArrayXXc<Real>* xi_psi_prime; // array of Arrays
+      ArrayXXc<Real>* xi_prime_psi_prime; // array of Arrays
+      ArrayXXc<Real>* xi_psi_over_sxx; // array of Arrays
+      ArrayXXc<Real>* xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx; // array of Arrays
+      ArrayXXc<Real>* xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx; // array of Arrays
+    };
+
+    struct stXiPsiAll {
+      stBesselPrimes* xi_primes;
+      ArrayXXc<Real> for_diag_Lt1;
+      ArrayXXc<Real> for_diag_Lt2;
+      ArrayXXc<Real> for_diag_Lt3;
+    };
+
+    struct stPsiPsiAll {
+      stBesselPrimes* psi_primes;
+      ArrayXXc<Real> for_diag_Lt1;
+      ArrayXXc<Real> for_diag_Lt2;
+      ArrayXXc<Real> for_diag_Lt3;
+    };
+
+    struct stBesselProducts {
+      stXiPsiAll* xi_struct;
+      stPsiPsiAll* psi_struct;
+    };
+
     struct stBessel {
       ArrayXXc<Real>* xi_psi; // array of Arrays
       ArrayXXc<Real>* psi_psi; // array of Arrays
@@ -70,6 +99,31 @@ namespace Raman {
       ArrayXXr<Real> p_n0;
     };
 
+    static void destructStBesselProducts(stBesselProducts* st) {
+      delete[] st->xi_struct->xi_primes->xi_psi;
+      delete[] st->xi_struct->xi_primes->xi_prime_psi;
+      delete[] st->xi_struct->xi_primes->xi_psi_prime;
+      delete[] st->xi_struct->xi_primes->xi_prime_psi_prime;
+      delete[] st->xi_struct->xi_primes->xi_psi_over_sxx;
+      delete[] st->xi_struct->xi_primes->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
+      delete[] st->xi_struct->xi_primes->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
+      delete st->xi_struct->xi_primes;
+      delete st->xi_struct;
+
+
+      delete[] st->psi_struct->psi_primes->xi_psi;
+      delete[] st->psi_struct->psi_primes->xi_prime_psi;
+      delete[] st->psi_struct->psi_primes->xi_psi_prime;
+      delete[] st->psi_struct->psi_primes->xi_prime_psi_prime;
+      delete[] st->psi_struct->psi_primes->xi_psi_over_sxx;
+      delete[] st->psi_struct->psi_primes->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
+      delete[] st->psi_struct->psi_primes->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
+      delete st->psi_struct->psi_primes;
+      delete st->psi_struct;
+
+      delete st;
+    }
+
     static stGLQuad* auxInitLegendreQuad(size_t N1, Real a = -1.0, Real b = 1.0);
 
     static stRtfunc* auxPrepareIntegrals(size_t nNint, sInt type);
@@ -77,6 +131,8 @@ namespace Raman {
     static stFpovx* sphGetFpovx(int n_n_max, Real s, ArrayXr<Real>& x);
 
     static stFprow* sphGetFpRow(int n, Real s, ArrayXr<Real>& x);
+
+    static stBesselProducts* sphGetModifiedBesselProducts(int n_n_max, Real s, ArrayXr<Real>& x, int N_B);
 
     static stBessel* sphGetXiPsi(int n_n_max, Real s, ArrayXr<Real>& x, int N_B);
 
@@ -96,10 +152,12 @@ namespace Raman {
   private:
     LowLevel() {};
 
-    // Untested
-    static stZnAll* vshGetZnAll(size_t n_n_max, ArrayXr<Real>& rho, sBessel type);
+    static stBesselPrimes* sphGetBesselProductsPrimes(ArrayXXc<Real>* prods, int N);
 
     static ArrayXXr<Real>* sphGetUforFp(int n);
+
+    // Untested
+    static stZnAll* vshGetZnAll(size_t n_n_max, ArrayXr<Real>& rho, sBessel type);
   };
 }
 

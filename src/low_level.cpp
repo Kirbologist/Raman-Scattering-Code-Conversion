@@ -104,7 +104,7 @@ namespace Raman{
   typename LowLevel<Real>::stFprow* LowLevel<Real>::sphGetFpRow(
       int n, Real s, ArrayXr<Real>& x) {
     int num_x = x.size();
-    RowArrayXr<Real> x_squared = pow(x, 2).transpose();
+    RowArrayXr<Real> x_squared = x.pow(2).transpose();
     ArrayXXr<Real>* u = sphGetUforFp(n);
     Real alpha_bar_k = 1;
     int q_min;
@@ -164,7 +164,7 @@ namespace Raman{
             }
           }
           if (test.any()) {
-            if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite...
+            if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite
               cout << "Problem (1) in sphGetFpovx..." << endl;
             for (int i = 0; i < num_x; i++) {
               if (test(i)) {
@@ -204,7 +204,7 @@ namespace Raman{
           }
         }
         if (test.any()) {
-          if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite...
+          if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite
             cout << "Problem (2) in sphGetFpovx..." << endl;
           for (int i = 0; i < num_x; i++) {
             if (test(i)) {
@@ -254,6 +254,93 @@ namespace Raman{
       }
     }
     return u;
+  }
+
+  template <class Real>
+  typename LowLevel<Real>::stBesselProducts* LowLevel<Real>::sphGetModifiedBesselProducts(
+      int n_n_max, Real s, ArrayXr<Real>& x, int N_B) {
+    stBesselProducts* output = new stBesselProducts();
+    output->xi_struct = new stXiPsiAll();
+    output->psi_struct = new stPsiPsiAll();
+    stBessel* prods = sphGetXiPsi(n_n_max, s, x, N_B);
+    output->xi_struct->xi_primes = sphGetBesselProductsPrimes(prods->xi_psi, n_n_max);
+    output->psi_struct->psi_primes = sphGetBesselProductsPrimes(prods->psi_psi, n_n_max);
+
+    ArrayXXc<Real> psi_n_p1_psi_n = ((*(prods->psi_n))(all, seq(2, last)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> psi_n_psi_n_p1 = ((*(prods->psi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(2, last))).transpose();
+    ArrayXXc<Real> xi_n_p1_psi_n = psi_n_p1_psi_n + I*((*(prods->chi_n))(all, seq(2, last)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> xi_n_psi_n_p1 = psi_n_psi_n_p1 + I*((*(prods->chi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(2, last))).transpose();
+    output->psi_struct->for_diag_Lt1 = s*psi_n_psi_n_p1 - psi_n_p1_psi_n;
+    output->xi_struct->for_diag_Lt1 = s*xi_n_psi_n_p1 - xi_n_p1_psi_n;
+    ArrayXXc<Real> psi_n_psi_n = ((*(prods->psi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
+    ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*((*(prods->chi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
+
+    delete[] prods->xi_psi;
+    delete[] prods->psi_psi;
+    delete prods->chi_n;
+    delete prods->psi_n;
+    delete prods->psi_k;
+    delete prods;
+
+    ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(n_n_max, 2, n_n_max + 1);
+    output->psi_struct->for_diag_Lt2 = psi_n_psi_n_p1 - s*psi_n_p1_psi_n + (s - 1)*(s + 1)/s *
+        (n_vec.matrix() * (1/x.transpose()).matrix()).array() * psi_n_psi_n;
+    output->xi_struct->for_diag_Lt2 = xi_n_psi_n_p1 - s*xi_n_p1_psi_n + (s - 1)*(s + 1)/s *
+        (n_vec.matrix() * (1/x.transpose()).matrix()).array() *xi_n_psi_n;
+    RowArrayXc<Real> tmp = s*x.pow(2).transpose();
+    output->psi_struct->for_diag_Lt3 = psi_n_psi_n.rowwise() / tmp;
+    output->xi_struct->for_diag_Lt3 = xi_n_psi_n.rowwise() / tmp;
+
+    return output;
+  }
+
+  template <class Real>
+  typename LowLevel<Real>::stBesselPrimes* LowLevel<Real>::sphGetBesselProductsPrimes(
+      ArrayXXc<Real>* prods, int N) {
+    int X = prods[0].cols();
+
+    stBesselPrimes* output = new stBesselPrimes();
+    output->xi_psi = new ArrayXXc<Real>[N]();
+    output->xi_prime_psi = new ArrayXXc<Real>[N]();
+    output->xi_psi_prime = new ArrayXXc<Real>[N]();
+    output->xi_prime_psi_prime = new ArrayXXc<Real>[N]();
+    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx = new ArrayXXc<Real>[N]();
+    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx = new ArrayXXc<Real>[N]();
+    output->xi_psi_over_sxx = new ArrayXXc<Real>[N]();
+    for (int i = 0; i < N; i++) {
+      output->xi_psi[i] = prods[i + 1](seq(1, last - 1), all);
+      output->xi_prime_psi[i] = ArrayXXc<Real>::Zero(N, X);
+      output->xi_psi_prime[i] = ArrayXXc<Real>::Zero(N, X);
+      output->xi_prime_psi_prime[i] = ArrayXXc<Real>::Zero(N, X);
+      output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx[i] = ArrayXXc<Real>::Zero(N, X);
+      output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx[i] = ArrayXXc<Real>::Zero(N, X);
+      output->xi_psi_over_sxx[i] = ArrayXXc<Real>::Zero(N, X);
+    }
+
+    int k_p1, n_p1;
+    for (int n = 1; n <= N; n++) {
+      for (int k = 2 - n % 2; k <= N; k += 2) {
+        k_p1 = k*(k + 1);
+        n_p1 = n*(n + 1);
+
+        output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx[n - 1].row(k - 1) = (
+            (k + n + 1)*(k + 1)*prods[n - 1].row(k - 1) +
+            (k_p1 - k*(n + 1))*prods[n - 1].row(k + 1) +
+            (k_p1 - (k + 1)*n)*prods[n + 1].row(k - 1) +
+            (k_p1 + k*n)*prods[n + 1].row(k + 1)) / ((2*n + 1)*(2*k + 1));
+
+        output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx[n - 1].row(k - 1) = (
+            (n_p1 + (k + 1)*(n + 1))*prods[n - 1].row(k - 1) +
+            (n - k)*(n + 1)*prods[n - 1].row(k + 1) +
+            (n - k)*n*prods[n + 1].row(k - 1) +
+            (n_p1 + k*n)*prods[n + 1].row(k + 1)) / ((2*n + 1)*(2*k + 1));
+      }
+      for (int k = 1 + n % 2; k < N; k += 2) {
+        output->xi_prime_psi[n - 1].row(k - 1) = (prods[n - 1].row(k)*(n + 1) - n*prods[n + 1].row(k)) / (2 * n + 1);
+        output->xi_psi_prime[n - 1].row(k - 1) = (prods[n].row(k - 1)*(k + 1) - k*prods[n].row(k + 1)) / (2 * k + 1);
+      }
+    }
+    return output;
   }
 
   template <class Real>
