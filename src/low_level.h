@@ -3,7 +3,6 @@
 
 #include "raman_elastic_scattering.h"
 #include "high_level.h"
-#include <Eigen/CXX11/Tensor>
 
 using namespace Eigen;
 using namespace std;
@@ -21,9 +20,16 @@ namespace Raman {
     };
 
     struct stRtfunc {
-      size_t nNbTheta;
+      size_t n_Nb_theta;
       ArrayXr<Real> theta;
-      ArrayXr<Real> wTheta;
+      ArrayXr<Real> w_theta;
+      ArrayXr<Real> r;
+      ArrayXr<Real> dr_dt;
+      Real a;
+      Real c;
+      Real h;
+      Real r0;
+      sInt type;
     };
 
     struct stFpovx {
@@ -109,7 +115,6 @@ namespace Raman {
       delete[] st->xi_struct->xi_primes->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
       delete st->xi_struct->xi_primes;
       delete st->xi_struct;
-
 
       delete[] st->psi_struct->psi_primes->xi_psi;
       delete[] st->psi_struct->psi_primes->xi_prime_psi;

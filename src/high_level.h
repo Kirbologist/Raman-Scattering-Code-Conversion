@@ -2,6 +2,7 @@
 #define HIGH_LEVEL_H
 
 #include "raman_elastic_scattering.h"
+#include "low_level.h"
 
 using namespace Eigen;
 using namespace std;
@@ -19,6 +20,8 @@ namespace Raman {
       Real alpha_p;
       ArrayXi abs_m_vec;
     };
+
+    static LowLevel<Real>::stRtfunc* sphMakeGeometry(size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
 
     // Untested
     static stIncPar* vshMakeIncidentParams(sIncType type, size_t n_max);

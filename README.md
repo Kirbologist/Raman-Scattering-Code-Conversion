@@ -5,7 +5,7 @@ Project supervisor is A/Prof Taras Plakhotnik.
 
 ## Introduction
 
-The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (lent to me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support multiprecision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids, with most of the calculations based on "Scattering, Absorption, and Emission of Light by Small Particles" by Mishchenko et al. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that has numeric computation and scientific computing support. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
+The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (lent to me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support multiprecision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids, with most of the calculations based on "Scattering, Absorption, and Emission of Light by Small Particles" by Mishchenko et al. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
 
 ## Notable differences from smarties
 
@@ -19,6 +19,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - vshMakeIncidentParams
   - vshEgenThetaAllPhi
   - vshGetZnAll
+- sphGetBesselProductsPrimes has its signature changed so that it now the int N is an argument, where N is the the number of Eigen Arrays in prods - 2, or the original int n_n_max that was used to produce prods. This is because of the limitations of C++ arrays. This issue would be mitigated if the array of Eigen Arrays can easily be implemented using Eigen's tensor module instead.
 
 ## Dependencies
 

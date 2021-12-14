@@ -6,6 +6,39 @@ using namespace std;
 
 namespace Raman {
   template <class Real>
+  typename LowLevel<Real>::stRtfunc* HighLevel<Real>::sphMakeGeometry(
+      size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta) {
+    sInt type;
+    stRtfunc* output;
+    if (theta != nullptr) {
+      output->w_theta = ArrayXr<Real>::Zero(theta->size());
+      output->theta = *theta;
+      output->n_Nb_theta = theta->size();
+      type = PTS;
+    } else {
+      type = GAUSS;
+      output = auxPrepareIntegrals(2*n_Nb_theta, type);
+      output->theta = output->theta(seq(0, n_Nb_theta - 1));
+      output->w_theta = output->w_theta(seq(0, n_Nb_theta - 1))*2;
+      output->n_Nb_theta = n_Nb_theta;
+    }
+
+    output->a = a;
+    output->c = c;
+    output->type = type;
+
+    ArrayXr<Real> sin_t = sin(output->theta), cos_t = cos(output->theta);
+
+    output->r = a*c/sqrt(pow(c*sin_t, 2) + pow(a*cos_t, 2));
+    output->dr_dt = (pow(a, 2) - pow(c, 2))/pow(a*c, 2)*sin_t * cos_t * output->r.pow(3);
+
+    output->h = max(a, c)/min(a, c);
+    output->r0 = pow(pow(a, 2)*c, static_cast<Real>(1)/3);
+
+    return output;
+  }
+
+  template <class Real>
   typename HighLevel<Real>::stIncPar* HighLevel<Real>::vshMakeIncidentParams(
       sIncType type, size_t n_max) {
     stIncPar* output = new stIncPar();

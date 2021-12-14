@@ -47,13 +47,13 @@ namespace Raman{
   typename LowLevel<Real>::stRtfunc* LowLevel<Real>::auxPrepareIntegrals(
     size_t nNint, sInt type) {
     stRtfunc* output = new stRtfunc();
-    output->nNbTheta = nNint;
+    output->n_Nb_theta = nNint;
 
     switch (type) {
       case GAUSS: {
         stGLQuad* weights = LowLevel<Real>::auxInitLegendreQuad(nNint);
         output->theta = acos(weights->x);
-        output->wTheta = weights->w;
+        output->w_theta = weights->w;
         delete weights;
         break;
       }
@@ -61,7 +61,7 @@ namespace Raman{
       case RECTANGLE: {
         output->theta = ArrayXr<Real>::LinSpaced(nNint, 0, PI);
         Real dTheta = PI/(nNint - 1);
-        output->wTheta = dTheta*sin(output->theta);
+        output->w_theta = dTheta*sin(output->theta);
         break;
       }
 
@@ -381,7 +381,7 @@ namespace Raman{
         n_nb_lambda = lambda.size();
     if (rt.size() != theta.size() && rt(0) != 0 && !isinf(rt(0)))
       cout << "vshEgenThetaAllPhi error: theta and rt must be the same size row arrays." << endl;
-    int n_nb_theta = theta.size();
+    int n_Nb_theta = theta.size();
 
     ArrayXr<Real> n = ArrayXr<Real>::LinSpaced(n_n_max + 1, 0, n_n_max);
     ArrayXr<Real> mu_n_times = sqrt((2*n + 1)*n*(n + 1)/(4*PI));
@@ -405,15 +405,15 @@ namespace Raman{
 
       CErm[n_n_max] = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
       CEtm[n_n_max] = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
-      CEfm[n_n_max] = ArrayXc<Real>::Zero(n_nb_lambda, n_nb_theta);
+      CEfm[n_n_max] = ArrayXc<Real>::Zero(n_nb_lambda, n_Nb_theta);
 
       CErm[n_n_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
       CEtm[n_n_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
-      CEfm[n_n_max + 1] = (-I*coeff2 * q_nm.col(2)).replicate(1, n_nb_theta);
+      CEfm[n_n_max + 1] = (-I*coeff2 * q_nm.col(2)).replicate(1, n_Nb_theta);
 
       CErm[n_n_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
       CEtm[n_n_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
-      CEfm[n_n_max - 1] = (-I*coeff2 * q_nm.col(0)).replicate(1, n_nb_theta);
+      CEfm[n_n_max - 1] = (-I*coeff2 * q_nm.col(0)).replicate(1, n_Nb_theta);
 
       output->CErm = CErm;
       output->CEtm = CEtm;
@@ -432,7 +432,7 @@ namespace Raman{
       st_zn_all_col = vshGetZnAll(n_n_max, rho_col, type);
     } else {
       st_zn_all_col->Z0 = st_zn_all_col->Z1 = st_zn_all_col->Z2 =
-          ArrayXXc<Real>::Ones(n_nb_lambda*n_nb_theta, n_n_max + 1);
+          ArrayXXc<Real>::Ones(n_nb_lambda*n_Nb_theta, n_n_max + 1);
     }
 
     if (stPT == nullptr)
@@ -441,9 +441,9 @@ namespace Raman{
     ArrayXi n_vec, p_vec;
     ArrayXr<Real> pi_nm, tau_nm, d_nm;
     VectorXc<Real> vec_n_dep, vec_n_dep2, mu_n_divd;
-    ArrayXXc<Real> Er_sum(n_nb_lambda, n_nb_theta);
-    ArrayXXc<Real> Et_sum(n_nb_lambda, n_nb_theta);
-    ArrayXXc<Real> Ef_sum(n_nb_lambda, n_nb_theta);
+    ArrayXXc<Real> Er_sum(n_nb_lambda, n_Nb_theta);
+    ArrayXXc<Real> Et_sum(n_nb_lambda, n_Nb_theta);
+    ArrayXXc<Real> Ef_sum(n_nb_lambda, n_Nb_theta);
     ArrayXXc<Real> q_nm_for_Z1, ip_nm_for_Z0, q_nm_for_Z2, tmp1, tmp2;
     for (int m = -n_n_max; m <= n_n_max; m++) {
       n_vec = ArrayXi::LinSpaced(n_n_max - abs(m) + 1, abs(m), n_n_max);
@@ -453,7 +453,7 @@ namespace Raman{
       d_nm = m ? pi_nm.colwise()*(sin(theta)/m).transpose() : stPT->p_n0;
 
       if (isinf(rt(0))) {
-        q_nm_for_Z1 = ArrayXXc<Real>::Zero(n_nb_lambda, n_nb_theta);
+        q_nm_for_Z1 = ArrayXXc<Real>::Zero(n_nb_lambda, n_Nb_theta);
         ip_nm_for_Z0 = p_nm(all, p_vec);
         mu_n_divd = mu_n_divd_gen*pow(-I, n + 1);
       } else {
@@ -465,7 +465,7 @@ namespace Raman{
 
       ArrayXi ind_in_rho_col;
       for (int l = 0; l < n_nb_lambda; l++) {
-        ind_in_rho_col = ArrayXi::LinSpaced(n_nb_theta, 0, n_nb_theta - 1) + l*n_nb_theta;
+        ind_in_rho_col = ArrayXi::LinSpaced(n_Nb_theta, 0, n_Nb_theta - 1) + l*n_Nb_theta;
         vec_n_dep = (q_nm_for_Z1.row(l) * mu_n_times(n_vec)).transpose().matrix();
         Er_sum.row(l) = ((d_nm*st_zn_all_col->Z1(ind_in_rho_col, n_vec)).matrix() * vec_n_dep).transpose().array();
         tmp1 = mu_n_divd(0, n_vec);
