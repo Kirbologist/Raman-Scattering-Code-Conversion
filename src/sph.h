@@ -91,6 +91,7 @@ namespace Raman {
   template <class Real>
   stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, ArrayXr<Real>& x, int N_B);
 
+  // Untested
   template <class Real>
   stRtfunc<Real>* sphMakeGeometry(size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
 }

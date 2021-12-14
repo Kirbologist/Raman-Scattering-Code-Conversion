@@ -7,6 +7,17 @@ Project supervisor is A/Prof Taras Plakhotnik.
 
 The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (lent to me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support multiprecision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids, with most of the calculations based on "Scattering, Absorption, and Emission of Light by Small Particles" by Mishchenko et al. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
 
+## Progress
+
+  - [x] aux* functions (2/2)
+  - [ ] vsh* functions (8/9)
+  - [ ] sph* functions (7/11)
+  - [ ] rvh* functions (0/5)
+  - [ ] slv* functions (0/2)
+  - [ ] main function (0/1)
+  - [ ] arbitrary-precision support
+  - [ ] parallel computing support
+
 ## Notable differences from smarties
 
 - Expansion coefficients and other arrays that store using p-indices now include values for when n=0, m=0. This makes P (the length of the p-vectors) equal to (N+1)^2 and makes the code more convenient in a index-by-zero language without compromising any calculations. Functions that are affected by this include:
@@ -20,6 +31,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - vshEgenThetaAllPhi
   - vshGetZnAll
 - sphGetBesselProductsPrimes has its signature changed so that it now the int N is an argument, where N is the the number of Eigen Arrays in prods - 2, or the original int n_n_max that was used to produce prods. This is because of the limitations of C++ arrays. This issue would be mitigated if the array of Eigen Arrays can easily be implemented using Eigen's tensor module instead.
+- Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
 
 ## Dependencies
 
