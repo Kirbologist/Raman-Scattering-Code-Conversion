@@ -39,19 +39,6 @@ namespace Raman {
     ArrayXXc<Real>* xi_psi_over_sxx; // array of Arrays
     ArrayXXc<Real>* xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx; // array of Arrays
     ArrayXXc<Real>* xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx; // array of Arrays
-  };
-
-  template <class Real>
-  struct stXiPsiAll {
-    stBesselPrimes<Real>* xi_primes;
-    ArrayXXc<Real> for_diag_Lt1;
-    ArrayXXc<Real> for_diag_Lt2;
-    ArrayXXc<Real> for_diag_Lt3;
-  };
-
-  template <class Real>
-  struct stPsiPsiAll {
-    stBesselPrimes<Real>* psi_primes;
     ArrayXXc<Real> for_diag_Lt1;
     ArrayXXc<Real> for_diag_Lt2;
     ArrayXXc<Real> for_diag_Lt3;
@@ -59,31 +46,29 @@ namespace Raman {
 
   template <class Real>
   struct stBesselProducts {
-    stXiPsiAll<Real>* xi_struct;
-    stPsiPsiAll<Real>* psi_struct;
+    stBesselPrimes<Real>* st_xi_psi_all;
+    stBesselPrimes<Real>* st_psi_psi_all;
   };
 
   template <class Real>
   void destructStBesselProducts(stBesselProducts<Real>* st) {
-    delete[] st->xi_struct->xi_primes->xi_psi;
-    delete[] st->xi_struct->xi_primes->xi_prime_psi;
-    delete[] st->xi_struct->xi_primes->xi_psi_prime;
-    delete[] st->xi_struct->xi_primes->xi_prime_psi_prime;
-    delete[] st->xi_struct->xi_primes->xi_psi_over_sxx;
-    delete[] st->xi_struct->xi_primes->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
-    delete[] st->xi_struct->xi_primes->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
-    delete st->xi_struct->xi_primes;
-    delete st->xi_struct;
+    delete[] st->st_xi_psi_all->xi_psi;
+    delete[] st->st_xi_psi_all->xi_prime_psi;
+    delete[] st->st_xi_psi_all->xi_psi_prime;
+    delete[] st->st_xi_psi_all->xi_prime_psi_prime;
+    delete[] st->st_xi_psi_all->xi_psi_over_sxx;
+    delete[] st->st_xi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
+    delete[] st->st_xi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
+    delete st->st_xi_psi_all;
 
-    delete[] st->psi_struct->psi_primes->xi_psi;
-    delete[] st->psi_struct->psi_primes->xi_prime_psi;
-    delete[] st->psi_struct->psi_primes->xi_psi_prime;
-    delete[] st->psi_struct->psi_primes->xi_prime_psi_prime;
-    delete[] st->psi_struct->psi_primes->xi_psi_over_sxx;
-    delete[] st->psi_struct->psi_primes->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
-    delete[] st->psi_struct->psi_primes->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
-    delete st->psi_struct->psi_primes;
-    delete st->psi_struct;
+    delete[] st->st_psi_psi_all->xi_psi;
+    delete[] st->st_psi_psi_all->xi_prime_psi;
+    delete[] st->st_psi_psi_all->xi_psi_prime;
+    delete[] st->st_psi_psi_all->xi_prime_psi_prime;
+    delete[] st->st_psi_psi_all->xi_psi_over_sxx;
+    delete[] st->st_psi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
+    delete[] st->st_psi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
+    delete st->st_psi_psi_all;
 
     delete st;
   }

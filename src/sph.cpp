@@ -266,18 +266,16 @@ namespace Raman {
   template <class Real>
   stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, ArrayXr<Real>& x, int N_B) {
     stBesselProducts<Real>* output = new stBesselProducts<Real>();
-    output->xi_struct = new stXiPsiAll<Real>();
-    output->psi_struct = new stPsiPsiAll<Real>();
     stBessel<Real>* prods = sphGetXiPsi<Real>(n_n_max, s, x, N_B);
-    output->xi_struct->xi_primes = sphGetBesselProductsPrimes(prods->xi_psi, n_n_max);
-    output->psi_struct->psi_primes = sphGetBesselProductsPrimes(prods->psi_psi, n_n_max);
+    output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi, n_n_max);
+    output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi, n_n_max);
 
     ArrayXXc<Real> psi_n_p1_psi_n = ((*(prods->psi_n))(all, seq(2, last)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
     ArrayXXc<Real> psi_n_psi_n_p1 = ((*(prods->psi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(2, last))).transpose();
     ArrayXXc<Real> xi_n_p1_psi_n = psi_n_p1_psi_n + I*((*(prods->chi_n))(all, seq(2, last)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
     ArrayXXc<Real> xi_n_psi_n_p1 = psi_n_psi_n_p1 + I*((*(prods->chi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(2, last))).transpose();
-    output->psi_struct->for_diag_Lt1 = s*psi_n_psi_n_p1 - psi_n_p1_psi_n;
-    output->xi_struct->for_diag_Lt1 = s*xi_n_psi_n_p1 - xi_n_p1_psi_n;
+    output->st_psi_psi_all->for_diag_Lt1 = s*psi_n_psi_n_p1 - psi_n_p1_psi_n;
+    output->st_xi_psi_all->for_diag_Lt1 = s*xi_n_psi_n_p1 - xi_n_p1_psi_n;
     ArrayXXc<Real> psi_n_psi_n = ((*(prods->psi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
     ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*((*(prods->chi_n))(all, seq(1, last - 1)) * (*(prods->psi_k))(all, seq(1, last - 1))).transpose();
 
@@ -289,13 +287,13 @@ namespace Raman {
     delete prods;
 
     ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(n_n_max, 2, n_n_max + 1);
-    output->psi_struct->for_diag_Lt2 = psi_n_psi_n_p1 - s*psi_n_p1_psi_n + (s - 1)*(s + 1)/s *
+    output->st_psi_psi_all->for_diag_Lt2 = psi_n_psi_n_p1 - s*psi_n_p1_psi_n + (s - 1)*(s + 1)/s *
         (n_vec.matrix() * (1/x.transpose()).matrix()).array() * psi_n_psi_n;
-    output->xi_struct->for_diag_Lt2 = xi_n_psi_n_p1 - s*xi_n_p1_psi_n + (s - 1)*(s + 1)/s *
+    output->st_xi_psi_all->for_diag_Lt2 = xi_n_psi_n_p1 - s*xi_n_p1_psi_n + (s - 1)*(s + 1)/s *
         (n_vec.matrix() * (1/x.transpose()).matrix()).array() *xi_n_psi_n;
     RowArrayXc<Real> tmp = s*x.pow(2).transpose();
-    output->psi_struct->for_diag_Lt3 = psi_n_psi_n.rowwise() / tmp;
-    output->xi_struct->for_diag_Lt3 = xi_n_psi_n.rowwise() / tmp;
+    output->st_psi_psi_all->for_diag_Lt3 = psi_n_psi_n.rowwise() / tmp;
+    output->st_xi_psi_all->for_diag_Lt3 = xi_n_psi_n.rowwise() / tmp;
 
     return output;
   }
