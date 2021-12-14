@@ -6,7 +6,7 @@ BOOST_FLAG=
 
 CC=g++
 CPPFLAGS=-std=gnu++17 -Wall -pedantic $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(GMP_FLAG) $(MPFR_FLAG) $(BOOST_FLAG)
-OBJS=raman_elastic_scattering.o math.o low_level.o high_level.o
+OBJS=raman_elastic_scattering.o math.o raman_aux.o vsh.o sph.o
 PRODUCT=raman_elastic_scattering
 
 .PHONY=build clean info

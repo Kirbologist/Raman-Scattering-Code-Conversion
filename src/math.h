@@ -1,5 +1,5 @@
-#ifndef MATH_H
-#define MATH_H
+#ifndef MY_MATH_H
+#define MY_MATH_H
 
 #include "raman_elastic_scattering.h"
 #include <boost/math/special_functions/bessel.hpp>
