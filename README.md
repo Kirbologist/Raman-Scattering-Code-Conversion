@@ -30,7 +30,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - vshMakeIncidentParams
   - vshEgenThetaAllPhi
   - vshGetZnAll
-- sphGetBesselProductsPrimes has its signature changed so that it now the int N is an argument, where N is the the number of Eigen Arrays in prods - 2, or the original int n_n_max that was used to produce prods. This is because of the limitations of C++ arrays. This issue would be mitigated if the array of Eigen Arrays can easily be implemented using Eigen's tensor module instead.
+- sphGetBesselProductsPrimes has its signature changed so that it now the int N is an argument, where N is the the number of Eigen Arrays in prods - 2, or the original int N_max that was used to produce prods. This is because of the limitations of C++ arrays. This issue would be mitigated if the array of Eigen Arrays can easily be implemented using Eigen's tensor module instead.
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
 
 ## Dependencies

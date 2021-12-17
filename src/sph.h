@@ -74,31 +74,55 @@ namespace Raman {
   }
 
   template <class Real>
+  struct st4M {
+    ArrayXXc<Real> M11;
+    ArrayXXc<Real> M12;
+    ArrayXXc<Real> M21;
+    ArrayXXc<Real> M22;
+    ArrayXi m;
+    int ind_e;
+    int ind_o;
+  };
+
+  template <class Real>
+  struct stPQa {
+    st4M<Real>* st4MPeo;
+    st4M<Real>* st4MPoe;
+    st4M<Real>* st4MQeo;
+    st4M<Real>* st4MQoe;
+    bool has_st4MP = false;
+    bool has_st4MQ = false;
+  };
+
+  template <class Real>
   ArrayXXr<Real>* sphGetUforFp(int n);
 
   template <class Real>
   stFprow<Real>* sphGetFpRow(int n, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, const ArrayXr<Real>& x);
+  stFpovx<Real>* sphGetFpovx(int N_max, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int NB);
+  stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
   stBesselPrimes<Real>* sphGetBesselProductsPrimes(ArrayXXc<Real>* prods, int N);
 
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int NB);
+  stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  stRtfunc<Real>* sphMakeGeometry(size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
+  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
 
   template <class Real>
   size_t sphCheckBesselConvergence(size_t N_req, Real s, ArrayXr<Real> x, Real acc, size_t N_min);
 
   template <class Real>
   size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc = 1e-13);
+
+  template <class Real>
+  st4M<Real>* sphCalculatePQ(int N_max, ArrayXi abs_m_vec, stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB = -1);
 }
 
 #endif

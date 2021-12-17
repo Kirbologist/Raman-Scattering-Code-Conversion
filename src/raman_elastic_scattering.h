@@ -54,10 +54,10 @@ namespace Raman {
     ArrayXr<Real> k1;
     ArrayXr<Real> s;
     int N;
-    int n_Nb_theta;
+    int Nb_theta;
     sIncType inc_type;
-    stIncPar inc_par;
-    int n_Nb_theta_pst;
+    stIncPar<Real>* inc_par;
+    int Nb_theta_pst;
     Real lambda;
     Real epsilon1;
     complex<Real> epsilon2;
@@ -71,7 +71,7 @@ namespace Raman {
     ArrayXi abs_m_vec;
     bool get_symmetric_T = false;
     bool output = true;
-  }
+  };
 }
 
 #endif

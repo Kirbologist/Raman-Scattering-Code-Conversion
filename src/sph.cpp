@@ -163,25 +163,25 @@ namespace Raman {
   }
 
   template <class Real>
-  stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, const ArrayXr<Real>& x) {
+  stFpovx<Real>* sphGetFpovx(int N_max, Real s, const ArrayXr<Real>& x) {
     int num_x = x.size();
 
     stFpovx<Real>* output = new stFpovx<Real>();
-    output->rb_chi = vshRBchi<Real>(ArrayXr<double>::LinSpaced(n_n_max + 1, 0, n_n_max), x);
-    output->rb_psi = vshRBpsi<Real>(ArrayXr<double>::LinSpaced(n_n_max + 1, 0, n_n_max), s*x);
-    output->Fpovx = new ArrayXXc<Real>[n_n_max + 1]();
-    for (int i = 0; i <= n_n_max; i++)
-      output->Fpovx[i] = ArrayXXc<Real>::Zero(n_n_max + 1, num_x);
+    output->rb_chi = vshRBchi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), x);
+    output->rb_psi = vshRBpsi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), s*x);
+    output->Fpovx = new ArrayXXc<Real>[N_max + 1]();
+    for (int i = 0; i <= N_max; i++)
+      output->Fpovx[i] = ArrayXXc<Real>::Zero(N_max + 1, num_x);
 
-    stFprow<Real>* FpRow = sphGetFpRow<Real>(n_n_max, s, x);
-    output->Fpovx[n_n_max].topRows(n_n_max - 3) = (FpRow->S).rowwise() / x.transpose();
+    stFprow<Real>* FpRow = sphGetFpRow<Real>(N_max, s, x);
+    output->Fpovx[N_max].topRows(N_max - 3) = (FpRow->S).rowwise() / x.transpose();
     delete FpRow;
 
-    for (int k = n_n_max; k >= 0; k--) {
-      for (int i = k % 2; i <= min(k + 2, n_n_max); i += 2)
+    for (int k = N_max; k >= 0; k--) {
+      for (int i = k % 2; i <= min(k + 2, N_max); i += 2)
         (output->Fpovx[i]).row(k) = (output->rb_chi.col(i) * output->rb_psi.col(k)).transpose();
       if (k > 0) {
-        for (int n = k + 3; n < n_n_max; n += 2)
+        for (int n = k + 3; n < N_max; n += 2)
           (output->Fpovx[n]).row(k - 1) = ((output->Fpovx[n + 1]).row(k) + (output->Fpovx[n - 1]).row(k)) *
               (2*k + 1) / (2*n + 1) / s - (output->Fpovx[n]).row(k + 1);
       }
@@ -189,26 +189,26 @@ namespace Raman {
     return output;
   }
 
-  // Expects: NB >= n_n_max
+  // Expects: NB >= N_max
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int NB) {
+  stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
     stBessel<Real>* output = new stBessel<Real>();
     stFpovx<Real>* chi_psi_prod = sphGetFpovx<Real>(NB + 1, s, x);
-    output->psi_psi = new ArrayXXc<Real>[n_n_max + 2]();
-    for (int i = 0; i < n_n_max + 2; i++)
-      output->psi_psi[i] = ArrayXXc<Real>::Zero(n_n_max + 2, x.size());
-    output->psi_n = vshRBpsi<Real>(ArrayXr<Real>::LinSpaced(n_n_max + 2, 0, n_n_max + 1), x);
+    output->psi_psi = new ArrayXXc<Real>[N_max + 2]();
+    for (int i = 0; i < N_max + 2; i++)
+      output->psi_psi[i] = ArrayXXc<Real>::Zero(N_max + 2, x.size());
+    output->psi_n = vshRBpsi<Real>(ArrayXr<Real>::LinSpaced(N_max + 2, 0, N_max + 1), x);
 
-    for (int n = 0; n < n_n_max + 2; n++) {
-      for (int k = n % 2; k < n_n_max + 2; k += 2)
+    for (int n = 0; n < N_max + 2; n++) {
+      for (int k = n % 2; k < N_max + 2; k += 2)
         output->psi_psi[n].row(k) = (chi_psi_prod->rb_psi.col(k) * output->psi_n.col(n)).transpose();
     }
 
-    output->xi_psi = new ArrayXXc<Real>[n_n_max + 2]();
-    for (int i = 0; i < n_n_max + 2; i++)
-      output->xi_psi[i] = output->psi_psi[i] + I*chi_psi_prod->Fpovx[i](seq(0, n_n_max + 1), all);
-    output->chi_n = chi_psi_prod->rb_chi.leftCols(n_n_max + 2);
-    output->psi_k = chi_psi_prod->rb_psi.leftCols(n_n_max + 2);
+    output->xi_psi = new ArrayXXc<Real>[N_max + 2]();
+    for (int i = 0; i < N_max + 2; i++)
+      output->xi_psi[i] = output->psi_psi[i] + I*chi_psi_prod->Fpovx[i](seq(0, N_max + 1), all);
+    output->chi_n = chi_psi_prod->rb_chi.leftCols(N_max + 2);
+    output->psi_k = chi_psi_prod->rb_psi.leftCols(N_max + 2);
     delete[] chi_psi_prod->Fpovx;
     delete chi_psi_prod;
     return output;
@@ -262,13 +262,13 @@ namespace Raman {
     return output;
   }
 
-  // Expects: NB >= n_n_max
+  // Expects: NB >= N_max
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int NB) {
+  stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
     stBesselProducts<Real>* output = new stBesselProducts<Real>();
-    stBessel<Real>* prods = sphGetXiPsi<Real>(n_n_max, s, x, NB);
-    output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi, n_n_max);
-    output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi, n_n_max);
+    stBessel<Real>* prods = sphGetXiPsi<Real>(N_max, s, x, NB);
+    output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi, N_max);
+    output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi, N_max);
 
     ArrayXXc<Real> psi_n_p1_psi_n = (prods->psi_n(all, seq(2, last)) * prods->psi_k(all, seq(1, last - 1))).transpose();
     ArrayXXc<Real> psi_n_psi_n_p1 = (prods->psi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(2, last))).transpose();
@@ -283,7 +283,7 @@ namespace Raman {
     delete[] prods->psi_psi;
     delete prods;
 
-    ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(n_n_max, 2, n_n_max + 1);
+    ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(N_max, 2, N_max + 1);
     output->st_psi_psi_all->for_diag_Lt2 = psi_n_psi_n_p1 - s*psi_n_p1_psi_n + (s - 1)*(s + 1)/s *
         (n_vec.matrix() * (1/x.transpose()).matrix()).array() * psi_n_psi_n;
     output->st_xi_psi_all->for_diag_Lt2 = xi_n_psi_n_p1 - s*xi_n_p1_psi_n + (s - 1)*(s + 1)/s *
@@ -296,20 +296,20 @@ namespace Raman {
   }
 
   template <class Real>
-  stRtfunc<Real>* sphMakeGeometry(size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta) {
+  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, ArrayXr<Real>* theta) {
     sInt type;
     stRtfunc<Real>* output = new stRtfunc<Real>();
     if (theta) {
       output->w_theta = ArrayXr<Real>::Zero(theta->size());
       output->theta = *theta;
-      output->n_Nb_theta = theta->size();
+      output->Nb_theta = theta->size();
       type = PTS;
     } else {
       type = GAUSS;
-      stRtfunc<Real>* tmp = auxPrepareIntegrals<Real>(2*n_Nb_theta, type);
-      output->theta = tmp->theta(seq(0, n_Nb_theta - 1));
-      output->w_theta = tmp->w_theta(seq(0, n_Nb_theta - 1))*2;
-      output->n_Nb_theta = n_Nb_theta;
+      stRtfunc<Real>* tmp = auxPrepareIntegrals<Real>(2*Nb_theta, type);
+      output->theta = tmp->theta(seq(0, Nb_theta - 1));
+      output->w_theta = tmp->w_theta(seq(0, Nb_theta - 1))*2;
+      output->Nb_theta = Nb_theta;
       delete tmp;
     }
 
@@ -410,6 +410,23 @@ namespace Raman {
     size_t NB = sphCheckBesselConvergence(NQ, s_min, x_max, acc, N1);
     return NB;
   }
+
+/*
+  template <class Real>
+  st4M<Real>* sphCalculatePQ(int N_max, ArrayXi abs_m_vec,
+      stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB) {
+    if (NB < N_max)
+      NB = N_max;
+    size_t M = abs_m_vec.size();
+    bool print_output = params->output;
+    if (print_output)
+      cout << "sphCalculatePQ: Calculate P, Q for " << M << "m-values with N_Q = " <<
+          N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
+
+    stPQa<Real>* output = new stPQa[M]();
+    Real k1 = params->k1, s = params->s,
+  }
+  */
 
   template ArrayXXr<double>* sphGetUforFp(int);
   template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);

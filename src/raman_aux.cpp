@@ -44,7 +44,7 @@ namespace Raman {
   template <class Real>
   stRtfunc<Real>* auxPrepareIntegrals(size_t nNint, sInt type) {
     stRtfunc<Real>* output = new stRtfunc<Real>();
-    output->n_Nb_theta = nNint;
+    output->Nb_theta = nNint;
 
     switch (type) {
       case GAUSS: {

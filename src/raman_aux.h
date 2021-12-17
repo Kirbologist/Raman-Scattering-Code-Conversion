@@ -16,7 +16,7 @@ namespace Raman {
 
   template <class Real>
   struct stRtfunc {
-    size_t n_Nb_theta;
+    size_t Nb_theta;
     ArrayXr<Real> theta;
     ArrayXr<Real> w_theta;
     ArrayXr<Real> r;

@@ -39,22 +39,22 @@ namespace Raman {
 
   // Untested
   template<class Real>
-  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t n_max);
+  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t N_max);
 
   // Untested
   template<class Real>
-  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t n_max,
+  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t N_max,
       Real theta_p, Real phi_p, Real alpha_p);
 
   template<class Real>
-  stPinmTaunm<Real>* vshPinmTaunm(size_t n_ax, const ArrayXr<Real>& theta);
+  stPinmTaunm<Real>* vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta);
 
   template<class Real>
-  stIncEabnm<Real>* vshGetIncidentCoeffs(int n_max, stIncPar<Real>* angles);
+  stIncEabnm<Real>* vshGetIncidentCoeffs(int N_max, stIncPar<Real>* angles);
 
   // Untested
   template<class Real>
-  stZnAll<Real>* vshGetZnAll(size_t n_n_max, const ArrayXr<Real>& rho, sBessel type);
+  stZnAll<Real>* vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type);
 
   // Untested
   template<class Real>
