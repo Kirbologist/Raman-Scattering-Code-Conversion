@@ -5,6 +5,7 @@
 #include <complex>
 #include <iostream>
 #include <Eigen/Core>
+#include <Eigen/CXX11/Tensor>
 
 using namespace std;
 using namespace Eigen;
@@ -34,6 +35,12 @@ namespace Raman {
 
   template <class Real>
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
+
+  template <class Real>
+  struct stParams {
+    ArrayXr<Real> s;
+    ArrayXr<Real> k1;
+  };
 }
 
 #endif

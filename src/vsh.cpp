@@ -288,7 +288,7 @@ namespace Raman {
           ArrayXXc<Real>::Ones(n_nb_lambda*n_Nb_theta, n_n_max + 1);
     }
 
-    if (stPT == nullptr)
+    if (!stPT)
       stPT = vshPinmTaunm<Real>(n_n_max, theta.transpose());
 
     ArrayXi n_vec, p_vec;

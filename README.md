@@ -11,7 +11,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
   - [x] aux* functions (2/2)
   - [ ] vsh* functions (8/9)
-  - [ ] sph* functions (7/11)
+  - [ ] sph* functions (10/11)
   - [ ] rvh* functions (0/5)
   - [ ] slv* functions (0/2)
   - [ ] main function (0/1)

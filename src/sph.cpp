@@ -1,6 +1,7 @@
 #include "sph.h"
 #include "vsh.h"
 #include "math.h"
+#include <stdexcept>
 
 using namespace Eigen;
 using namespace std;
@@ -188,10 +189,11 @@ namespace Raman {
     return output;
   }
 
+  // Expects: NB >= n_n_max
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B) {
+  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int NB) {
     stBessel<Real>* output = new stBessel<Real>();
-    stFpovx<Real>* chi_psi_prod = sphGetFpovx<Real>(N_B + 1, s, x);
+    stFpovx<Real>* chi_psi_prod = sphGetFpovx<Real>(NB + 1, s, x);
     output->psi_psi = new ArrayXXc<Real>[n_n_max + 2]();
     for (int i = 0; i < n_n_max + 2; i++)
       output->psi_psi[i] = ArrayXXc<Real>::Zero(n_n_max + 2, x.size());
@@ -260,10 +262,11 @@ namespace Raman {
     return output;
   }
 
+  // Expects: NB >= n_n_max
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B) {
+  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int NB) {
     stBesselProducts<Real>* output = new stBesselProducts<Real>();
-    stBessel<Real>* prods = sphGetXiPsi<Real>(n_n_max, s, x, N_B);
+    stBessel<Real>* prods = sphGetXiPsi<Real>(n_n_max, s, x, NB);
     output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi, n_n_max);
     output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi, n_n_max);
 
@@ -296,7 +299,7 @@ namespace Raman {
   stRtfunc<Real>* sphMakeGeometry(size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta) {
     sInt type;
     stRtfunc<Real>* output = new stRtfunc<Real>();
-    if (theta != nullptr) {
+    if (theta) {
       output->w_theta = ArrayXr<Real>::Zero(theta->size());
       output->theta = *theta;
       output->n_Nb_theta = theta->size();
@@ -325,6 +328,89 @@ namespace Raman {
     return output;
   }
 
+  template <class Real>
+  size_t sphCheckBesselConvergence(size_t N_req, Real s, ArrayXr<Real> x, Real acc, size_t N_min) {
+    size_t NB_start = max(N_req, N_min);
+    size_t NB = NB_start;
+    stFpovx<Real>* prod = sphGetFpovx<Real>(NB, s, x);
+    bool to_continue = true;
+    size_t max_N = 500, NB_step = 16;
+
+    int NB_next;
+    stFpovx<Real>* prod_new;
+    Tensor<Real, 0> rel_acc_ee, rel_acc_oo;
+    Real rel_acc;
+    ArithmeticSequence<long int, long int, long int>
+        seq1(0, N_req, 2), seq2(1, N_req, 2), seq3(0, x.size() - 1); // prod->Fpovx[0].cols() = x.size()
+    long int dim1 = seq1.size(), dim3 = seq3.size();
+    Tensor<complex<Real>, 3> tmp(dim1, dim1, dim3);
+    while (to_continue && NB < max_N) {
+      NB_next = NB + NB_step;
+      prod_new = sphGetFpovx<Real>(NB_next, s, x);
+      tmp = *arr2tensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
+          *arr2tensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
+      rel_acc_ee = tmp.abs().real().maximum();
+      tmp = *arr2tensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
+          *arr2tensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
+      rel_acc_oo = tmp.abs().real().maximum();
+      rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
+      if (rel_acc < acc)
+        to_continue = false;
+      else {
+        NB = NB_next;
+        delete[] prod->Fpovx;
+        delete prod;
+        prod = prod_new;
+      }
+    }
+    delete[] prod_new->Fpovx;
+    delete prod_new;
+
+    if (NB > NB_start) {
+      NB -= NB_step;
+      NB_step = 1;
+      to_continue = true;
+      while (to_continue && NB < max_N) {
+        NB += NB_step;
+        delete[] prod->Fpovx;
+        delete prod;
+        prod = sphGetFpovx<Real>(NB, s, x);
+        tmp = *arr2tensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
+            *arr2tensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
+        rel_acc_ee = tmp.abs().maximum().real();
+        tmp = *arr2tensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
+            *arr2tensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
+        rel_acc_oo = tmp.abs().maximum().real();
+        rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
+        if (rel_acc < acc)
+          to_continue = false;
+      }
+    }
+
+    delete[] prod->Fpovx;
+    delete prod;
+    if (to_continue)
+      throw(runtime_error("Problem in sphEstimateNB: convergence was not achieved"));
+    return NB;
+  }
+
+  template <class Real>
+  size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc) {
+    ArrayXr<Real> s = params->s;
+    ArrayXr<Real> k1 = params->k1;
+
+    ArrayXr<Real> x_max = {{k1.maxCoeff() * stGeometry->r.maxCoeff()}};
+    typename ArrayXr<Real>::Index ind;
+    abs(s).minCoeff(&ind);
+    Real s_min = s(ind);
+    abs(s).maxCoeff(&ind);
+    Real s_max = s(ind);
+
+    size_t N1 = sphCheckBesselConvergence(NQ, s_max, x_max, acc, NQ);
+    size_t NB = sphCheckBesselConvergence(NQ, s_min, x_max, acc, N1);
+    return NB;
+  }
+
   template ArrayXXr<double>* sphGetUforFp(int);
   template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);
   template stFpovx<double>* sphGetFpovx(int, double, const ArrayXr<double>&);
@@ -332,4 +418,6 @@ namespace Raman {
   template stBesselPrimes<double>* sphGetBesselProductsPrimes(ArrayXXc<double>*, int);
   template stBesselProducts<double>* sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
   template stRtfunc<double>* sphMakeGeometry(size_t, double, double, ArrayXr<double>*);
+  template size_t sphCheckBesselConvergence(size_t, double, ArrayXr<double>, double, size_t);
+  template size_t sphEstimateNB(size_t, stRtfunc<double>*, stParams<double>*, double);
 }

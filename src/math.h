@@ -18,6 +18,12 @@ namespace Raman {
   complex<Real> mp_im_unit(void);
 
   template<class Real>
+  Tensor<complex<Real>, 3>* arr2tensor(ArrayXXc<Real>* arr,
+      ArithmeticSequence<long int, long int, long int> slice_dim1,
+      ArithmeticSequence<long int, long int, long int> slice_dim2,
+      ArithmeticSequence<long int, long int, long int> slice_dim3);
+
+  template<class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x);
 
   template<class Real>

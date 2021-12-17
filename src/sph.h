@@ -83,17 +83,22 @@ namespace Raman {
   stFpovx<Real>* sphGetFpovx(int n_n_max, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B);
+  stBessel<Real>* sphGetXiPsi(int n_n_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
   stBesselPrimes<Real>* sphGetBesselProductsPrimes(ArrayXXc<Real>* prods, int N);
 
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int N_B);
+  stBesselProducts<Real>* sphGetModifiedBesselProducts(int n_n_max, Real s, const ArrayXr<Real>& x, int NB);
 
-  // Untested
   template <class Real>
   stRtfunc<Real>* sphMakeGeometry(size_t n_Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
+
+  template <class Real>
+  size_t sphCheckBesselConvergence(size_t N_req, Real s, ArrayXr<Real> x, Real acc, size_t N_min);
+
+  template <class Real>
+  size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc = 1e-13);
 }
 
 #endif
