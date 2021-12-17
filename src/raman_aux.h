@@ -32,7 +32,7 @@ namespace Raman {
   stGLQuad<Real>* auxInitLegendreQuad(size_t N1, Real a = -1.0, Real b = 1.0);
 
   template <class Real>
-  stRtfunc<Real>* auxPrepareIntegrals(size_t nNint, sInt type);
+  stRtfunc<Real>* auxPrepareIntegrals(size_t N_int, sInt type);
 }
 
 #endif

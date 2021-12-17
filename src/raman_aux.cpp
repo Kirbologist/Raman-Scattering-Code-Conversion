@@ -42,13 +42,13 @@ namespace Raman {
 
   // Missing functionality
   template <class Real>
-  stRtfunc<Real>* auxPrepareIntegrals(size_t nNint, sInt type) {
+  stRtfunc<Real>* auxPrepareIntegrals(size_t N_int, sInt type) {
     stRtfunc<Real>* output = new stRtfunc<Real>();
-    output->Nb_theta = nNint;
+    output->Nb_theta = N_int;
 
     switch (type) {
       case GAUSS: {
-        stGLQuad<Real>* weights = auxInitLegendreQuad<Real>(nNint);
+        stGLQuad<Real>* weights = auxInitLegendreQuad<Real>(N_int);
         output->theta = acos(weights->x);
         output->w_theta = weights->w;
         delete weights;
@@ -56,9 +56,9 @@ namespace Raman {
       }
 
       case RECTANGLE: {
-        output->theta = ArrayXr<Real>::LinSpaced(nNint, 0, PI);
-        Real dTheta = PI/(nNint - 1);
-        output->w_theta = dTheta*sin(output->theta);
+        output->theta = ArrayXr<Real>::LinSpaced(N_int, 0, PI);
+        Real d_theta = PI/(N_int - 1);
+        output->w_theta = d_theta*sin(output->theta);
         break;
       }
 

@@ -22,16 +22,16 @@ namespace Raman {
   }
 
   template <class Real>
-  Tensor<complex<Real>, 3>* arr2tensor(ArrayXXc<Real>* arr,
+  Tensor3c<Real> subtensor(Tensor3c<Real>& tensor,
       ArithmeticSequence<long int, long int, long int> slice_dim1,
       ArithmeticSequence<long int, long int, long int> slice_dim2,
       ArithmeticSequence<long int, long int, long int> slice_dim3) {
     long int new_dim1 = slice_dim1.size(), new_dim2 = slice_dim2.size(), new_dim3 = slice_dim3.size();
-    Tensor<complex<Real>, 3>* output = new Tensor<complex<Real>, 3>(new_dim1, new_dim2, new_dim3);
+    Tensor3c<Real> output(new_dim1, new_dim2, new_dim3);
     for (long int i = 0; i < new_dim1; i++) {
       for (long int j = 0; j < new_dim2; j++) {
         for (long int k = 0; k < new_dim3; k++)
-          (*output)(i, j, k) = arr[slice_dim1[i]](slice_dim2[j], slice_dim3[k]);
+          output(i, j, k) = tensor(slice_dim1[i], slice_dim2[j], slice_dim3[k]);
       }
     }
     return output;
@@ -53,7 +53,7 @@ namespace Raman {
     return output;
   }
 
-  template Tensor<complex<double>, 3>* arr2tensor(ArrayXXc<double>*,
+  template Tensor3c<double> subtensor(Tensor3c<double>&,
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>);

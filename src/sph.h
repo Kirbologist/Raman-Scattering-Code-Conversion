@@ -16,15 +16,15 @@ namespace Raman {
 
   template <class Real>
   struct stFpovx {
-    ArrayXXc<Real>* Fpovx;
+    Tensor3c<Real> Fpovx;
     ArrayXXc<Real> rb_chi;
     ArrayXXc<Real> rb_psi;
   };
 
   template <class Real>
   struct stBessel {
-    ArrayXXc<Real>* xi_psi;
-    ArrayXXc<Real>* psi_psi;
+    Tensor3c<Real> xi_psi;
+    Tensor3c<Real> psi_psi;
     ArrayXXc<Real> chi_n;
     ArrayXXc<Real> psi_n;
     ArrayXXc<Real> psi_k;
@@ -32,13 +32,13 @@ namespace Raman {
 
   template <class Real>
   struct stBesselPrimes {
-    ArrayXXc<Real>* xi_psi;
-    ArrayXXc<Real>* xi_prime_psi;
-    ArrayXXc<Real>* xi_psi_prime;
-    ArrayXXc<Real>* xi_prime_psi_prime;
-    ArrayXXc<Real>* xi_psi_over_sxx;
-    ArrayXXc<Real>* xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
-    ArrayXXc<Real>* xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
+    Tensor3c<Real> xi_psi;
+    Tensor3c<Real> xi_prime_psi;
+    Tensor3c<Real> xi_psi_prime;
+    Tensor3c<Real> xi_prime_psi_prime;
+    Tensor3c<Real> xi_psi_over_sxx;
+    Tensor3c<Real> xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
+    Tensor3c<Real> xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
     ArrayXXc<Real> for_diag_Lt1;
     ArrayXXc<Real> for_diag_Lt2;
     ArrayXXc<Real> for_diag_Lt3;
@@ -49,29 +49,6 @@ namespace Raman {
     stBesselPrimes<Real>* st_xi_psi_all;
     stBesselPrimes<Real>* st_psi_psi_all;
   };
-
-  template <class Real>
-  void destructStBesselProducts(stBesselProducts<Real>* st) {
-    delete[] st->st_xi_psi_all->xi_psi;
-    delete[] st->st_xi_psi_all->xi_prime_psi;
-    delete[] st->st_xi_psi_all->xi_psi_prime;
-    delete[] st->st_xi_psi_all->xi_prime_psi_prime;
-    delete[] st->st_xi_psi_all->xi_psi_over_sxx;
-    delete[] st->st_xi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
-    delete[] st->st_xi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
-    delete st->st_xi_psi_all;
-
-    delete[] st->st_psi_psi_all->xi_psi;
-    delete[] st->st_psi_psi_all->xi_prime_psi;
-    delete[] st->st_psi_psi_all->xi_psi_prime;
-    delete[] st->st_psi_psi_all->xi_prime_psi_prime;
-    delete[] st->st_psi_psi_all->xi_psi_over_sxx;
-    delete[] st->st_psi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
-    delete[] st->st_psi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
-    delete st->st_psi_psi_all;
-
-    delete st;
-  }
 
   template <class Real>
   struct st4M {
@@ -107,7 +84,7 @@ namespace Raman {
   stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  stBesselPrimes<Real>* sphGetBesselProductsPrimes(ArrayXXc<Real>* prods, int N);
+  stBesselPrimes<Real>* sphGetBesselProductsPrimes(Tensor3c<Real>& prods);
 
   template <class Real>
   stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB);

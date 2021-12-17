@@ -169,21 +169,26 @@ namespace Raman {
     stFpovx<Real>* output = new stFpovx<Real>();
     output->rb_chi = vshRBchi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), x);
     output->rb_psi = vshRBpsi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), s*x);
-    output->Fpovx = new ArrayXXc<Real>[N_max + 1]();
-    for (int i = 0; i <= N_max; i++)
-      output->Fpovx[i] = ArrayXXc<Real>::Zero(N_max + 1, num_x);
+    output->Fpovx = Tensor3c<Real>(N_max + 1, N_max + 1, num_x);
+    output->Fpovx.setZero();
 
     stFprow<Real>* FpRow = sphGetFpRow<Real>(N_max, s, x);
-    output->Fpovx[N_max].topRows(N_max - 3) = (FpRow->S).rowwise() / x.transpose();
+    ArrayXXc<Real> tmp;
+    for (int i = 0; i < N_max - 3; i++) {
+      tmp = (FpRow->S.row(i) / x.transpose()).template cast<complex<Real>>();
+      output->Fpovx.chip(N_max, 0).chip(i, 0) = TensorCast(tmp, num_x);
+    }
     delete FpRow;
 
+    Tensor1c<Real> col_shape(num_x);
     for (int k = N_max; k >= 0; k--) {
       for (int i = k % 2; i <= min(k + 2, N_max); i += 2)
-        (output->Fpovx[i]).row(k) = (output->rb_chi.col(i) * output->rb_psi.col(k)).transpose();
+        output->Fpovx.chip(i, 0).chip(k, 0) = TensorCast(output->rb_chi.col(i) * output->rb_psi.col(k), num_x);
       if (k > 0) {
         for (int n = k + 3; n < N_max; n += 2)
-          (output->Fpovx[n]).row(k - 1) = ((output->Fpovx[n + 1]).row(k) + (output->Fpovx[n - 1]).row(k)) *
-              (2*k + 1) / (2*n + 1) / s - (output->Fpovx[n]).row(k + 1);
+          output->Fpovx.chip(n, 0).chip(k - 1, 0) = (output->Fpovx.chip(n + 1, 0).chip(k, 0) +
+              output->Fpovx.chip(n - 1, 0).chip(k, 0)) * col_shape.constant(static_cast<Real>(2*k + 1) / (2*n + 1) / s) -
+              output->Fpovx.chip(n, 0).chip(k + 1, 0);
       }
     }
     return output;
@@ -192,71 +197,80 @@ namespace Raman {
   // Expects: NB >= N_max
   template <class Real>
   stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
+    int num_x = x.size();
     stBessel<Real>* output = new stBessel<Real>();
     stFpovx<Real>* chi_psi_prod = sphGetFpovx<Real>(NB + 1, s, x);
-    output->psi_psi = new ArrayXXc<Real>[N_max + 2]();
-    for (int i = 0; i < N_max + 2; i++)
-      output->psi_psi[i] = ArrayXXc<Real>::Zero(N_max + 2, x.size());
+    output->psi_psi = Tensor3c<Real>(N_max + 2, N_max + 2, num_x);
+    output->psi_psi.setZero();
     output->psi_n = vshRBpsi<Real>(ArrayXr<Real>::LinSpaced(N_max + 2, 0, N_max + 1), x);
 
     for (int n = 0; n < N_max + 2; n++) {
       for (int k = n % 2; k < N_max + 2; k += 2)
-        output->psi_psi[n].row(k) = (chi_psi_prod->rb_psi.col(k) * output->psi_n.col(n)).transpose();
+        output->psi_psi.chip(n, 0).chip(k, 0) =
+            TensorCast(chi_psi_prod->rb_psi.col(k) * output->psi_n.col(n), num_x);
     }
 
-    output->xi_psi = new ArrayXXc<Real>[N_max + 2]();
-    for (int i = 0; i < N_max + 2; i++)
-      output->xi_psi[i] = output->psi_psi[i] + I*chi_psi_prod->Fpovx[i](seq(0, N_max + 1), all);
+    std::array<int, 3> offsets = {0, 0, 0}, extents = {N_max + 2, N_max + 2, num_x};\
+    output->xi_psi = output->psi_psi + output->psi_psi.constant(I) *
+        chi_psi_prod->Fpovx.slice(offsets, extents);
     output->chi_n = chi_psi_prod->rb_chi.leftCols(N_max + 2);
     output->psi_k = chi_psi_prod->rb_psi.leftCols(N_max + 2);
-    delete[] chi_psi_prod->Fpovx;
     delete chi_psi_prod;
     return output;
   }
 
+  // Expects: prods = [(N + 2) x (N + 2) x X] tensor
   template <class Real>
-  stBesselPrimes<Real>* sphGetBesselProductsPrimes(ArrayXXc<Real>* prods, int N) {
-    int X = prods[0].cols();
+  stBesselPrimes<Real>* sphGetBesselProductsPrimes(Tensor3c<Real>& prods) {
+    int N = prods.dimension(0) - 2;
+    int X = prods.dimension(2);
 
     stBesselPrimes<Real>* output = new stBesselPrimes<Real>();
-    output->xi_psi = new ArrayXXc<Real>[N]();
-    output->xi_prime_psi = new ArrayXXc<Real>[N]();
-    output->xi_psi_prime = new ArrayXXc<Real>[N]();
-    output->xi_prime_psi_prime = new ArrayXXc<Real>[N]();
-    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx = new ArrayXXc<Real>[N]();
-    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx = new ArrayXXc<Real>[N]();
-    output->xi_psi_over_sxx = new ArrayXXc<Real>[N]();
-    for (int i = 0; i < N; i++) {
-      output->xi_psi[i] = prods[i + 1](seq(1, last - 1), all);
-      output->xi_prime_psi[i] = ArrayXXc<Real>::Zero(N, X);
-      output->xi_psi_prime[i] = ArrayXXc<Real>::Zero(N, X);
-      output->xi_prime_psi_prime[i] = ArrayXXc<Real>::Zero(N, X);
-      output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx[i] = ArrayXXc<Real>::Zero(N, X);
-      output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx[i] = ArrayXXc<Real>::Zero(N, X);
-      output->xi_psi_over_sxx[i] = ArrayXXc<Real>::Zero(N, X);
-    }
+    std::array<int, 3> offsets = {1, 1, 0}, extents = {N, N, X};
+    output->xi_psi = prods.slice(offsets, extents);
+    output->xi_prime_psi = Tensor3c<Real>(N, N, X);
+    output->xi_psi_prime = Tensor3c<Real>(N, N, X);
+    output->xi_prime_psi_prime = Tensor3c<Real>(N, N, X);
+    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx = Tensor3c<Real>(N, N, X);
+    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx = Tensor3c<Real>(N, N, X);
+    output->xi_psi_over_sxx = Tensor3c<Real>(N, N, X);
+
+    output->xi_prime_psi.setZero();
+    output->xi_psi_prime.setZero();
+    output->xi_prime_psi_prime.setZero();
+    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx.setZero();
+    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx.setZero();
+    output->xi_psi_over_sxx.setZero();
 
     int k_p1, n_p1;
+    Tensor1c<Real> col_shape(X);
     for (int n = 1; n <= N; n++) {
       for (int k = 2 - n % 2; k <= N; k += 2) {
         k_p1 = k*(k + 1);
         n_p1 = n*(n + 1);
 
-        output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx[n - 1].row(k - 1) = (
-            (k + n + 1)*(k + 1)*prods[n - 1].row(k - 1) +
-            (k_p1 - k*(n + 1))*prods[n - 1].row(k + 1) +
-            (k_p1 - (k + 1)*n)*prods[n + 1].row(k - 1) +
-            (k_p1 + k*n)*prods[n + 1].row(k + 1)) / ((2*n + 1)*(2*k + 1));
+        output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx.chip(n - 1, 0).chip(k - 1, 0) = (
+            col_shape.constant((k + n + 1)*(k + 1)) * prods.chip(n - 1, 0).chip(k - 1, 0) +
+            col_shape.constant(k_p1 - k*(n + 1)) * prods.chip(n - 1, 0).chip(k + 1, 0) +
+            col_shape.constant(k_p1 - (k + 1)*n) * prods.chip(n + 1, 0).chip(k - 1, 0) +
+            col_shape.constant(k_p1 + k*n) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
+            col_shape.constant((2*n + 1)*(2*k + 1));
 
-        output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx[n - 1].row(k - 1) = (
-            (n_p1 + (k + 1)*(n + 1))*prods[n - 1].row(k - 1) +
-            (n - k)*(n + 1)*prods[n - 1].row(k + 1) +
-            (n - k)*n*prods[n + 1].row(k - 1) +
-            (n_p1 + k*n)*prods[n + 1].row(k + 1)) / ((2*n + 1)*(2*k + 1));
+        output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx.chip(n - 1, 0).chip(k - 1, 0) = (
+            col_shape.constant(n_p1 + (k + 1) * (n + 1))*prods.chip(n - 1, 0).chip(k - 1, 0) +
+            col_shape.constant((n - k)*(n + 1)) * prods.chip(n - 1, 0).chip(k + 1, 0) +
+            col_shape.constant((n - k)*n) * prods.chip(n + 1, 0).chip(k - 1, 0) +
+            col_shape.constant(n_p1 + k*n) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
+            col_shape.constant((2*n + 1)*(2*k + 1));
       }
+
       for (int k = 1 + n % 2; k < N; k += 2) {
-        output->xi_prime_psi[n - 1].row(k - 1) = (prods[n - 1].row(k)*(n + 1) - n*prods[n + 1].row(k)) / (2 * n + 1);
-        output->xi_psi_prime[n - 1].row(k - 1) = (prods[n].row(k - 1)*(k + 1) - k*prods[n].row(k + 1)) / (2 * k + 1);
+        output->xi_prime_psi.chip(n - 1, 0).chip(k - 1, 0) =
+            (prods.chip(n - 1, 0).chip(k, 0) * col_shape.constant(n + 1) -
+            col_shape.constant(n)*prods.chip(n + 1, 0).chip(k, 0)) / col_shape.constant(2*n + 1);
+        output->xi_psi_prime.chip(n - 1, 0).chip(k - 1, 0) =
+            (prods.chip(n, 0).chip(k - 1, 0) * col_shape.constant(k + 1) -
+            col_shape.constant(k)*prods.chip(n, 0).chip(k + 1, 0)) / col_shape.constant(2*k + 1);
       }
     }
     return output;
@@ -267,8 +281,8 @@ namespace Raman {
   stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
     stBesselProducts<Real>* output = new stBesselProducts<Real>();
     stBessel<Real>* prods = sphGetXiPsi<Real>(N_max, s, x, NB);
-    output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi, N_max);
-    output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi, N_max);
+    output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi);
+    output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi);
 
     ArrayXXc<Real> psi_n_p1_psi_n = (prods->psi_n(all, seq(2, last)) * prods->psi_k(all, seq(1, last - 1))).transpose();
     ArrayXXc<Real> psi_n_psi_n_p1 = (prods->psi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(2, last))).transpose();
@@ -279,8 +293,6 @@ namespace Raman {
     ArrayXXc<Real> psi_n_psi_n = (prods->psi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(1, last - 1))).transpose();
     ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*(prods->chi_n(all, seq(1, last - 1)) * prods->psi_k(all, seq(1, last - 1))).transpose();
 
-    delete[] prods->xi_psi;
-    delete[] prods->psi_psi;
     delete prods;
 
     ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(N_max, 2, N_max + 1);
@@ -341,29 +353,27 @@ namespace Raman {
     Tensor<Real, 0> rel_acc_ee, rel_acc_oo;
     Real rel_acc;
     ArithmeticSequence<long int, long int, long int>
-        seq1(0, N_req, 2), seq2(1, N_req, 2), seq3(0, x.size() - 1); // prod->Fpovx[0].cols() = x.size()
+        seq1(0, N_req, 2), seq2(1, N_req, 2), seq3(0, x.size() - 1); // prod->Fpovx has no. of columns = x.size()
     long int dim1 = seq1.size(), dim3 = seq3.size();
-    Tensor<complex<Real>, 3> tmp(dim1, dim1, dim3);
+    Tensor3c<Real> tmp(dim1, dim1, dim3);
     while (to_continue && NB < max_N) {
       NB_next = NB + NB_step;
       prod_new = sphGetFpovx<Real>(NB_next, s, x);
-      tmp = *arr2tensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
-          *arr2tensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
+      tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
+          subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
       rel_acc_ee = tmp.abs().real().maximum();
-      tmp = *arr2tensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
-          *arr2tensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
+      tmp = subtensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
+          subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
       rel_acc_oo = tmp.abs().real().maximum();
       rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
       if (rel_acc < acc)
         to_continue = false;
       else {
         NB = NB_next;
-        delete[] prod->Fpovx;
         delete prod;
         prod = prod_new;
       }
     }
-    delete[] prod_new->Fpovx;
     delete prod_new;
 
     if (NB > NB_start) {
@@ -372,14 +382,13 @@ namespace Raman {
       to_continue = true;
       while (to_continue && NB < max_N) {
         NB += NB_step;
-        delete[] prod->Fpovx;
         delete prod;
         prod = sphGetFpovx<Real>(NB, s, x);
-        tmp = *arr2tensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
-            *arr2tensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
+        tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
+            subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
         rel_acc_ee = tmp.abs().maximum().real();
-        tmp = *arr2tensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
-            *arr2tensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
+        tmp = subtensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
+            subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
         rel_acc_oo = tmp.abs().maximum().real();
         rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
         if (rel_acc < acc)
@@ -387,7 +396,6 @@ namespace Raman {
       }
     }
 
-    delete[] prod->Fpovx;
     delete prod;
     if (to_continue)
       throw(runtime_error("Problem in sphEstimateNB: convergence was not achieved"));
@@ -411,7 +419,7 @@ namespace Raman {
     return NB;
   }
 
-/*
+  /*
   template <class Real>
   st4M<Real>* sphCalculatePQ(int N_max, ArrayXi abs_m_vec,
       stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB) {
@@ -424,7 +432,22 @@ namespace Raman {
           N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
     stPQa<Real>* output = new stPQa[M]();
-    Real k1 = params->k1, s = params->s,
+    ArrayXr<Real> k1 = params->k1, s = params->s;
+    int N_int = Rt_func->Nb_theta, T = N_int;
+    ArrayXr<Real> x = Rt_func->r * k1, x_theta = Rt_func->dr_dt * k1
+
+    stPinmTaunm<Real>* stPT = vshPinmTaunm(N_max, Rt_func->theta);
+    ArrayXr<Real> sin_t = sin(Rt_func->theta);
+    ArrayXr<Real> dx_dt_wt = x_theta * Rt_func->w_theta;
+    ArrayXr<Real> n_vec = ArrayXr<Real>::LinSpaced(N_max, 1, N_max);
+    ArrayXr<Real> An_vec = sqrt((2*n_vec + 1) / (2*n_vec * (n_vec + 1)));
+    ArrayXXr<Real> An_Ak = (An_vec.matrix() * An_vec.transpose().matrix()).array();
+
+    stBesselProducts<Real>* prods = sphGetModifiedBesselProducts(N_max, s, x, NB);
+    ArrayXXc<Real>* xi_prime_psi = new ArrayXXc<Real>[N_max]();
+    ArrayXXc<Real>* xi_psi_prime = new ArrayXXc<Real>[N_max]();
+    ArrayXXc<Real>* xi_psi = new ArrayXXc<Real>[N_max]();
+    ArrayXXc<Real>* xi_psi = new ArrayXXc<Real>[N_max]();
   }
   */
 
@@ -432,7 +455,7 @@ namespace Raman {
   template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);
   template stFpovx<double>* sphGetFpovx(int, double, const ArrayXr<double>&);
   template stBessel<double>* sphGetXiPsi(int, double, const ArrayXr<double>&, int);
-  template stBesselPrimes<double>* sphGetBesselProductsPrimes(ArrayXXc<double>*, int);
+  template stBesselPrimes<double>* sphGetBesselProductsPrimes(Tensor3c<double>&);
   template stBesselProducts<double>* sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
   template stRtfunc<double>* sphMakeGeometry(size_t, double, double, ArrayXr<double>*);
   template size_t sphCheckBesselConvergence(size_t, double, ArrayXr<double>, double, size_t);

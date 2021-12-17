@@ -18,7 +18,7 @@ namespace Raman {
   complex<Real> mp_im_unit(void);
 
   template<class Real>
-  Tensor<complex<Real>, 3>* arr2tensor(ArrayXXc<Real>* arr,
+  Tensor3c<Real> subtensor(Tensor3c<Real>& tensor,
       ArithmeticSequence<long int, long int, long int> slice_dim1,
       ArithmeticSequence<long int, long int, long int> slice_dim2,
       ArithmeticSequence<long int, long int, long int> slice_dim3);

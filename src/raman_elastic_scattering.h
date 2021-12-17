@@ -6,6 +6,7 @@
 #include <iostream>
 #include <Eigen/Core>
 #include <Eigen/CXX11/Tensor>
+#include "TensorMatrixCast.h"
 
 using namespace std;
 using namespace Eigen;
@@ -35,6 +36,12 @@ namespace Raman {
 
   template <class Real>
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
+
+  template <class Real>
+  using Tensor3c = Tensor<complex<Real>, 3>;
+
+  template <class Real>
+  using Tensor1c = Tensor<complex<Real>, 1>;
 
   enum sIncType {KxEz, KxEy, KyEx, KyEz, KzEx, KzEy, GENERAL};
 
