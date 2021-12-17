@@ -11,7 +11,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
   - [x] aux* functions (2/2)
   - [ ] vsh* functions (8/9)
-  - [ ] sph* functions (10/11)
+  - [x] sph* functions (11/11)
   - [ ] rvh* functions (0/5)
   - [ ] slv* functions (0/2)
   - [ ] main function (0/1)
@@ -49,3 +49,5 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
 SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015); neither me, nor T. Plakhotnik wrote any of the original code. The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
 https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
+
+The code in TensorMatrixCast.h was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)

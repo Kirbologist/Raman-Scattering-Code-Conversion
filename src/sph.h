@@ -37,8 +37,8 @@ namespace Raman {
     Tensor3c<Real> xi_psi_prime;
     Tensor3c<Real> xi_prime_psi_prime;
     Tensor3c<Real> xi_psi_over_sxx;
-    Tensor3c<Real> xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx;
-    Tensor3c<Real> xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx;
+    Tensor3c<Real> xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx;
+    Tensor3c<Real> xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx;
     ArrayXXc<Real> for_diag_Lt1;
     ArrayXXc<Real> for_diag_Lt2;
     ArrayXXc<Real> for_diag_Lt3;
@@ -98,6 +98,7 @@ namespace Raman {
   template <class Real>
   size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc = 1e-13);
 
+  // Untested
   template <class Real>
   st4M<Real>* sphCalculatePQ(int N_max, ArrayXi abs_m_vec, stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB = -1);
 }

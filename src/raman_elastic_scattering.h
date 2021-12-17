@@ -35,6 +35,12 @@ namespace Raman {
   using RowArrayXc = Array<complex<Real>, 1, Dynamic>;
 
   template <class Real>
+  using MatrixXc = Matrix<complex<Real>, Dynamic, Dynamic>;
+
+  template <class Real>
+  using VectorXr = Matrix<Real, Dynamic, 1>;
+
+  template <class Real>
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
 
   template <class Real>

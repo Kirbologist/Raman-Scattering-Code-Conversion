@@ -231,15 +231,15 @@ namespace Raman {
     output->xi_prime_psi = Tensor3c<Real>(N, N, X);
     output->xi_psi_prime = Tensor3c<Real>(N, N, X);
     output->xi_prime_psi_prime = Tensor3c<Real>(N, N, X);
-    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx = Tensor3c<Real>(N, N, X);
-    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx = Tensor3c<Real>(N, N, X);
+    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx = Tensor3c<Real>(N, N, X);
+    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx = Tensor3c<Real>(N, N, X);
     output->xi_psi_over_sxx = Tensor3c<Real>(N, N, X);
 
     output->xi_prime_psi.setZero();
     output->xi_psi_prime.setZero();
     output->xi_prime_psi_prime.setZero();
-    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx.setZero();
-    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx.setZero();
+    output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.setZero();
+    output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.setZero();
     output->xi_psi_over_sxx.setZero();
 
     int k_p1, n_p1;
@@ -249,14 +249,14 @@ namespace Raman {
         k_p1 = k*(k + 1);
         n_p1 = n*(n + 1);
 
-        output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_ssx.chip(n - 1, 0).chip(k - 1, 0) = (
+        output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(n - 1, 0).chip(k - 1, 0) = (
             col_shape.constant((k + n + 1)*(k + 1)) * prods.chip(n - 1, 0).chip(k - 1, 0) +
             col_shape.constant(k_p1 - k*(n + 1)) * prods.chip(n - 1, 0).chip(k + 1, 0) +
             col_shape.constant(k_p1 - (k + 1)*n) * prods.chip(n + 1, 0).chip(k - 1, 0) +
             col_shape.constant(k_p1 + k*n) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
             col_shape.constant((2*n + 1)*(2*k + 1));
 
-        output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_ssx.chip(n - 1, 0).chip(k - 1, 0) = (
+        output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(n - 1, 0).chip(k - 1, 0) = (
             col_shape.constant(n_p1 + (k + 1) * (n + 1))*prods.chip(n - 1, 0).chip(k - 1, 0) +
             col_shape.constant((n - k)*(n + 1)) * prods.chip(n - 1, 0).chip(k + 1, 0) +
             col_shape.constant((n - k)*n) * prods.chip(n + 1, 0).chip(k - 1, 0) +
@@ -419,37 +419,220 @@ namespace Raman {
     return NB;
   }
 
-  /*
   template <class Real>
   st4M<Real>* sphCalculatePQ(int N_max, ArrayXi abs_m_vec,
       stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB) {
+    if (params->s.size() > 1 || params->k1.size() > 1)
+      throw(runtime_error("params->s and params->k1 must be scalar"));
     if (NB < N_max)
       NB = N_max;
     size_t M = abs_m_vec.size();
-    bool print_output = params->output;
-    if (print_output)
+    if (params->output)
       cout << "sphCalculatePQ: Calculate P, Q for " << M << "m-values with N_Q = " <<
           N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
     stPQa<Real>* output = new stPQa[M]();
-    ArrayXr<Real> k1 = params->k1, s = params->s;
+    Real s = params->s(0);
+    Real k1 = params->k1(0);
     int N_int = Rt_func->Nb_theta, T = N_int;
-    ArrayXr<Real> x = Rt_func->r * k1, x_theta = Rt_func->dr_dt * k1
+    ArrayXr<Real> x = Rt_func->r * k1, x_theta = Rt_func->dr_dt * k1;
 
     stPinmTaunm<Real>* stPT = vshPinmTaunm(N_max, Rt_func->theta);
     ArrayXr<Real> sin_t = sin(Rt_func->theta);
     ArrayXr<Real> dx_dt_wt = x_theta * Rt_func->w_theta;
-    ArrayXr<Real> n_vec = ArrayXr<Real>::LinSpaced(N_max, 1, N_max);
-    ArrayXr<Real> An_vec = sqrt((2*n_vec + 1) / (2*n_vec * (n_vec + 1)));
+    ArrayXr<Real> tmp = ArrayXr<Real>::LinSpaced(N_max, 1, N_max);
+    ArrayXr<Real> An_vec = sqrt((2*tmp + 1) / (2*tmp * (tmp + 1)));
     ArrayXXr<Real> An_Ak = (An_vec.matrix() * An_vec.transpose().matrix()).array();
 
     stBesselProducts<Real>* prods = sphGetModifiedBesselProducts(N_max, s, x, NB);
-    ArrayXXc<Real>* xi_prime_psi = new ArrayXXc<Real>[N_max]();
-    ArrayXXc<Real>* xi_psi_prime = new ArrayXXc<Real>[N_max]();
-    ArrayXXc<Real>* xi_psi = new ArrayXXc<Real>[N_max]();
-    ArrayXXc<Real>* xi_psi = new ArrayXXc<Real>[N_max]();
+    Tensor3c<Real> xi_prime_psi(N_max, T, N_max);
+    Tensor3c<Real> xi_psi_prime(N_max, T, N_max);
+    Tensor3c<Real> xi_psi(N_max, T, N_max);
+    Tensor3c<Real> xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx(N_max, T, N_max);
+    Tensor3c<Real> xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx(N_max, T, N_max);
+    for (int k = 0; k < N_max; k++) {
+      xi_psi.chip(k, 2) = prods->st_xi_psi_all->xi_psi.chip(k, 1);
+      xi_prime_psi.chip(k, 2) = prods->st_xi_psi_all->xi_prime_psi.chip(k, 1);
+      xi_psi_prime.chip(k, 2) = prods->st_xi_psi_all->xi_psi_prime.chip(k, 1);
+      xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 2) =
+          prods->st_xi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 1);
+      xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 2) =
+          prods->st_xi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 1);
+    }
+    ArrayXXc<Real> for_Q_diag_Lt1 = prods->st_xi_psi_all->for_diag_Lt1;
+    ArrayXXc<Real> for_Q_diag_Lt2 = prods->st_xi_psi_all->for_diag_Lt2;
+    ArrayXXc<Real> for_Q_diag_Lt3 = prods->st_xi_psi_all->for_diag_Lt3;
+    delete prods->st_xi_psi_all;
+
+    Tensor3c<Real> psi_prime_psi(N_max, T, N_max);
+    Tensor3c<Real> psi_psi_prime(N_max, T, N_max);
+    Tensor3c<Real> psi_psi(N_max, T, N_max);
+    Tensor3c<Real> psi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx(N_max, T, N_max);
+    Tensor3c<Real> psi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx(N_max, T, N_max);
+    for (int k = 0; k < N_max; k++) {
+      psi_psi.chip(k, 2) = prods->st_psi_psi_all->xi_psi.chip(k, 1);
+      psi_prime_psi.chip(k, 2) = prods->st_psi_psi_all->xi_prime_psi.chip(k, 1);
+      psi_psi_prime.chip(k, 2) = prods->st_psi_psi_all->xi_psi_prime.chip(k, 1);
+      psi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 2) =
+          prods->st_psi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 1);
+      psi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 2) =
+          prods->st_psi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 1);
+    }
+    ArrayXXc<Real> for_P_diag_Lt1 = prods->st_psi_psi_all->for_diag_Lt1;
+    ArrayXXc<Real> for_P_diag_Lt2 = prods->st_psi_psi_all->for_diag_Lt2;
+    ArrayXXc<Real> for_P_diag_Lt3 = prods->st_psi_psi_all->for_diag_Lt3;
+    delete prods->st_psi_psi_all;
+    delete prods;
+
+    for (int i = 0; i < M; i++) {
+      int m = abs_m_vec(i), Nm = N_max - m + 1;
+      ArrayXi n_vec = ArrayXi::LinSpaced(Nm, m, N_max);
+      ArrayXi p_vec = n_vec*(n_vec + 1) + m;
+      ArrayXr<Real> n_vec_real = n_vec.template cast<Real>();
+      ArrayXXr<Real> pi_nm = stPT->pi_nm(all, p_vec).transpose();
+      ArrayXXr<Real> tau_nm = stPT->tau_nm(all, p_vec).transpose();
+      ArrayXXr<Real> d_n = m ? pi_nm.rowwise() * (sin_t/m).transpose() : stPT->p_n0(all, n_vec).transpose();
+
+      ArrayXXr<Real> d_n_times_nnp1 = d_n.colwise() * (n_vec_real*(n_vec_real + 1));
+
+      ArrayXXc<Real> K1, K2, L5, L6, K1P, K2P, L5P, L6P;
+      K1 = K2 = L5 = L6 = K1P = K2P = L5P = L6P = ArrayXXc<Real>::Zero(Nm, Nm);
+
+      for (int k = m; k <= N_max; k++) {
+        int k_ind = k - m;
+        ArrayXr<Real> d_k = d_n.row(k_ind).tranpose();
+        ArrayXr<Real> tau_k = tau_nm.row(k_ind).transpose();
+
+        VectorXr<Real> dx_dt_tau_k_sin_t = dx_dt_wt * tau_k;
+        VectorXr<Real> dx_dt_d_k_sin_t = dx_dt_wt * d_k;
+
+        MatrixXc<Real> pi_n_xi_prime_psi = pi_nm.template cast<complex<Real>>() *
+            MatrixCast(xi_prime_psi.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        MatrixXc<Real> pi_n_xi_psi_prime = pi_nm.template cast<complex<Real>>() *
+            MatrixCast(xi_psi_prime.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        K1.col(k_ind) = pi_n_xi_psi_prime * dx_dt_d_k_sin_t;
+        K2.col(k_ind) = pi_n_xi_prime_psi * dx_dt_d_k_sin_t;
+
+        pi_n_xi_prime_psi = pi_nm.template cast<complex<Real>>() *
+            MatrixCast(psi_prime_psi.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        pi_n_xi_psi_prime = pi_nm.template cast<complex<Real>>() *
+            MatrixCast(psi_psi_prime.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        K1P.col(k_ind) = pi_n_xi_psi_prime * dx_dt_d_k_sin_t;
+        K2P.col(k_ind) = pi_n_xi_prime_psi * dx_dt_d_k_sin_t;
+
+        MatrixXc<Real> d_n_xi_psi_nnp1 = d_n_times_nnp1 *
+            MatrixCast(xi_psi.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        MatrixXc<Real> tau_n_xi_psi = tau_nm *
+            MatrixCast(xi_psi.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+
+        L5.col(k_ind) = d_n_xi_psi_nnp1 * dx_dt_tau_k_sin_t - tau_n_xi_psi * dx_dt_d_k_sin_t*k*(k + 1);
+
+        d_n_xi_psi_nnp1 = d_n_times_nnp1 * MatrixCast(psi_psi.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        tau_n_xi_psi = tau_nm * MatrixCast(psi_psi.chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+
+        L5P.col(k_ind) = d_n_xi_psi_nnp1 * dx_dt_tau_k_sin_t - tau_n_xi_psi * dx_dt_d_k_sin_t*k*(k + 1);
+
+        MatrixXc<Real> d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 =
+            d_n_times_nnp1 * MatrixCast(xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx
+            .chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        MatrixXc<Real> tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 =
+            tau_nm * MatrixCast(xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx
+            .chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+
+        L6.col(k_ind) = d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 * dx_dt_tau_k_sin_t -
+            tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 * dx_dt_d_k_sin_t * k*(k + 1);
+
+        d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 =
+            d_n_times_nnp1 * MatrixCast(psi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx
+            .chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+        tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 =
+            tau_nm * MatrixCast(psi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx
+            .chip(k - 1, 2), N_max, T).array().bottomRows(Nm);
+
+        L6P.col(k_ind) = d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 * dx_dt_tau_k_sin_t -
+            tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 * dx_dt_d_k_sin_t * k*(k + 1);
+      }
+
+      ArrayXXr<Real> prefactor1 = (s - 1)*(s + 1) / s * An_Ak(n_vec, n_vec);
+      ArrayXXr<Real> prefactor2 = I * prefactor1 / (n_vec * (n_vec + 1)).replicate(1, Nm).rowwise() - (n_vec * (n_vec + 1)).transpose();
+
+      ArrayXXc<Real> Q12 = prefactor1 * K1;
+      ArrayXXc<Real> Q21 = -prefactor1 * K2;
+      ArrayXXc<Real> Q11 = prefactor2 * L5;
+      ArrayXXc<Real> Q22 = prefactor2 * L6;
+
+      ArrayXXc<Real> P12 = prefactor1 * K1P;
+      ArrayXXc<Real> P21 = -prefactor1 * K2P;
+      ArrayXXc<Real> P11 = prefactor2 * L5P;
+      ArrayXXc<Real> P22 = prefactor2 * L6P;
+
+      ArrayXr<Real> prefact_diag1 = -I/s * (2*n_vec_real + 1) / (2*n_vec_real*(n_vec_real + 1));
+      ArrayXr<Real> prefact_diag2 = -I*(s - 1)*(s + 1)/s/2 * (2*n_vec + 1);
+      ArrayXr<Real> pi2_p_tau2 = pow(pi_nm, 2) + pow(tau_nm, 2);
+
+      ArrayXc<Real> Ltilde1 = (pi2_p_tau2 * for_Q_diag_Lt1(n_vec, all)).matrix() * Rt_func->w_theta.matrix();
+      ArrayXc<Real> Ltilde2 = (pi2_p_tau2 * for_Q_diag_Lt2(n_vec, all)).matrix() * Rt_func->w_theta.matrix();
+      ArrayXc<Real> Ltilde3 = (d_n * tau_nm * for_Q_diag_Lt3(n_vec, all)).matrix() * dx_dt_wt.matrix();
+
+      for (int j = 0; j < Nm; j++) {
+        Q11(j, j) = prefact_diag1(j) * Ltilde1(j);
+        Q22(j, j) = prefact_diag1(j) * Ltilde2(j) + prefact_diag2 * Ltilde3(j);
+      }
+
+      Ltilde1 = (pi2_p_tau2 * for_P_diag_Lt1(n_vec, all)).matrix() * Rt_func->w_theta.matrix();
+      Ltilde2 = (pi2_p_tau2 * for_P_diag_Lt2(n_vec, all)).matrix() * Rt_func->w_theta.matrix();
+      Ltilde3 = (d_n * tau_nm * for_P_diag_Lt3(n_vec, all)).matrix() * dx_dt_wt.matrix();
+
+      for (int j = 0; j < Nm; j++) {
+        P11(j, j) = prefact_diag1(j) * Ltilde1(j);
+        P22(j, j) = prefact_diag1(j) * Ltilde2(j) + prefact_diag2 * Ltilde3(j);
+      }
+
+      ArithmeticSequence<int, int, int> inde = seq(m % 2, Nm, 2);
+      ArithmeticSequence<int, int, int> indo = seq(1 - m % 2, Nm, 2);
+
+      output[i]->st4MQeo = new st4M<Real>();
+      output[i]->st4MQeo->M12 = Q12(inde, indo);
+      output[i]->st4MQeo->M21 = Q21(inde, indo);
+      output[i]->st4MQeo->M11 = Q11(inde, indo);
+      output[i]->st4MQeo->M22 = Q22(inde, indo);
+      output[i]->st4MQeo->m = m;
+      output[i]->st4MQeo->ind1 = inde;
+      output[i]->st4MQeo->ind2 = indo;
+
+      output[i]->st4MQoe = new st4M<Real>();
+      output[i]->st4MQoe->M12 = Q12(inde, indo);
+      output[i]->st4MQoe->M21 = Q21(inde, indo);
+      output[i]->st4MQoe->M11 = Q11(inde, indo);
+      output[i]->st4MQoe->M22 = Q22(inde, indo);
+      output[i]->st4MQoe->m = m;
+      output[i]->st4MQoe->ind1 = inde;
+      output[i]->st4MQoe->ind2 = indo;
+
+      output[i]->st4MPeo = new st4M<Real>();
+      output[i]->st4MPeo->M12 = Q12(inde, indo);
+      output[i]->st4MPeo->M21 = Q21(inde, indo);
+      output[i]->st4MPeo->M11 = Q11(inde, indo);
+      output[i]->st4MPeo->M22 = Q22(inde, indo);
+      output[i]->st4MPeo->m = m;
+      output[i]->st4MPeo->ind1 = inde;
+      output[i]->st4MPeo->ind2 = indo;
+
+      output[i]->st4MPoe = new st4M<Real>();
+      output[i]->st4MPoe->M12 = Q12(inde, indo);
+      output[i]->st4MPoe->M21 = Q21(inde, indo);
+      output[i]->st4MPoe->M11 = Q11(inde, indo);
+      output[i]->st4MPoe->M22 = Q22(inde, indo);
+      output[i]->st4MPoe->m = m;
+      output[i]->st4MPoe->ind1 = inde;
+      output[i]->st4MPoe->ind2 = indo;
+
+      output[i]->has_st4MQ = true;
+      output[i]->has_st4MP = true;
+    }
+    delete stPT;
+    return output;
   }
-  */
 
   template ArrayXXr<double>* sphGetUforFp(int);
   template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);
