@@ -6,17 +6,7 @@
 using namespace Eigen;
 
 namespace Raman {
-  enum sIncType {KxEz, KxEy, KyEx, KyEz, KzEx, KzEy, GENERAL};
   enum sBessel {J, H1};
-
-  template<class Real>
-  struct stIncPar {
-    sIncType type;
-    Real theta_p;
-    Real phi_p;
-    Real alpha_p;
-    ArrayXi abs_m_vec;
-  };
 
   template<class Real>
   struct stPinmTaunm {

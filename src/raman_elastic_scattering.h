@@ -36,11 +36,42 @@ namespace Raman {
   template <class Real>
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
 
+  enum sIncType {KxEz, KxEy, KyEx, KyEz, KzEx, KzEy, GENERAL};
+
+  template<class Real>
+  struct stIncPar {
+    sIncType type;
+    Real theta_p;
+    Real phi_p;
+    Real alpha_p;
+    ArrayXi abs_m_vec;
+  };
+
   template <class Real>
   struct stParams {
-    ArrayXr<Real> s;
+    Real a;
+    Real c;
     ArrayXr<Real> k1;
+    ArrayXr<Real> s;
+    int N;
+    int n_Nb_theta;
+    sIncType inc_type;
+    stIncPar inc_par;
+    int n_Nb_theta_pst;
+    Real lambda;
+    Real epsilon1;
+    complex<Real> epsilon2;
   };
+
+  template <class Real>
+  struct stOptions {
+    bool get_R = false;
+    int Delta;
+    int NB;
+    ArrayXi abs_m_vec;
+    bool get_symmetric_T = false;
+    bool output = true;
+  }
 }
 
 #endif
