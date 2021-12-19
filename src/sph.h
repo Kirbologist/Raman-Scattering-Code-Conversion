@@ -56,9 +56,9 @@ namespace Raman {
     ArrayXXc<Real> M12;
     ArrayXXc<Real> M21;
     ArrayXXc<Real> M22;
-    ArrayXi m;
-    int ind_e;
-    int ind_o;
+    int m;
+    ArrayXi ind1;
+    ArrayXi ind2;
   };
 
   template <class Real>
@@ -92,15 +92,17 @@ namespace Raman {
   template <class Real>
   stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
 
+  // Could use some more thorough testing
   template <class Real>
   size_t sphCheckBesselConvergence(size_t N_req, Real s, ArrayXr<Real> x, Real acc, size_t N_min);
 
+  // Could use some more thorough testing
   template <class Real>
   size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc = 1e-13);
 
   // Untested
   template <class Real>
-  st4M<Real>* sphCalculatePQ(int N_max, ArrayXi abs_m_vec, stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB = -1);
+  stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB = -1);
 }
 
 #endif

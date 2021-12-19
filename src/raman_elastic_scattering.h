@@ -79,11 +79,15 @@ namespace Raman {
   template <class Real>
   struct stOptions {
     bool get_R = false;
-    int Delta;
-    int NB;
+    int Delta = 0;
+    int NB = 0;
     ArrayXi abs_m_vec;
     bool get_symmetric_T = false;
     bool output = true;
+
+    stOptions(int N) {
+      this.abs_m_vec = ArrayXi::LinSpaced(N + 1, 0, N);
+    }
   };
 }
 

@@ -37,6 +37,26 @@ namespace Raman {
     return output;
   }
 
+  ArrayXi seq2Array(long int first, long int last, long int stride) {
+    ArithmeticSequence<long int, long int, long int> sequence = seq(first, last, stride);
+    size_t rows = sequence.size();
+    ArrayXi output(rows);
+    for (size_t i = 0; i < rows; i++)
+      output(i) = sequence[i];
+    return output;
+  }
+
+  template <class Real>
+  ArrayXXc<Real> reduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows) {
+    const auto dims = tensor.dimensions();
+    ArrayXXc<Real> output(num_rows, dims[1]);
+    for (int i = 0; i < num_rows; i++) {
+      for (int j = 0; j < dims[1]; j++)
+        output(i, j) = tensor(dims[0] - num_rows + i, j, offset);
+    }
+    return output;
+  }
+
   template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
@@ -57,6 +77,7 @@ namespace Raman {
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>);
-  template ArrayXr<double> arr_bessel_j(ArrayXr<double>& nu, double x);
-  template ArrayXr<double> arr_bessel_y(ArrayXr<double>& nu, double x);
+  template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
+  template ArrayXr<double> arr_bessel_j(ArrayXr<double>&, double);
+  template ArrayXr<double> arr_bessel_y(ArrayXr<double>&, double);
 }
