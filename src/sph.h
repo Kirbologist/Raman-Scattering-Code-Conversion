@@ -84,24 +84,24 @@ namespace Raman {
   stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  stBesselPrimes<Real>* sphGetBesselProductsPrimes(Tensor3c<Real>& prods);
+  stBesselPrimes<Real>* sphGetBesselProductsPrimes(const Tensor3c<Real>& prods);
 
   template <class Real>
   stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, ArrayXr<Real>* theta = nullptr);
+  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta = nullptr);
 
   // Could use some more thorough testing
   template <class Real>
-  size_t sphCheckBesselConvergence(size_t N_req, Real s, ArrayXr<Real> x, Real acc, size_t N_min);
+  size_t sphCheckBesselConvergence(size_t N_req, Real s, const ArrayXr<Real>& x, Real acc, size_t N_min);
 
   // Could use some more thorough testing
   template <class Real>
-  size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc = 1e-13);
+  size_t sphEstimateNB(size_t NQ, const stRtfunc<Real>* stGeometry, const stParams<Real>* params, Real acc = 1e-13);
 
   template <class Real>
-  stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB = -1);
+  stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB = -1);
 }
 
 #endif

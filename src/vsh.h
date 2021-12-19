@@ -60,7 +60,7 @@ namespace Raman {
   stPinmTaunm<Real>* vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta);
 
   template <class Real>
-  stIncEabnm<Real>* vshGetIncidentCoeffs(int N_max, stIncPar<Real>* angles);
+  stIncEabnm<Real>* vshGetIncidentCoeffs(int N_max, const stIncPar<Real>* angles);
 
   // Untested
   template <class Real>
@@ -71,10 +71,10 @@ namespace Raman {
   stEAllPhi<Real>* vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
-      sBessel type, stPinmTaunm<Real>* stPT = nullptr);
+      sBessel type, const stPinmTaunm<Real>* stPT = nullptr);
 
   template <class Real>
-  stEforPhi<Real>* vshEthetaForPhi(stEAllPhi<Real>* stEsurf, Real phi0);
+  stEforPhi<Real>* vshEthetaForPhi(const stEAllPhi<Real>* stEsurf, Real phi0);
 
   template <class Real>
   ArrayXXc<Real> vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x);

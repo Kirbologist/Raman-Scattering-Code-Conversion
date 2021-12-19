@@ -152,8 +152,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stIncEabnm<Real>* vshGetIncidentCoeffs(
-      int N_max, stIncPar<Real>* angles) {
+  stIncEabnm<Real>* vshGetIncidentCoeffs(int N_max, const stIncPar<Real>* angles) {
     Real alpha_p = angles->alpha_p, phi_p = angles->phi_p;
     Array<Real, 1, 1> theta_p = {{angles->theta_p}};
     int P_max = (N_max + 1)*(N_max + 1);
@@ -229,7 +228,7 @@ namespace Raman {
   stEAllPhi<Real>* vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
-      sBessel type, stPinmTaunm<Real>* stPT) {
+      sBessel type, const stPinmTaunm<Real>* stPT) {
     int P_max = p_nm.cols(), N_max = static_cast<int>(round(sqrt(P_max) - 1)),
         Nb_lambda = lambda.size();
     if (rt.size() != theta.size() && rt(0) != 0 && !isinf(rt(0)))
@@ -346,7 +345,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stEforPhi<Real>* vshEthetaForPhi(stEAllPhi<Real>* stEsurf, Real phi0) {
+  stEforPhi<Real>* vshEthetaForPhi(const stEAllPhi<Real>* stEsurf, Real phi0) {
     stEforPhi<Real>* output = new stEforPhi<Real>();
     int N_max = stEsurf->N_max;
     output->theta = stEsurf->theta;
@@ -402,12 +401,12 @@ namespace Raman {
   template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t);
   template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t, double, double, double);
   template stPinmTaunm<double>* vshPinmTaunm(size_t, const ArrayXr<double>&);
-  template stIncEabnm<double>* vshGetIncidentCoeffs(int, stIncPar<double>*);
+  template stIncEabnm<double>* vshGetIncidentCoeffs(int, const stIncPar<double>*);
   template stZnAll<double>* vshGetZnAll(size_t, const ArrayXr<double>&, sBessel);
   template stEAllPhi<double>* vshEgenThetaAllPhi(const ArrayXr<double>&,
       const ArrayXr<double>&, const ArrayXXc<double>&, const ArrayXXc<double>&,
-      const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, stPinmTaunm<double>*);
-  template stEforPhi<double>* vshEthetaForPhi(stEAllPhi<double>*, double);
+      const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, const stPinmTaunm<double>*);
+  template stEforPhi<double>* vshEthetaForPhi(const stEAllPhi<double>*, double);
   template ArrayXXc<double> vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
   template ArrayXXc<double> vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
 }

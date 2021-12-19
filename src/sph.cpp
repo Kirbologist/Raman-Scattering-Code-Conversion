@@ -221,7 +221,7 @@ namespace Raman {
 
   // Expects: prods = [(N + 2) x (N + 2) x X] tensor
   template <class Real>
-  stBesselPrimes<Real>* sphGetBesselProductsPrimes(Tensor3c<Real>& prods) {
+  stBesselPrimes<Real>* sphGetBesselProductsPrimes(const Tensor3c<Real>& prods) {
     int N = prods.dimension(0) - 2;
     int X = prods.dimension(2);
 
@@ -308,7 +308,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, ArrayXr<Real>* theta) {
+  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta) {
     sInt type;
     stRtfunc<Real>* output = new stRtfunc<Real>();
     if (theta) {
@@ -341,7 +341,7 @@ namespace Raman {
   }
 
   template <class Real>
-  size_t sphCheckBesselConvergence(size_t N_req, Real s, ArrayXr<Real> x, Real acc, size_t N_min) {
+  size_t sphCheckBesselConvergence(size_t N_req, Real s, const ArrayXr<Real>& x, Real acc, size_t N_min) {
     size_t NB_start = max(N_req, N_min);
     size_t NB = NB_start;
     stFpovx<Real>* prod = sphGetFpovx<Real>(NB, s, x);
@@ -403,7 +403,7 @@ namespace Raman {
   }
 
   template <class Real>
-  size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc) {
+  size_t sphEstimateNB(size_t NQ, const stRtfunc<Real>* stGeometry, const stParams<Real>* params, Real acc) {
     ArrayXr<Real> s = params->s;
     ArrayXr<Real> k1 = params->k1;
 
@@ -421,7 +421,7 @@ namespace Raman {
 
   template <class Real>
   stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,
-      stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB) {
+      const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB) {
     if (params->s.size() > 1 || params->k1.size() > 1)
       throw(runtime_error("params->s and params->k1 must be scalar"));
     if (NB < N_max)
@@ -637,10 +637,10 @@ namespace Raman {
   template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);
   template stFpovx<double>* sphGetFpovx(int, double, const ArrayXr<double>&);
   template stBessel<double>* sphGetXiPsi(int, double, const ArrayXr<double>&, int);
-  template stBesselPrimes<double>* sphGetBesselProductsPrimes(Tensor3c<double>&);
+  template stBesselPrimes<double>* sphGetBesselProductsPrimes(const Tensor3c<double>&);
   template stBesselProducts<double>* sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
-  template stRtfunc<double>* sphMakeGeometry(size_t, double, double, ArrayXr<double>*);
-  template size_t sphCheckBesselConvergence(size_t, double, ArrayXr<double>, double, size_t);
-  template size_t sphEstimateNB(size_t, stRtfunc<double>*, stParams<double>*, double);
-  template stPQa<double>* sphCalculatePQ(int, const ArrayXi&, stRtfunc<double>*, stParams<double>*, int);
+  template stRtfunc<double>* sphMakeGeometry(size_t, double, double, const ArrayXr<double>*);
+  template size_t sphCheckBesselConvergence(size_t, double, const ArrayXr<double>&, double, size_t);
+  template size_t sphEstimateNB(size_t, const stRtfunc<double>*, const stParams<double>*, double);
+  template stPQa<double>* sphCalculatePQ(int, const ArrayXi&, const stRtfunc<double>*, const stParams<double>*, int);
 }

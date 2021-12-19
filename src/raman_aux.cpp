@@ -48,10 +48,10 @@ namespace Raman {
 
     switch (type) {
       case GAUSS: {
-        stGLQuad<Real>* weights = auxInitLegendreQuad<Real>(N_int);
-        output->theta = acos(weights->x);
-        output->w_theta = weights->w;
-        delete weights;
+        stGLQuad<Real>* GL_quad = auxInitLegendreQuad<Real>(N_int);
+        output->theta = acos(GL_quad->x);
+        output->w_theta = GL_quad->w;
+        delete GL_quad;
         break;
       }
 
