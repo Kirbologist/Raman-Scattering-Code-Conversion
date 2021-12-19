@@ -10,7 +10,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 ## Progress
 
   - [x] aux* functions (2/2)
-  - [ ] vsh* functions (8/9)
+  - [x] vsh* functions (9/9)
   - [x] sph* functions (11/11)
   - [ ] rvh* functions (0/5)
   - [ ] slv* functions (0/2)
@@ -35,6 +35,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - vshGetZnAll
 - sphGetBesselProductsPrimes has its signature changed so that it now the int N is an argument, where N is the the number of Eigen Arrays in prods - 2, or the original int N_max that was used to produce prods. This is because of the limitations of C++ arrays. This issue would be mitigated if the array of Eigen Arrays can easily be implemented using Eigen's tensor module instead.
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
+- stPQa (the struct returned from sphCalculatePQ) has bool members 'has_st4MP' and 'has_st4MQ' to indicate whether st4MP and st4MQ respectively have been defined. This makes the code more type safe and supportable than just using a list of strings for the same purpose, which is what the original code did.
 
 ## Dependencies
 

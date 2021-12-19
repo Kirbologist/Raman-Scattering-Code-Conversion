@@ -243,34 +243,35 @@ namespace Raman {
     stEAllPhi<Real>* output = new stEAllPhi<Real>();
     output->theta = theta;
     output->r_of_theta = rt;
-    ArrayXXc<Real>* CErm = new ArrayXXc<Real>[2*N_max + 1]();
-    ArrayXXc<Real>* CEtm = new ArrayXXc<Real>[2*N_max + 1]();
-    ArrayXXc<Real>* CEfm = new ArrayXXc<Real>[2*N_max + 1]();
+    output->N_max = N_max;
+    ArrayXXc<Real>* Erm = new ArrayXXc<Real>[2*N_max + 1]();
+    ArrayXXc<Real>* Etm = new ArrayXXc<Real>[2*N_max + 1]();
+    ArrayXXc<Real>* Efm = new ArrayXXc<Real>[2*N_max + 1]();
 
     if (!rt(0)) {
       for (int m = -N_max; m <= N_max; m++) {
         if (abs(m) > 1) {
-          CErm[m + N_max] = CEtm[m + N_max] = CEfm[m + N_max] =
+          Erm[m + N_max] = Etm[m + N_max] = Efm[m + N_max] =
               ArrayXc<Real>::Zero(Nb_lambda, Nb_lambda);
         }
       }
       Real coeff1 = 1/sqrt(6*PI), coeff2 = coeff1/sqrt(2);
 
-      CErm[N_max] = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
-      CEtm[N_max] = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
-      CEfm[N_max] = ArrayXc<Real>::Zero(Nb_lambda, Nb_theta);
+      Erm[N_max] = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
+      Etm[N_max] = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
+      Efm[N_max] = ArrayXc<Real>::Zero(Nb_lambda, Nb_theta);
 
-      CErm[N_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
-      CEtm[N_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
-      CEfm[N_max + 1] = (-I*coeff2 * q_nm.col(2)).replicate(1, Nb_theta);
+      Erm[N_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
+      Etm[N_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
+      Efm[N_max + 1] = (-I*coeff2 * q_nm.col(2)).replicate(1, Nb_theta);
 
-      CErm[N_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
-      CEtm[N_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
-      CEfm[N_max - 1] = (-I*coeff2 * q_nm.col(0)).replicate(1, Nb_theta);
+      Erm[N_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
+      Etm[N_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
+      Efm[N_max - 1] = (-I*coeff2 * q_nm.col(0)).replicate(1, Nb_theta);
 
-      output->CErm = CErm;
-      output->CEtm = CEtm;
-      output->CEfm = CEfm;
+      output->Erm = Erm;
+      output->Etm = Etm;
+      output->Efm = Efm;
 
       cout << "r0 = 0 in vshEgenThetaAllPhi" << endl;
       return output;
@@ -334,9 +335,9 @@ namespace Raman {
         Ef_sum.row(l) = (tmp1 + tmp2).transpose().array();
       }
 
-      output->CErm[m + N_max] = pow(-1, m) * Er_sum;
-      output->CEtm[m + N_max] = pow(-1, m) * Et_sum;
-      output->CEfm[m + N_max] = pow(-1, m) * Ef_sum;
+      output->Erm[m + N_max] = pow(-1, m) * Er_sum;
+      output->Etm[m + N_max] = pow(-1, m) * Et_sum;
+      output->Efm[m + N_max] = pow(-1, m) * Ef_sum;
     }
     delete stPT;
     delete st_zn_all_col;
@@ -344,34 +345,58 @@ namespace Raman {
     return output;
   }
 
+  template <class Real>
+  stEforPhi<Real>* vshEthetaForPhi(stEAllPhi<Real>* stEsurf, Real phi0) {
+    stEforPhi<Real>* output = new stEforPhi<Real>();
+    int N_max = stEsurf->N_max;
+    output->theta = stEsurf->theta;
+    output->phi0 = phi0;
+
+    int Nb_lambda = stEsurf->Erm->rows();
+    int Nb_theta = stEsurf->theta.size();
+
+    output->Er = ArrayXXc<Real>::Zero(Nb_lambda, Nb_theta);
+    output->Et = ArrayXXc<Real>::Zero(Nb_lambda, Nb_theta);
+    output->Ef = ArrayXXc<Real>::Zero(Nb_lambda, Nb_theta);
+
+    complex<Real> exp_phase;
+    for (int m = -N_max; m <= N_max; m++) {
+      exp_phase = exp(I*static_cast<Real>(m)*phi0);
+      output->Er += stEsurf->Erm[m + N_max] * exp_phase;
+      output->Et += stEsurf->Etm[m + N_max] * exp_phase;
+      output->Ef += stEsurf->Efm[m + N_max] * exp_phase;
+    }
+    return output;
+  }
+
   // Many versions in original code
   template <class Real>
-  ArrayXXc<Real>& vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
-    ArrayXXc<Real>* chi_x = new ArrayXXc<Real>(x.size(), n.size());
+  ArrayXXc<Real> vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
+    ArrayXXc<Real> chi_x(x.size(), n.size());
     ArrayXr<Real> yx;
     n += 0.5;
     for (int i = 0; i < x.size(); i++) {
       yx = arr_bessel_y(n, x(i));
       if ((yx.isInf()).any())
         cout << "Warning: Bessel (y) calculation went beyond precision in vshRBchi()" << endl;
-      (*chi_x).row(i) = sqrt(static_cast<complex<Real>>(x(i)*PI/2))*yx;
+      chi_x.row(i) = sqrt(static_cast<complex<Real>>(x(i)*PI/2))*yx;
     }
-    return *chi_x;
+    return chi_x;
   }
 
   // Many versions in original code
   template <class Real>
-  ArrayXXc<Real>& vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
-    ArrayXXc<Real>* psi_x = new ArrayXXc<Real>(x.size(), n.size());
+  ArrayXXc<Real> vshRBpsi(ArrayXr<Real> n, const ArrayXr<Real>& x) {
+    ArrayXXc<Real> psi_x(x.size(), n.size());
     ArrayXr<Real> jx;
     n += 0.5;
     for (int i = 0; i < x.size(); i++) {
       jx = arr_bessel_j(n, x(i));
       if ((jx == 0.0).any())
         cout << "Warning: Bessel (j) calculation went beyond precision in vshRBpsi()" << endl;
-      (*psi_x).row(i) = sqrt(static_cast<complex<Real>>(x(i)*PI/2))*jx;
+      psi_x.row(i) = sqrt(static_cast<complex<Real>>(x(i)*PI/2))*jx;
     }
-    return *psi_x;
+    return psi_x;
   }
 
   template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t);
@@ -382,6 +407,7 @@ namespace Raman {
   template stEAllPhi<double>* vshEgenThetaAllPhi(const ArrayXr<double>&,
       const ArrayXr<double>&, const ArrayXXc<double>&, const ArrayXXc<double>&,
       const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, stPinmTaunm<double>*);
-  template ArrayXXc<double>& vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
-  template ArrayXXc<double>& vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
+  template stEforPhi<double>* vshEthetaForPhi(stEAllPhi<double>*, double);
+  template ArrayXXc<double> vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
+  template ArrayXXc<double> vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
 }

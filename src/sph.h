@@ -100,7 +100,6 @@ namespace Raman {
   template <class Real>
   size_t sphEstimateNB(size_t NQ, stRtfunc<Real>* stGeometry, stParams<Real>* params, Real acc = 1e-13);
 
-  // Untested
   template <class Real>
   stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, stRtfunc<Real>* Rt_func, stParams<Real>* params, int NB = -1);
 }

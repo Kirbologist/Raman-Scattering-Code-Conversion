@@ -17,5 +17,14 @@ int main(int argc, char** argv) {
   stPQa<double>* test2 = sphCalculatePQ(10, ArrayXi::LinSpaced(11, 0, 10), test, params, 12);
   cout << test2[1].st4MPoe->M11 << endl << test2[1].st4MPoe->M12 << endl << test2[1].st4MPoe->M21 << endl << test2[1].st4MPoe->M22 << endl;
   cout << test2[1].st4MPoe->m << endl << test2[1].st4MPoe->ind1 << endl << test2[1].st4MPoe->ind2 << endl;
+  delete params;
+  delete test;
+  for (int i = 0; i <= 10; i++) {
+    delete test2[i].st4MQeo;
+    delete test2[i].st4MQoe;
+    delete test2[i].st4MPeo;
+    delete test2[i].st4MPoe;
+  }
+  delete[] test2;
   return 0;
 }
