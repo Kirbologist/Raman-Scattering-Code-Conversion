@@ -6,7 +6,7 @@ using namespace std;
 
 namespace Raman {
   template <class Real>
-  stGLQuad<Real>* auxInitLegendreQuad(size_t N1, Real a, Real b) {
+  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(size_t N1, Real a, Real b) {
     int N = N1 - 1, N2 = N1 + 1;
     ArrayXr<Real> xu, y, y0(N1), Lp;
     ArrayXXr<Real> L(N1, N2);
@@ -32,7 +32,7 @@ namespace Raman {
       y = y0 - L.col(N1)/Lp;
     }
 
-    stGLQuad<Real>* output = new stGLQuad<Real>();
+    unique_ptr<stGLQuad<Real>> output = make_unique<stGLQuad<Real>>();
 
     output->x = (a*(1 - y) + b*(1 + y))/2;
     output->w = ArrayXr<Real>::Constant(N1, b - a) /
@@ -42,16 +42,15 @@ namespace Raman {
 
   // Missing functionality
   template <class Real>
-  stRtfunc<Real>* auxPrepareIntegrals(size_t N_int, sInt type) {
-    stRtfunc<Real>* output = new stRtfunc<Real>();
+  unique_ptr<stRtfunc<Real>> auxPrepareIntegrals(size_t N_int, sInt type) {
+    unique_ptr<stRtfunc<Real>> output = make_unique<stRtfunc<Real>>();
     output->Nb_theta = N_int;
 
     switch (type) {
       case GAUSS: {
-        stGLQuad<Real>* GL_quad = auxInitLegendreQuad<Real>(N_int);
+        unique_ptr<stGLQuad<Real>> GL_quad = auxInitLegendreQuad<Real>(N_int);
         output->theta = acos(GL_quad->x);
         output->w_theta = GL_quad->w;
-        delete GL_quad;
         break;
       }
 
@@ -69,6 +68,6 @@ namespace Raman {
     return output;
   }
 
-  template stGLQuad<double>* auxInitLegendreQuad(size_t, double, double);
-  template stRtfunc<double>* auxPrepareIntegrals(size_t, sInt);
+  template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(size_t, double, double);
+  template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(size_t, sInt);
 }

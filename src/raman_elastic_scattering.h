@@ -4,6 +4,8 @@
 #include <cmath>
 #include <complex>
 #include <iostream>
+#include <string>
+#include <memory>
 #include <Eigen/Core>
 #include <Eigen/CXX11/Tensor>
 #include "TensorMatrixCast.h"

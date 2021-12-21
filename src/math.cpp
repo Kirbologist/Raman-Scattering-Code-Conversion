@@ -1,5 +1,6 @@
 #include "math.h"
 #include "raman_elastic_scattering.h"
+#include <Eigen/LU>
 
 using namespace Eigen;
 using namespace std;
@@ -58,6 +59,16 @@ namespace Raman {
   }
 
   template <class Real>
+  ArrayXXc<Real> invertLUcol(ArrayXXc<Real>& B) {
+    PartialPivLU<MatrixXc<Real>> PLU_decomp = B.matrix().lu();
+    MatrixXc<Real> P = PLU_decomp.permutationP();
+    MatrixXc<Real> L = PLU_decomp.matrixLU().template triangularView<UnitLower>();
+    MatrixXc<Real> U = PLU_decomp.matrixLU().template triangularView<Upper>();
+    MatrixXc<Real> Y = L.lu().solve(P);
+    return U.lu().solve(Y).array();
+  }
+
+  template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
     for (int i = 0; i < nu.size(); i++)
@@ -78,6 +89,7 @@ namespace Raman {
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>);
   template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
+  template ArrayXXc<double> invertLUcol(ArrayXXc<double>&);
   template ArrayXr<double> arr_bessel_j(ArrayXr<double>&, double);
   template ArrayXr<double> arr_bessel_y(ArrayXr<double>&, double);
 }

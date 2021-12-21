@@ -29,6 +29,9 @@ namespace Raman {
   ArrayXXc<Real> reduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows);
 
   template <class Real>
+  ArrayXXc<Real> invertLUcol(ArrayXXc<Real>& B);
+
+  template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x);
 
   template <class Real>

@@ -62,13 +62,19 @@ namespace Raman {
   };
 
   template <class Real>
-  struct stPQa {
-    st4M<Real>* st4MPeo;
-    st4M<Real>* st4MPoe;
-    st4M<Real>* st4MQeo;
-    st4M<Real>* st4MQoe;
-    bool has_st4MP = false;
-    bool has_st4MQ = false;
+  struct stPQ {
+    unique_ptr<st4M<Real>> st_4M_P_eo;
+    unique_ptr<st4M<Real>> st_4M_P_oe;
+    unique_ptr<st4M<Real>> st_4M_Q_eo;
+    unique_ptr<st4M<Real>> st_4M_Q_oe;
+    vector<string> mat_list;
+
+    stPQ() {
+      this->st_4M_P_eo = make_unique<st4M<Real>>();
+      this->st_4M_P_oe = make_unique<st4M<Real>>();
+      this->st_4M_Q_eo = make_unique<st4M<Real>>();
+      this->st_4M_Q_oe = make_unique<st4M<Real>>();
+    }
   };
 
   template <class Real>
@@ -101,7 +107,7 @@ namespace Raman {
   size_t sphEstimateNB(size_t NQ, const stRtfunc<Real>* stGeometry, const stParams<Real>* params, Real acc = 1e-13);
 
   template <class Real>
-  stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB = -1);
+  unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB = -1);
 }
 
 #endif

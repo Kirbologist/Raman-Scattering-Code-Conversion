@@ -318,7 +318,7 @@ namespace Raman {
       type = PTS;
     } else {
       type = GAUSS;
-      stRtfunc<Real>* tmp = auxPrepareIntegrals<Real>(2*Nb_theta, type);
+      unique_ptr<stRtfunc<Real>> tmp = auxPrepareIntegrals<Real>(2*Nb_theta, type);
       output->theta = tmp->theta(seq(0, Nb_theta - 1));
       output->w_theta = tmp->w_theta(seq(0, Nb_theta - 1))*2;
       output->Nb_theta = Nb_theta;
@@ -420,7 +420,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stPQa<Real>* sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,
+  unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,
       const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB) {
     if (params->s.size() > 1 || params->k1.size() > 1)
       throw(runtime_error("params->s and params->k1 must be scalar"));
@@ -431,7 +431,7 @@ namespace Raman {
     cout << "sphCalculatePQ: Calculate P, Q for " << M << "m-values with N_Q = " <<
         N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
-    stPQa<Real>* output = new stPQa<Real>[M]();
+    unique_ptr<vector<stPQ<Real>>> output = make_unique<vector<stPQ<Real>>>(M);
     Real s = params->s(0);
     Real k1 = params->k1(0);
     int N_int = Rt_func->Nb_theta, T = N_int; // Number of theta's
@@ -590,44 +590,40 @@ namespace Raman {
       ArrayXi inde = seq2Array(m % 2, Nm - 1, 2);
       ArrayXi indo = seq2Array(1 - m % 2, Nm - 1, 2);
 
-      output[i].st4MQeo = new st4M<Real>();
-      output[i].st4MQeo->M12 = Q12(inde, indo);
-      output[i].st4MQeo->M21 = Q21(indo, inde);
-      output[i].st4MQeo->M11 = Q11(inde, inde);
-      output[i].st4MQeo->M22 = Q22(indo, indo);
-      output[i].st4MQeo->m = m;
-      output[i].st4MQeo->ind1 = inde;
-      output[i].st4MQeo->ind2 = indo;
+      output->at(i).st_4M_Q_eo->M12 = Q12(inde, indo);
+      output->at(i).st_4M_Q_eo->M21 = Q21(indo, inde);
+      output->at(i).st_4M_Q_eo->M11 = Q11(inde, inde);
+      output->at(i).st_4M_Q_eo->M22 = Q22(indo, indo);
+      output->at(i).st_4M_Q_eo->m = m;
+      output->at(i).st_4M_Q_eo->ind1 = inde;
+      output->at(i).st_4M_Q_eo->ind2 = indo;
 
-      output[i].st4MQoe = new st4M<Real>();
-      output[i].st4MQoe->M12 = Q12(indo, inde);
-      output[i].st4MQoe->M21 = Q21(inde, indo);
-      output[i].st4MQoe->M11 = Q11(indo, indo);
-      output[i].st4MQoe->M22 = Q22(inde, inde);
-      output[i].st4MQoe->m = m;
-      output[i].st4MQoe->ind1 = inde;
-      output[i].st4MQoe->ind2 = indo;
+      output->at(i).st_4M_Q_oe->M12 = Q12(indo, inde);
+      output->at(i).st_4M_Q_oe->M21 = Q21(inde, indo);
+      output->at(i).st_4M_Q_oe->M11 = Q11(indo, indo);
+      output->at(i).st_4M_Q_oe->M22 = Q22(inde, inde);
+      output->at(i).st_4M_Q_oe->m = m;
+      output->at(i).st_4M_Q_oe->ind1 = inde;
+      output->at(i).st_4M_Q_oe->ind2 = indo;
 
-      output[i].st4MPeo = new st4M<Real>();
-      output[i].st4MPeo->M12 = P12(inde, indo);
-      output[i].st4MPeo->M21 = P21(indo, inde);
-      output[i].st4MPeo->M11 = P11(inde, inde);
-      output[i].st4MPeo->M22 = P22(indo, indo);
-      output[i].st4MPeo->m = m;
-      output[i].st4MPeo->ind1 = inde;
-      output[i].st4MPeo->ind2 = indo;
+      output->at(i).st_4M_P_eo->M12 = P12(inde, indo);
+      output->at(i).st_4M_P_eo->M21 = P21(indo, inde);
+      output->at(i).st_4M_P_eo->M11 = P11(inde, inde);
+      output->at(i).st_4M_P_eo->M22 = P22(indo, indo);
+      output->at(i).st_4M_P_eo->m = m;
+      output->at(i).st_4M_P_eo->ind1 = inde;
+      output->at(i).st_4M_P_eo->ind2 = indo;
 
-      output[i].st4MPoe = new st4M<Real>();
-      output[i].st4MPoe->M12 = P12(indo, inde);
-      output[i].st4MPoe->M21 = P21(inde, indo);
-      output[i].st4MPoe->M11 = P11(indo, indo);
-      output[i].st4MPoe->M22 = P22(inde, inde);
-      output[i].st4MPoe->m = m;
-      output[i].st4MPoe->ind1 = inde;
-      output[i].st4MPoe->ind2 = indo;
+      output->at(i).st_4M_P_oe->M12 = P12(indo, inde);
+      output->at(i).st_4M_P_oe->M21 = P21(inde, indo);
+      output->at(i).st_4M_P_oe->M11 = P11(indo, indo);
+      output->at(i).st_4M_P_oe->M22 = P22(inde, inde);
+      output->at(i).st_4M_P_oe->m = m;
+      output->at(i).st_4M_P_oe->ind1 = inde;
+      output->at(i).st_4M_P_oe->ind2 = indo;
 
-      output[i].has_st4MQ = true;
-      output[i].has_st4MP = true;
+      output->at(i).mat_list.push_back("st_4M_Q");
+      output->at(i).mat_list.push_back("st_4M_P");
     }
     delete stPT;
     return output;
@@ -642,5 +638,5 @@ namespace Raman {
   template stRtfunc<double>* sphMakeGeometry(size_t, double, double, const ArrayXr<double>*);
   template size_t sphCheckBesselConvergence(size_t, double, const ArrayXr<double>&, double, size_t);
   template size_t sphEstimateNB(size_t, const stRtfunc<double>*, const stParams<double>*, double);
-  template stPQa<double>* sphCalculatePQ(int, const ArrayXi&, const stRtfunc<double>*, const stParams<double>*, int);
+  template unique_ptr<vector<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const stRtfunc<double>*, const stParams<double>*, int);
 }
