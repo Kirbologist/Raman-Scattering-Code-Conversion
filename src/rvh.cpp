@@ -1,16 +1,17 @@
 #include "rvh.h"
+#include "math.h"
 
 using namespace Eigen;
 using namespace std;
 
 namespace Raman {
   template <class Real>
-  stTR<Real>* rvhGetTRfromPQ(const vector<stPQ<Real>>* st_PQ_list, bool get_R) {
+  unique_ptr<vector<stTR<Real>>> rvhGetTRfromPQ(const unique_ptr<vector<stPQ<Real>>>& st_PQ_list, bool get_R) {
     size_t num_entries = st_PQ_list->size();
-    vector<stTR<Real>>* output = new vector<stTR<Real>>(num_entries, stTR<Real>());
+    auto output = make_unique<vector<stTR<Real>>>(num_entries);
     for (size_t i = 0; i < num_entries; i++) {
       stPQ<Real>* st_PQ = &(st_PQ_list->at(i));
-      stPQ<Real>* st_TR = &(output->at(i));
+      stTR<Real>* st_TR = &(output->at(i));
       MatrixXc<Real> P11_ee = st_PQ->st_4M_P_eo->M11;
       MatrixXc<Real> P12_eo = st_PQ->st_4M_P_eo->M12;
       MatrixXc<Real> P21_oe = st_PQ->st_4M_P_eo->M21;
@@ -40,13 +41,13 @@ namespace Raman {
 
       if (!m) {
         st_TR->st_4M_R_oe->M11 = invertLUcol(Q11_oo);
-        st_TR->st_4M_T_oe->M11 = -P11_oo * st_TR->st_4M_R_oe->M11;
+        st_TR->st_4M_T_oe->M11 = -P11_oo * st_TR->st_4M_R_oe->M11.matrix();
         st_TR->st_4M_R_oe->M22 = invertLUcol(Q22_ee);
-        st_TR->st_4M_T_oe->M22 = -P22_ee * st_TR->st_4M_R_oe->M22;
+        st_TR->st_4M_T_oe->M22 = -P22_ee * st_TR->st_4M_R_oe->M22.matrix();
         st_TR->st_4M_R_eo->M11 = invertLUcol(Q11_ee);
-        st_TR->st_4M_T_eo->M11 = -P11_ee * st_TR->st_4M_R_eo->M11;
+        st_TR->st_4M_T_eo->M11 = -P11_ee * st_TR->st_4M_R_eo->M11.matrix();
         st_TR->st_4M_R_eo->M22 = invertLUcol(Q22_oo);
-        st_TR->st_4M_T_eo->M22 = -P22_oo * st_TR->st_4M_R_eo->M22;
+        st_TR->st_4M_T_eo->M22 = -P22_oo * st_TR->st_4M_R_eo->M22.matrix();
 
         st_TR->st_4M_T_eo->M12 = ArrayXXc<Real>::Zero(num_even, num_odd);
         st_TR->st_4M_T_eo->M21 = ArrayXXc<Real>::Zero(num_odd, num_even);
@@ -74,14 +75,14 @@ namespace Raman {
 
         st_TR->st_4M_T_eo->M12 = G1 * G6 - G4;
         st_TR->st_4M_T_eo->M22 = G3 * G6 - G2;
-        st_TR->st_4M_T_eo->M11 = -G1 - st_TR->st_4M_T_eo->M12 * G5;
-        st_TR->st_4M_T_eo->M21 = -G3 - st_TR->st_4M_T_eo->M22 * G5;
+        st_TR->st_4M_T_eo->M11 = -G1 - st_TR->st_4M_T_eo->M12.matrix() * G5;
+        st_TR->st_4M_T_eo->M21 = -G3 - st_TR->st_4M_T_eo->M22.matrix() * G5;
 
         if (get_R) {
           st_TR->st_4M_R_eo->M12 = -Q11_inv * G6;
           st_TR->st_4M_R_eo->M22 = F2;
-          st_TR->st_4M_R_eo->M11 = Q11_inv - st_TR->st_4M_R_eo->M12 * G5;
-          st_TR->st_4M_R_eo->M21 = -st_TR->st_4M_R_eo->M22 * G5;
+          st_TR->st_4M_R_eo->M11 = Q11_inv - st_TR->st_4M_R_eo->M12.matrix() * G5;
+          st_TR->st_4M_R_eo->M21 = -st_TR->st_4M_R_eo->M22.matrix() * G5;
         }
 
         Q11_inv = invertLUcol(Q11_oo);
@@ -98,14 +99,14 @@ namespace Raman {
 
         st_TR->st_4M_T_oe->M12 = G1 * G6 - G4;
         st_TR->st_4M_T_oe->M22 = G3 * G6 - G2;
-        st_TR->st_4M_T_oe->M11 = -G1 - st_TR->st_4M_T_oe->M12 * G5;
-        st_TR->st_4M_T_oe->M21 = -G3 - st_TR->st_4M_T_oe->M22 * G5;
+        st_TR->st_4M_T_oe->M11 = -G1 - st_TR->st_4M_T_oe->M12.matrix() * G5;
+        st_TR->st_4M_T_oe->M21 = -G3 - st_TR->st_4M_T_oe->M22.matrix() * G5;
 
         if (get_R) {
           st_TR->st_4M_R_oe->M12 = -Q11_inv * G6;
           st_TR->st_4M_R_oe->M22 = F2;
-          st_TR->st_4M_R_oe->M11 = Q11_inv - st_TR->st_4M_R_oe->M12 * G5;
-          st_TR->st_4M_R_oe->M21 = -st_TR->st_4M_R_oe->M22 * G5;
+          st_TR->st_4M_R_oe->M11 = Q11_inv - st_TR->st_4M_R_oe->M12.matrix() * G5;
+          st_TR->st_4M_R_oe->M21 = -st_TR->st_4M_R_oe->M22.matrix() * G5;
         }
       }
 
@@ -127,4 +128,6 @@ namespace Raman {
     }
     return output;
   }
+
+  template unique_ptr<vector<stTR<double>>> rvhGetTRfromPQ(const unique_ptr<vector<stPQ<double>>>&, bool);
 }

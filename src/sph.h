@@ -46,8 +46,8 @@ namespace Raman {
 
   template <class Real>
   struct stBesselProducts {
-    stBesselPrimes<Real>* st_xi_psi_all;
-    stBesselPrimes<Real>* st_psi_psi_all;
+    unique_ptr<stBesselPrimes<Real>> st_xi_psi_all;
+    unique_ptr<stBesselPrimes<Real>> st_psi_psi_all;
   };
 
   template <class Real>
@@ -78,25 +78,25 @@ namespace Raman {
   };
 
   template <class Real>
-  ArrayXXr<Real>* sphGetUforFp(int n);
+  unique_ptr<ArrayXXr<Real>> sphGetUforFp(int n);
 
   template <class Real>
-  stFprow<Real>* sphGetFpRow(int n, Real s, const ArrayXr<Real>& x);
+  unique_ptr<stFprow<Real>> sphGetFpRow(int n, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stFpovx<Real>* sphGetFpovx(int N_max, Real s, const ArrayXr<Real>& x);
+  unique_ptr<stFpovx<Real>> sphGetFpovx(int N_max, Real s, const ArrayXr<Real>& x);
 
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB);
+  unique_ptr<stBessel<Real>> sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  stBesselPrimes<Real>* sphGetBesselProductsPrimes(const Tensor3c<Real>& prods);
+  unique_ptr<stBesselPrimes<Real>> sphGetBesselProductsPrimes(const Tensor3c<Real>& prods);
 
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB);
+  unique_ptr<stBesselProducts<Real>> sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta = nullptr);
+  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta = nullptr);
 
   // Could use some more thorough testing
   template <class Real>
@@ -104,10 +104,10 @@ namespace Raman {
 
   // Could use some more thorough testing
   template <class Real>
-  size_t sphEstimateNB(size_t NQ, const stRtfunc<Real>* stGeometry, const stParams<Real>* params, Real acc = 1e-13);
+  size_t sphEstimateNB(size_t NQ, const unique_ptr<stRtfunc<Real>>& stGeometry, const unique_ptr<stParams<Real>>& params, Real acc = 1e-13);
 
   template <class Real>
-  unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB = -1);
+  unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const unique_ptr<stRtfunc<Real>>& Rt_func, const unique_ptr<stParams<Real>>& params, int NB = -1);
 }
 
 #endif

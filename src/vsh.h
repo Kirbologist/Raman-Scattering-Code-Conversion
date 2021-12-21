@@ -32,9 +32,9 @@ namespace Raman {
   struct stEAllPhi {
     RowArrayXr<Real> theta;
     RowArrayXr<Real> r_of_theta;
-    ArrayXXc<Real>* Erm;
-    ArrayXXc<Real>* Etm;
-    ArrayXXc<Real>* Efm;
+    unique_ptr<vector<ArrayXXc<Real>>> Erm;
+    unique_ptr<vector<ArrayXXc<Real>>> Etm;
+    unique_ptr<vector<ArrayXXc<Real>>> Efm;
     int N_max;
   };
 
@@ -49,32 +49,32 @@ namespace Raman {
 
   // Untested
   template <class Real>
-  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t N_max);
+  unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max);
 
   // Untested
   template <class Real>
-  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t N_max,
+  unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max,
       Real theta_p, Real phi_p, Real alpha_p);
 
   template <class Real>
-  stPinmTaunm<Real>* vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta);
+  unique_ptr<stPinmTaunm<Real>> vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta);
 
   template <class Real>
-  stIncEabnm<Real>* vshGetIncidentCoeffs(int N_max, const stIncPar<Real>* angles);
-
-  // Untested
-  template <class Real>
-  stZnAll<Real>* vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type);
+  unique_ptr<stIncEabnm<Real>> vshGetIncidentCoeffs(int N_max, const unique_ptr<stIncPar<Real>>& angles);
 
   // Untested
   template <class Real>
-  stEAllPhi<Real>* vshEgenThetaAllPhi(
+  unique_ptr<stZnAll<Real>> vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type);
+
+  // Untested
+  template <class Real>
+  unique_ptr<stEAllPhi<Real>> vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
       sBessel type, const stPinmTaunm<Real>* stPT = nullptr);
 
   template <class Real>
-  stEforPhi<Real>* vshEthetaForPhi(const stEAllPhi<Real>* stEsurf, Real phi0);
+  unique_ptr<stEforPhi<Real>> vshEthetaForPhi(const unique_ptr<stEAllPhi<Real>>& stEsurf, Real phi0);
 
   template <class Real>
   ArrayXXc<Real> vshRBchi(ArrayXr<Real> n, const ArrayXr<Real>& x);

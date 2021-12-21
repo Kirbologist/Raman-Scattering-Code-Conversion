@@ -71,7 +71,7 @@ namespace Raman {
     int N;
     int Nb_theta;
     sIncType inc_type;
-    stIncPar<Real>* inc_par;
+    unique_ptr<stIncPar<Real>> inc_par;
     int Nb_theta_pst;
     Real lambda;
     Real epsilon1;

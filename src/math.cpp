@@ -59,7 +59,7 @@ namespace Raman {
   }
 
   template <class Real>
-  ArrayXXc<Real> invertLUcol(ArrayXXc<Real>& B) {
+  ArrayXXc<Real> invertLUcol(MatrixXc<Real>& B) {
     PartialPivLU<MatrixXc<Real>> PLU_decomp = B.matrix().lu();
     MatrixXc<Real> P = PLU_decomp.permutationP();
     MatrixXc<Real> L = PLU_decomp.matrixLU().template triangularView<UnitLower>();
@@ -89,7 +89,7 @@ namespace Raman {
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>);
   template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
-  template ArrayXXc<double> invertLUcol(ArrayXXc<double>&);
+  template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
   template ArrayXr<double> arr_bessel_j(ArrayXr<double>&, double);
   template ArrayXr<double> arr_bessel_y(ArrayXr<double>&, double);
 }

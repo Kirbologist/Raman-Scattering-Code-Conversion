@@ -3,8 +3,8 @@
 
 namespace Raman {
   template <class Real>
-  stIncPar<Real>* vshMakeIncidentParams(sIncType type, size_t N_max) {
-    stIncPar<Real>* output = new stIncPar<Real>();
+  unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max) {
+    auto output = make_unique<stIncPar<Real>>();
     switch (type) {
       case KxEz: {
         output->type = KxEz;
@@ -71,10 +71,11 @@ namespace Raman {
   }
 
   template <class Real>
-  stIncPar<Real>* vshMakeIncidentParams(
+  unique_ptr<stIncPar<Real>> vshMakeIncidentParams(
       sIncType type, size_t N_max, Real theta_p, Real phi_p, Real alpha_p) {
-    stIncPar<Real>* output = new stIncPar<Real>();
+    unique_ptr<stIncPar<Real>> output;
     if (type == GENERAL) {
+      output = make_unique<stIncPar<Real>>();
       output->type = GENERAL;
       output->theta_p = theta_p;
       output->phi_p = phi_p;
@@ -88,11 +89,11 @@ namespace Raman {
 
   // Many versions in orignial code
   template <class Real>
-  stPinmTaunm<Real>* vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta) {
+  unique_ptr<stPinmTaunm<Real>> vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta) {
     if ((theta < 0.0).any())
       cout << "Warning: theta must be >= 0 in vshPinmTaunm..." << endl;
     size_t n_rows = size(theta), n_cols, P_max = (N_max + 1)*(N_max + 1);
-    stPinmTaunm<Real>* output = new stPinmTaunm<Real>();
+    auto output = make_unique<stPinmTaunm<Real>>();
     output->pi_nm = ArrayXXr<Real>::Zero(n_rows, P_max);
     output->tau_nm = ArrayXXr<Real>::Zero(n_rows, P_max);
     ArrayXr<Real> A_m_sin_mm1 = ArrayXr<Real>::Ones(n_rows);
@@ -152,7 +153,7 @@ namespace Raman {
   }
 
   template <class Real>
-  stIncEabnm<Real>* vshGetIncidentCoeffs(int N_max, const stIncPar<Real>* angles) {
+  unique_ptr<stIncEabnm<Real>> vshGetIncidentCoeffs(int N_max, const unique_ptr<stIncPar<Real>>& angles) {
     Real alpha_p = angles->alpha_p, phi_p = angles->phi_p;
     Array<Real, 1, 1> theta_p = {{angles->theta_p}};
     int P_max = (N_max + 1)*(N_max + 1);
@@ -173,12 +174,11 @@ namespace Raman {
         d_bar_nm(ind(j)) = fact_n(n) * fact_m(m(j) + N_max);
     }
 
-    stPinmTaunm<Real>* stPTp = vshPinmTaunm<Real>(N_max, theta_p);
+    auto stPTp = vshPinmTaunm<Real>(N_max, theta_p);
     ArrayXc<Real> minus_EC_nm_star = cos(alpha_p)*I*stPTp->pi_nm.row(0) + sin(alpha_p)*stPTp->tau_nm.row(0);
     ArrayXc<Real> i_EB_nm_star = I*cos(alpha_p)*stPTp->tau_nm.row(0) + sin(alpha_p)*stPTp->pi_nm.row(0);
-    delete stPTp;
 
-    stIncEabnm<Real>* output = new stIncEabnm<Real>();
+    auto output = make_unique<stIncEabnm<Real>>();
     output->a_nm = d_bar_nm * minus_EC_nm_star;
     output->b_nm = d_bar_nm * i_EB_nm_star;
     return output;
@@ -186,7 +186,7 @@ namespace Raman {
 
   // Many versions in original code
   template <class Real>
-  stZnAll<Real>* vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type) {
+  unique_ptr<stZnAll<Real>> vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type) {
     if ((rho == 0).any())
       cout << "Warning: rho = 0 arguments not allowed in vshZnAll..." << endl;
 
@@ -216,7 +216,7 @@ namespace Raman {
     f.colwise() *= sqrt((PI/2) / rho);
 
     RowArrayXc<Real> n = RowArrayXc<Real>::LinSpaced(N_max, 1, N_max);
-    stZnAll<Real>* output = new stZnAll<Real>();
+    auto output = make_unique<stZnAll<Real>>();
     output->Z0 = f(all, seq(1, last));
     output->Z1 = (output->Z0).colwise() / rho.template cast<complex<Real>>();
     output->Z2 = f(all, seq(0, last - 1)) - (output->Z1).rowwise() * n;
@@ -225,7 +225,7 @@ namespace Raman {
 
   // Many versions in original code
   template <class Real>
-  stEAllPhi<Real>* vshEgenThetaAllPhi(
+  unique_ptr<stEAllPhi<Real>> vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
       sBessel type, const stPinmTaunm<Real>* stPT) {
@@ -239,38 +239,38 @@ namespace Raman {
     ArrayXr<Real> mu_n_times = sqrt((2*n + 1)*n*(n + 1)/(4*PI));
     ArrayXr<Real> mu_n_divd_gen = mu_n_times/(n*(n + 1));
 
-    stEAllPhi<Real>* output = new stEAllPhi<Real>();
+    auto output = make_unique<stEAllPhi<Real>>();
     output->theta = theta;
     output->r_of_theta = rt;
     output->N_max = N_max;
-    ArrayXXc<Real>* Erm = new ArrayXXc<Real>[2*N_max + 1]();
-    ArrayXXc<Real>* Etm = new ArrayXXc<Real>[2*N_max + 1]();
-    ArrayXXc<Real>* Efm = new ArrayXXc<Real>[2*N_max + 1]();
+    auto Erm = make_unique<vector<ArrayXXc<Real>>>(2*N_max + 1);
+    auto Etm = make_unique<vector<ArrayXXc<Real>>>(2*N_max + 1);
+    auto Efm = make_unique<vector<ArrayXXc<Real>>>(2*N_max + 1);
 
     if (!rt(0)) {
       for (int m = -N_max; m <= N_max; m++) {
         if (abs(m) > 1) {
-          Erm[m + N_max] = Etm[m + N_max] = Efm[m + N_max] =
+          Erm->at(m + N_max) = Etm->at(m + N_max) = Efm->at(m + N_max) =
               ArrayXc<Real>::Zero(Nb_lambda, Nb_lambda);
         }
       }
       Real coeff1 = 1/sqrt(6*PI), coeff2 = coeff1/sqrt(2);
 
-      Erm[N_max] = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
-      Etm[N_max] = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
-      Efm[N_max] = ArrayXc<Real>::Zero(Nb_lambda, Nb_theta);
+      Erm->at(N_max) = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
+      Etm->at(N_max) = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
+      Efm->at(N_max) = ArrayXc<Real>::Zero(Nb_lambda, Nb_theta);
 
-      Erm[N_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
-      Etm[N_max + 1] = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
-      Efm[N_max + 1] = (-I*coeff2 * q_nm.col(2)).replicate(1, Nb_theta);
+      Erm->at(N_max + 1) = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
+      Etm->at(N_max + 1) = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
+      Efm->at(N_max + 1) = (-I*coeff2 * q_nm.col(2)).replicate(1, Nb_theta);
 
-      Erm[N_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
-      Etm[N_max - 1] = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
-      Efm[N_max - 1] = (-I*coeff2 * q_nm.col(0)).replicate(1, Nb_theta);
+      Erm->at(N_max - 1) = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
+      Etm->at(N_max - 1) = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
+      Efm->at(N_max - 1) = (-I*coeff2 * q_nm.col(0)).replicate(1, Nb_theta);
 
-      output->Erm = Erm;
-      output->Etm = Etm;
-      output->Efm = Efm;
+      output->Erm = move(Erm);
+      output->Etm = move(Etm);
+      output->Efm = move(Efm);
 
       cout << "r0 = 0 in vshEgenThetaAllPhi" << endl;
       return output;
@@ -278,18 +278,19 @@ namespace Raman {
 
     ArrayXXr<Real> kr;
     ArrayXr<Real> rho_col;
-    stZnAll<Real>* st_zn_all_col = new stZnAll<Real>();
+    unique_ptr<stZnAll<Real>> st_zn_all_col;
     if (!isinf(rt(0))) {
       kr = ((2*PI*sqrt(epsilon)/lambda).matrix() * rt.matrix()).array();
       rho_col = kr.transpose().reshaped();
       st_zn_all_col = vshGetZnAll(N_max, rho_col, type);
     } else {
+      st_zn_all_col = make_unique<stZnAll<Real>>();
       st_zn_all_col->Z0 = st_zn_all_col->Z1 = st_zn_all_col->Z2 =
           ArrayXXc<Real>::Ones(Nb_lambda*Nb_theta, N_max + 1);
     }
 
     if (!stPT)
-      stPT = vshPinmTaunm<Real>(N_max, theta.transpose());
+      stPT = vshPinmTaunm<Real>(N_max, theta.transpose()).get();
 
     ArrayXi n_vec, p_vec;
     ArrayXr<Real> pi_nm, tau_nm, d_nm;
@@ -334,24 +335,22 @@ namespace Raman {
         Ef_sum.row(l) = (tmp1 + tmp2).transpose().array();
       }
 
-      output->Erm[m + N_max] = pow(-1, m) * Er_sum;
-      output->Etm[m + N_max] = pow(-1, m) * Et_sum;
-      output->Efm[m + N_max] = pow(-1, m) * Ef_sum;
+      output->Erm->at(m + N_max) = pow(-1, m) * Er_sum;
+      output->Etm->at(m + N_max) = pow(-1, m) * Et_sum;
+      output->Efm->at(m + N_max) = pow(-1, m) * Ef_sum;
     }
-    delete stPT;
-    delete st_zn_all_col;
 
     return output;
   }
 
   template <class Real>
-  stEforPhi<Real>* vshEthetaForPhi(const stEAllPhi<Real>* stEsurf, Real phi0) {
-    stEforPhi<Real>* output = new stEforPhi<Real>();
+  unique_ptr<stEforPhi<Real>> vshEthetaForPhi(const unique_ptr<stEAllPhi<Real>>& stEsurf, Real phi0) {
+    auto output = make_unique<stEforPhi<Real>>();
     int N_max = stEsurf->N_max;
     output->theta = stEsurf->theta;
     output->phi0 = phi0;
 
-    int Nb_lambda = stEsurf->Erm->rows();
+    int Nb_lambda = stEsurf->Erm->at(0).rows();
     int Nb_theta = stEsurf->theta.size();
 
     output->Er = ArrayXXc<Real>::Zero(Nb_lambda, Nb_theta);
@@ -361,9 +360,9 @@ namespace Raman {
     complex<Real> exp_phase;
     for (int m = -N_max; m <= N_max; m++) {
       exp_phase = exp(I*static_cast<Real>(m)*phi0);
-      output->Er += stEsurf->Erm[m + N_max] * exp_phase;
-      output->Et += stEsurf->Etm[m + N_max] * exp_phase;
-      output->Ef += stEsurf->Efm[m + N_max] * exp_phase;
+      output->Er += stEsurf->Erm->at(m + N_max) * exp_phase;
+      output->Et += stEsurf->Etm->at(m + N_max) * exp_phase;
+      output->Ef += stEsurf->Efm->at(m + N_max) * exp_phase;
     }
     return output;
   }
@@ -398,15 +397,15 @@ namespace Raman {
     return psi_x;
   }
 
-  template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t);
-  template stIncPar<double>* vshMakeIncidentParams(sIncType, size_t, double, double, double);
-  template stPinmTaunm<double>* vshPinmTaunm(size_t, const ArrayXr<double>&);
-  template stIncEabnm<double>* vshGetIncidentCoeffs(int, const stIncPar<double>*);
-  template stZnAll<double>* vshGetZnAll(size_t, const ArrayXr<double>&, sBessel);
-  template stEAllPhi<double>* vshEgenThetaAllPhi(const ArrayXr<double>&,
+  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, size_t);
+  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, size_t, double, double, double);
+  template unique_ptr<stPinmTaunm<double>> vshPinmTaunm(size_t, const ArrayXr<double>&);
+  template unique_ptr<stIncEabnm<double>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<double>>&);
+  template unique_ptr<stZnAll<double>> vshGetZnAll(size_t, const ArrayXr<double>&, sBessel);
+  template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXr<double>&,
       const ArrayXr<double>&, const ArrayXXc<double>&, const ArrayXXc<double>&,
       const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, const stPinmTaunm<double>*);
-  template stEforPhi<double>* vshEthetaForPhi(const stEAllPhi<double>*, double);
+  template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
   template ArrayXXc<double> vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
   template ArrayXXc<double> vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
 }

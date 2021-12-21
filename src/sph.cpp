@@ -8,10 +8,10 @@ using namespace std;
 
 namespace Raman {
   template <class Real>
-  ArrayXXr<Real>* sphGetUforFp(int n) {
+  unique_ptr<ArrayXXr<Real>> sphGetUforFp(int n) {
     int b_max = n/2;
-    ArrayXXr<Real>* u = new ArrayXXr<Real>(b_max + 2, b_max + 1);
-    (*u).setZero();
+    auto u = make_unique<ArrayXXr<Real>>(b_max + 2, b_max + 1);
+    u->setZero();
     (*u)(0, 0) = 1;
     for (int b = 0; b < b_max; b++) {
       (*u)(0, b + 1) = (2*n - 1)*(*u)(0, b) - (2*n - 1)*(*u)(1, b);
@@ -23,10 +23,10 @@ namespace Raman {
   }
 
   template <class Real>
-  stFprow<Real>* sphGetFpRow(int n, Real s, const ArrayXr<Real>& x) {
+  unique_ptr<stFprow<Real>> sphGetFpRow(int n, Real s, const ArrayXr<Real>& x) {
     int num_x = x.size();
     RowArrayXr<Real> x_squared = x.pow(2).transpose();
-    ArrayXXr<Real>* u = sphGetUforFp<Real>(n);
+    unique_ptr<ArrayXXr<Real>> u = sphGetUforFp<Real>(n);
     Real alpha_bar_k = 1;
     int q_min;
     int q_int;
@@ -154,31 +154,29 @@ namespace Raman {
       loss_prec_S.row(k) = abs(max_term_S.row(k) / S.row(k));
       S.row(k) *= -pow(s, k + 1);
     }
-    delete u;
 
-    stFprow<Real>* output = new stFprow<Real>();
+    auto output = make_unique<stFprow<Real>>();
     output->S = S;
     output->loss_prec_S = loss_prec_S;
     return output;
   }
 
   template <class Real>
-  stFpovx<Real>* sphGetFpovx(int N_max, Real s, const ArrayXr<Real>& x) {
+  unique_ptr<stFpovx<Real>> sphGetFpovx(int N_max, Real s, const ArrayXr<Real>& x) {
     int num_x = x.size();
 
-    stFpovx<Real>* output = new stFpovx<Real>();
+    auto output = make_unique<stFpovx<Real>>();
     output->rb_chi = vshRBchi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), x);
     output->rb_psi = vshRBpsi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), s*x);
     output->Fpovx = Tensor3c<Real>(N_max + 1, N_max + 1, num_x);
     output->Fpovx.setZero();
 
-    stFprow<Real>* FpRow = sphGetFpRow<Real>(N_max, s, x);
+    unique_ptr<stFprow<Real>> FpRow = sphGetFpRow<Real>(N_max, s, x);
     ArrayXXc<Real> tmp;
     for (int i = 0; i < N_max - 3; i++) {
       tmp = (FpRow->S.row(i) / x.transpose()).template cast<complex<Real>>();
       output->Fpovx.chip(N_max, 0).chip(i, 0) = TensorCast(tmp, num_x);
     }
-    delete FpRow;
 
     Tensor1c<Real> col_shape(num_x);
     for (int k = N_max; k >= 0; k--) {
@@ -196,10 +194,10 @@ namespace Raman {
 
   // Expects: NB >= N_max
   template <class Real>
-  stBessel<Real>* sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
+  unique_ptr<stBessel<Real>> sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
     int num_x = x.size();
-    stBessel<Real>* output = new stBessel<Real>();
-    stFpovx<Real>* chi_psi_prod = sphGetFpovx<Real>(NB + 1, s, x);
+    auto output = make_unique<stBessel<Real>>();
+    unique_ptr<stFpovx<Real>> chi_psi_prod = sphGetFpovx<Real>(NB + 1, s, x);
     output->psi_psi = Tensor3c<Real>(N_max + 2, N_max + 2, num_x);
     output->psi_psi.setZero();
     output->psi_n = vshRBpsi<Real>(ArrayXr<Real>::LinSpaced(N_max + 2, 0, N_max + 1), x);
@@ -210,22 +208,21 @@ namespace Raman {
             TensorCast(chi_psi_prod->rb_psi.col(k) * output->psi_n.col(n), num_x);
     }
 
-    std::array<int, 3> offsets = {0, 0, 0}, extents = {N_max + 2, N_max + 2, num_x};\
+    std::array<int, 3> offsets = {0, 0, 0}, extents = {N_max + 2, N_max + 2, num_x};
     output->xi_psi = output->psi_psi + output->psi_psi.constant(I) *
         chi_psi_prod->Fpovx.slice(offsets, extents);
     output->chi_n = chi_psi_prod->rb_chi.leftCols(N_max + 2);
     output->psi_k = chi_psi_prod->rb_psi.leftCols(N_max + 2);
-    delete chi_psi_prod;
     return output;
   }
 
   // Expects: prods = [(N + 2) x (N + 2) x X] tensor
   template <class Real>
-  stBesselPrimes<Real>* sphGetBesselProductsPrimes(const Tensor3c<Real>& prods) {
+  unique_ptr<stBesselPrimes<Real>> sphGetBesselProductsPrimes(const Tensor3c<Real>& prods) {
     int N = prods.dimension(0) - 2;
     int X = prods.dimension(2);
 
-    stBesselPrimes<Real>* output = new stBesselPrimes<Real>();
+    auto output = make_unique<stBesselPrimes<Real>>();
     std::array<int, 3> offsets = {0, 0, 0}, extents = {N + 1, N + 1, X};
     output->xi_psi = prods.slice(offsets, extents);
     output->xi_prime_psi = Tensor3c<Real>(N + 1, N + 1, X);
@@ -278,9 +275,9 @@ namespace Raman {
 
   // Expects: NB >= N_max
   template <class Real>
-  stBesselProducts<Real>* sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
-    stBesselProducts<Real>* output = new stBesselProducts<Real>();
-    stBessel<Real>* prods = sphGetXiPsi<Real>(N_max, s, x, NB);
+  unique_ptr<stBesselProducts<Real>> sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
+    auto output = make_unique<stBesselProducts<Real>>();
+    unique_ptr<stBessel<Real>> prods = sphGetXiPsi<Real>(N_max, s, x, NB);
     output->st_xi_psi_all = sphGetBesselProductsPrimes<Real>(prods->xi_psi);
     output->st_psi_psi_all = sphGetBesselProductsPrimes<Real>(prods->psi_psi);
 
@@ -292,8 +289,6 @@ namespace Raman {
     output->st_xi_psi_all->for_diag_Lt1 = s*xi_n_psi_np1 - xi_np1_psi_n;
     ArrayXXc<Real> psi_n_psi_n = (prods->psi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(0, last - 1))).transpose();
     ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*(prods->chi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(0, last - 1))).transpose();
-
-    delete prods;
 
     ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(N_max + 1, 1, N_max + 1);
     output->st_psi_psi_all->for_diag_Lt2 = psi_n_psi_np1 - s*psi_np1_psi_n + (s - 1)*(s + 1)/s *
@@ -308,9 +303,9 @@ namespace Raman {
   }
 
   template <class Real>
-  stRtfunc<Real>* sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta) {
+  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta) {
     sInt type;
-    stRtfunc<Real>* output = new stRtfunc<Real>();
+    auto output = make_unique<stRtfunc<Real>>();
     if (theta) {
       output->w_theta = ArrayXr<Real>::Zero(theta->size());
       output->theta = *theta;
@@ -322,7 +317,6 @@ namespace Raman {
       output->theta = tmp->theta(seq(0, Nb_theta - 1));
       output->w_theta = tmp->w_theta(seq(0, Nb_theta - 1))*2;
       output->Nb_theta = Nb_theta;
-      delete tmp;
     }
 
     output->a = a;
@@ -344,12 +338,12 @@ namespace Raman {
   size_t sphCheckBesselConvergence(size_t N_req, Real s, const ArrayXr<Real>& x, Real acc, size_t N_min) {
     size_t NB_start = max(N_req, N_min);
     size_t NB = NB_start;
-    stFpovx<Real>* prod = sphGetFpovx<Real>(NB, s, x);
+    unique_ptr<stFpovx<Real>> prod = sphGetFpovx<Real>(NB, s, x);
     bool to_continue = true;
     size_t max_N = 500, NB_step = 16;
 
     int NB_next;
-    stFpovx<Real>* prod_new;
+    unique_ptr<stFpovx<Real>> prod_new;
     Tensor<Real, 0> rel_acc_ee, rel_acc_oo;
     Real rel_acc;
     ArithmeticSequence<long int, long int, long int>
@@ -370,11 +364,9 @@ namespace Raman {
         to_continue = false;
       else {
         NB = NB_next;
-        delete prod;
-        prod = prod_new;
+        prod = move(prod_new);
       }
     }
-    delete prod_new;
 
     if (NB > NB_start) {
       NB -= NB_step;
@@ -382,7 +374,6 @@ namespace Raman {
       to_continue = true;
       while (to_continue && NB < max_N) {
         NB += NB_step;
-        delete prod;
         prod = sphGetFpovx<Real>(NB, s, x);
         tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
             subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
@@ -396,14 +387,13 @@ namespace Raman {
       }
     }
 
-    delete prod;
     if (to_continue)
       throw(runtime_error("Problem in sphEstimateNB: convergence was not achieved"));
     return NB;
   }
 
   template <class Real>
-  size_t sphEstimateNB(size_t NQ, const stRtfunc<Real>* stGeometry, const stParams<Real>* params, Real acc) {
+  size_t sphEstimateNB(size_t NQ, const unique_ptr<stRtfunc<Real>>& stGeometry, const unique_ptr<stParams<Real>>& params, Real acc) {
     ArrayXr<Real> s = params->s;
     ArrayXr<Real> k1 = params->k1;
 
@@ -421,7 +411,7 @@ namespace Raman {
 
   template <class Real>
   unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,
-      const stRtfunc<Real>* Rt_func, const stParams<Real>* params, int NB) {
+      const unique_ptr<stRtfunc<Real>>& Rt_func, const unique_ptr<stParams<Real>>& params, int NB) {
     if (params->s.size() > 1 || params->k1.size() > 1)
       throw(runtime_error("params->s and params->k1 must be scalar"));
     if (NB < N_max)
@@ -431,21 +421,21 @@ namespace Raman {
     cout << "sphCalculatePQ: Calculate P, Q for " << M << "m-values with N_Q = " <<
         N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
-    unique_ptr<vector<stPQ<Real>>> output = make_unique<vector<stPQ<Real>>>(M);
+    auto output = make_unique<vector<stPQ<Real>>>(M);
     Real s = params->s(0);
     Real k1 = params->k1(0);
     int N_int = Rt_func->Nb_theta, T = N_int; // Number of theta's
     ArrayXr<Real> x = Rt_func->r * k1; // [T x 1] x(theta)
     ArrayXr<Real> x_theta = Rt_func->dr_dt * k1; // [T x 1] x'(theta)
 
-    stPinmTaunm<Real>* stPT = vshPinmTaunm(N_max, Rt_func->theta);
+    unique_ptr<stPinmTaunm<Real>> stPT = vshPinmTaunm(N_max, Rt_func->theta);
     ArrayXr<Real> sin_t = sin(Rt_func->theta); // [T x 1]
     ArrayXr<Real> dx_dt_wt = x_theta * Rt_func->w_theta; // [T x 1]
     ArrayXr<Real> tmp1 = ArrayXr<Real>::LinSpaced(N_max + 1, 0, N_max); // [N x 1]
     ArrayXr<Real> An_vec = sqrt((2*tmp1 + 1) / (2*tmp1 * (tmp1 + 1))); // [N x 1]
     ArrayXXr<Real> An_Ak = (An_vec.matrix() * An_vec.transpose().matrix()).array(); // [N x N]
 
-    stBesselProducts<Real>* prods = sphGetModifiedBesselProducts(N_max, s, x, NB); // prods contains [N x N x T] tensors
+    unique_ptr<stBesselProducts<Real>> prods = sphGetModifiedBesselProducts(N_max, s, x, NB); // prods contains [N x N x T] tensors
     // Converting these [N x N x T] tensors into [N x T x N] tensors
     Tensor3c<Real> xi_prime_psi(N_max + 1, T, N_max + 1);
     Tensor3c<Real> xi_psi_prime(N_max + 1, T, N_max + 1);
@@ -464,7 +454,6 @@ namespace Raman {
     ArrayXXc<Real> for_Q_diag_Lt1 = prods->st_xi_psi_all->for_diag_Lt1;
     ArrayXXc<Real> for_Q_diag_Lt2 = prods->st_xi_psi_all->for_diag_Lt2;
     ArrayXXc<Real> for_Q_diag_Lt3 = prods->st_xi_psi_all->for_diag_Lt3;
-    delete prods->st_xi_psi_all;
 
     Tensor3c<Real> psi_prime_psi(N_max + 1, T, N_max + 1);
     Tensor3c<Real> psi_psi_prime(N_max + 1, T, N_max + 1);
@@ -483,8 +472,6 @@ namespace Raman {
     ArrayXXc<Real> for_P_diag_Lt1 = prods->st_psi_psi_all->for_diag_Lt1;
     ArrayXXc<Real> for_P_diag_Lt2 = prods->st_psi_psi_all->for_diag_Lt2;
     ArrayXXc<Real> for_P_diag_Lt3 = prods->st_psi_psi_all->for_diag_Lt3;
-    delete prods->st_psi_psi_all;
-    delete prods;
 
     for (int i = 0; i < M; i++) {
       int m = abs_m_vec(i);
@@ -625,18 +612,17 @@ namespace Raman {
       output->at(i).mat_list.push_back("st_4M_Q");
       output->at(i).mat_list.push_back("st_4M_P");
     }
-    delete stPT;
     return output;
   }
 
-  template ArrayXXr<double>* sphGetUforFp(int);
-  template stFprow<double>* sphGetFpRow(int, double, const ArrayXr<double>&);
-  template stFpovx<double>* sphGetFpovx(int, double, const ArrayXr<double>&);
-  template stBessel<double>* sphGetXiPsi(int, double, const ArrayXr<double>&, int);
-  template stBesselPrimes<double>* sphGetBesselProductsPrimes(const Tensor3c<double>&);
-  template stBesselProducts<double>* sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
-  template stRtfunc<double>* sphMakeGeometry(size_t, double, double, const ArrayXr<double>*);
+  template unique_ptr<ArrayXXr<double>> sphGetUforFp(int);
+  template unique_ptr<stFprow<double>> sphGetFpRow(int, double, const ArrayXr<double>&);
+  template unique_ptr<stFpovx<double>> sphGetFpovx(int, double, const ArrayXr<double>&);
+  template unique_ptr<stBessel<double>> sphGetXiPsi(int, double, const ArrayXr<double>&, int);
+  template unique_ptr<stBesselPrimes<double>> sphGetBesselProductsPrimes(const Tensor3c<double>&);
+  template unique_ptr<stBesselProducts<double>> sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
+  template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const ArrayXr<double>*);
   template size_t sphCheckBesselConvergence(size_t, double, const ArrayXr<double>&, double, size_t);
-  template size_t sphEstimateNB(size_t, const stRtfunc<double>*, const stParams<double>*, double);
-  template unique_ptr<vector<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const stRtfunc<double>*, const stParams<double>*, int);
+  template size_t sphEstimateNB(size_t, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
+  template unique_ptr<vector<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
 }
