@@ -32,9 +32,9 @@ namespace Raman {
   struct stEAllPhi {
     RowArrayXr<Real> theta;
     RowArrayXr<Real> r_of_theta;
-    unique_ptr<vector<ArrayXXc<Real>>> Erm;
-    unique_ptr<vector<ArrayXXc<Real>>> Etm;
-    unique_ptr<vector<ArrayXXc<Real>>> Efm;
+    vector<unique_ptr<ArrayXXc<Real>>> Erm;
+    vector<unique_ptr<ArrayXXc<Real>>> Etm;
+    vector<unique_ptr<ArrayXXc<Real>>> Efm;
     int N_max;
   };
 

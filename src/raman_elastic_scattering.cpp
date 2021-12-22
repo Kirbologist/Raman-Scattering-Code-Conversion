@@ -1,5 +1,6 @@
 #include "raman_elastic_scattering.h"
 #include "sph.h"
+#include "rvh.h"
 
 using namespace std;
 using namespace Eigen;
@@ -14,16 +15,15 @@ int main(int argc, char** argv) {
   params->k1 = {{2*M_PI/355}};
   params->s = {{1.35}};
   //size_t test2 = sphEstimateNB<double>(8, test, params);
-  unique_ptr<vector<stPQ<double>>> test2 = sphCalculatePQ(10, ArrayXi::LinSpaced(11, 0, 10), test, params, 12);
-  cout << test2->size() << endl;
-  cout << "Now trying to access test2->at(0):" << endl;
-  cout << test2->at(0).st_4M_P_oe->m << endl;
-  cout << "Now trying to access test2->at(10):" << endl;
-  cout << test2->at(10).st_4M_P_oe->m << endl;
-  test2->at(10).st_4M_P_oe->m = 15;
-  cout << "Now trying to access test2->at(0):" << endl;
-  cout << test2->at(0).st_4M_P_oe->m << endl;
-  cout << "Now trying to access test2->at(10):" << endl;
-  cout << test2->at(10).st_4M_P_oe->m << endl;
+  vector<unique_ptr<stPQ<double>>> test2 = sphCalculatePQ(10, ArrayXi::LinSpaced(11, 0, 10), test, params, 12);
+  cout << test2.size() << endl;
+  cout << "Now trying to access test2[0]" << endl;
+  cout << test2[0]->st_4M_P_oe().m << endl;
+  cout << "Now trying to access test2[10]:" << endl;
+  cout << test2[10]->st_4M_P_oe().m << endl;
+  rvhTruncateMatrices<double>(test2, 8);
+  cout << test2.size() << endl;
+  cout << "Now trying to access test2[0]:" << endl;
+  cout << test2[0]->st_4M_P_oe().m << endl;
   return 0;
 }

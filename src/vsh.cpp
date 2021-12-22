@@ -243,30 +243,30 @@ namespace Raman {
     output->theta = theta;
     output->r_of_theta = rt;
     output->N_max = N_max;
-    auto Erm = make_unique<vector<ArrayXXc<Real>>>(2*N_max + 1);
-    auto Etm = make_unique<vector<ArrayXXc<Real>>>(2*N_max + 1);
-    auto Efm = make_unique<vector<ArrayXXc<Real>>>(2*N_max + 1);
+    vector<unique_ptr<ArrayXXc<Real>>> Erm(2*N_max + 1);
+    vector<unique_ptr<ArrayXXc<Real>>> Etm(2*N_max + 1);
+    vector<unique_ptr<ArrayXXc<Real>>> Efm(2*N_max + 1);
 
     if (!rt(0)) {
       for (int m = -N_max; m <= N_max; m++) {
         if (abs(m) > 1) {
-          Erm->at(m + N_max) = Etm->at(m + N_max) = Efm->at(m + N_max) =
-              ArrayXc<Real>::Zero(Nb_lambda, Nb_lambda);
+          *(Erm[m + N_max]) = *(Etm[m + N_max]) = *(Efm[m + N_max]) =
+              ArrayXXc<Real>::Zero(Nb_lambda, Nb_lambda);
         }
       }
       Real coeff1 = 1/sqrt(6*PI), coeff2 = coeff1/sqrt(2);
 
-      Erm->at(N_max) = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
-      Etm->at(N_max) = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
-      Efm->at(N_max) = ArrayXc<Real>::Zero(Nb_lambda, Nb_theta);
+      *(Erm[N_max]) = ((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array();
+      *(Etm[N_max]) = ((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array();
+      *(Efm[N_max]) = ArrayXc<Real>::Zero(Nb_lambda, Nb_theta);
 
-      Erm->at(N_max + 1) = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
-      Etm->at(N_max + 1) = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
-      Efm->at(N_max + 1) = (-I*coeff2 * q_nm.col(2)).replicate(1, Nb_theta);
+      *(Erm[N_max + 1]) = ((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array();
+      *(Etm[N_max + 1]) = ((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array();
+      *(Efm[N_max + 1]) = (-I*coeff2 * q_nm.col(2)).replicate(1, Nb_theta);
 
-      Erm->at(N_max - 1) = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
-      Etm->at(N_max - 1) = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
-      Efm->at(N_max - 1) = (-I*coeff2 * q_nm.col(0)).replicate(1, Nb_theta);
+      *(Erm[N_max - 1]) = ((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array();
+      *(Etm[N_max - 1]) = ((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array();
+      *(Efm[N_max - 1]) = (-I*coeff2 * q_nm.col(0)).replicate(1, Nb_theta);
 
       output->Erm = move(Erm);
       output->Etm = move(Etm);
@@ -335,9 +335,9 @@ namespace Raman {
         Ef_sum.row(l) = (tmp1 + tmp2).transpose().array();
       }
 
-      output->Erm->at(m + N_max) = pow(-1, m) * Er_sum;
-      output->Etm->at(m + N_max) = pow(-1, m) * Et_sum;
-      output->Efm->at(m + N_max) = pow(-1, m) * Ef_sum;
+      *(output->Erm[m + N_max]) = pow(-1, m) * Er_sum;
+      *(output->Etm[m + N_max]) = pow(-1, m) * Et_sum;
+      *(output->Efm[m + N_max]) = pow(-1, m) * Ef_sum;
     }
 
     return output;
@@ -350,7 +350,7 @@ namespace Raman {
     output->theta = stEsurf->theta;
     output->phi0 = phi0;
 
-    int Nb_lambda = stEsurf->Erm->at(0).rows();
+    int Nb_lambda = stEsurf->Erm[0]->rows();
     int Nb_theta = stEsurf->theta.size();
 
     output->Er = ArrayXXc<Real>::Zero(Nb_lambda, Nb_theta);
@@ -360,9 +360,9 @@ namespace Raman {
     complex<Real> exp_phase;
     for (int m = -N_max; m <= N_max; m++) {
       exp_phase = exp(I*static_cast<Real>(m)*phi0);
-      output->Er += stEsurf->Erm->at(m + N_max) * exp_phase;
-      output->Et += stEsurf->Etm->at(m + N_max) * exp_phase;
-      output->Ef += stEsurf->Efm->at(m + N_max) * exp_phase;
+      output->Er += *(stEsurf->Erm[m + N_max]) * exp_phase;
+      output->Et += *(stEsurf->Etm[m + N_max]) * exp_phase;
+      output->Ef += *(stEsurf->Efm[m + N_max]) * exp_phase;
     }
     return output;
   }

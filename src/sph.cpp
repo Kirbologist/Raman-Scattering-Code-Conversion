@@ -216,6 +216,7 @@ namespace Raman {
     return output;
   }
 
+  // Note: the products won't be correct at n = 0 or k = 0
   // Expects: prods = [(N + 2) x (N + 2) x X] tensor
   template <class Real>
   unique_ptr<stBesselPrimes<Real>> sphGetBesselProductsPrimes(const Tensor3c<Real>& prods) {
@@ -241,8 +242,8 @@ namespace Raman {
 
     int kkp1, nnp1;
     Tensor1c<Real> col_shape(X);
-    for (int n = 0; n <= N; n++) {
-      for (int k = n % 2; k <= N; k += 2) {
+    for (int n = 1; n <= N; n++) {
+      for (int k = 2 - n % 2; k <= N; k += 2) {
         kkp1 = k*(k + 1);
         nnp1 = n*(n + 1);
 
@@ -261,7 +262,7 @@ namespace Raman {
             col_shape.constant((2*n + 1)*(2*k + 1));
       }
 
-      for (int k = 1 - n % 2; k <= N; k += 2) {
+      for (int k = 1 + n % 2; k <= N; k += 2) {
         output->xi_prime_psi.chip(n, 0).chip(k, 0) =
             (prods.chip(n - 1, 0).chip(k, 0) * col_shape.constant(n + 1) -
             col_shape.constant(n)*prods.chip(n + 1, 0).chip(k, 0)) / col_shape.constant(2*n + 1);
@@ -410,7 +411,7 @@ namespace Raman {
   }
 
   template <class Real>
-  unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,
+  vector<unique_ptr<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,
       const unique_ptr<stRtfunc<Real>>& Rt_func, const unique_ptr<stParams<Real>>& params, int NB) {
     if (params->s.size() > 1 || params->k1.size() > 1)
       throw(runtime_error("params->s and params->k1 must be scalar"));
@@ -421,7 +422,9 @@ namespace Raman {
     cout << "sphCalculatePQ: Calculate P, Q for " << M << "m-values with N_Q = " <<
         N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
-    auto output = make_unique<vector<stPQ<Real>>>(M);
+    vector<unique_ptr<stPQ<Real>>> output(M);
+    for (int i = 0; i < M; i++)
+      output[i] = make_unique<stPQ<Real>>();
     Real s = params->s(0);
     Real k1 = params->k1(0);
     int N_int = Rt_func->Nb_theta, T = N_int; // Number of theta's
@@ -577,40 +580,40 @@ namespace Raman {
       ArrayXi inde = seq2Array(m % 2, Nm - 1, 2);
       ArrayXi indo = seq2Array(1 - m % 2, Nm - 1, 2);
 
-      output->at(i).st_4M_Q_eo->M12 = Q12(inde, indo);
-      output->at(i).st_4M_Q_eo->M21 = Q21(indo, inde);
-      output->at(i).st_4M_Q_eo->M11 = Q11(inde, inde);
-      output->at(i).st_4M_Q_eo->M22 = Q22(indo, indo);
-      output->at(i).st_4M_Q_eo->m = m;
-      output->at(i).st_4M_Q_eo->ind1 = inde;
-      output->at(i).st_4M_Q_eo->ind2 = indo;
+      output[i]->st_4M_Q_eo().M12 = Q12(inde, indo);
+      output[i]->st_4M_Q_eo().M21 = Q21(indo, inde);
+      output[i]->st_4M_Q_eo().M11 = Q11(inde, inde);
+      output[i]->st_4M_Q_eo().M22 = Q22(indo, indo);
+      output[i]->st_4M_Q_eo().m = m;
+      output[i]->st_4M_Q_eo().ind1 = inde;
+      output[i]->st_4M_Q_eo().ind2 = indo;
 
-      output->at(i).st_4M_Q_oe->M12 = Q12(indo, inde);
-      output->at(i).st_4M_Q_oe->M21 = Q21(inde, indo);
-      output->at(i).st_4M_Q_oe->M11 = Q11(indo, indo);
-      output->at(i).st_4M_Q_oe->M22 = Q22(inde, inde);
-      output->at(i).st_4M_Q_oe->m = m;
-      output->at(i).st_4M_Q_oe->ind1 = inde;
-      output->at(i).st_4M_Q_oe->ind2 = indo;
+      output[i]->st_4M_Q_oe().M12 = Q12(indo, inde);
+      output[i]->st_4M_Q_oe().M21 = Q21(inde, indo);
+      output[i]->st_4M_Q_oe().M11 = Q11(indo, indo);
+      output[i]->st_4M_Q_oe().M22 = Q22(inde, inde);
+      output[i]->st_4M_Q_oe().m = m;
+      output[i]->st_4M_Q_oe().ind1 = inde;
+      output[i]->st_4M_Q_oe().ind2 = indo;
 
-      output->at(i).st_4M_P_eo->M12 = P12(inde, indo);
-      output->at(i).st_4M_P_eo->M21 = P21(indo, inde);
-      output->at(i).st_4M_P_eo->M11 = P11(inde, inde);
-      output->at(i).st_4M_P_eo->M22 = P22(indo, indo);
-      output->at(i).st_4M_P_eo->m = m;
-      output->at(i).st_4M_P_eo->ind1 = inde;
-      output->at(i).st_4M_P_eo->ind2 = indo;
+      output[i]->st_4M_P_eo().M12 = P12(inde, indo);
+      output[i]->st_4M_P_eo().M21 = P21(indo, inde);
+      output[i]->st_4M_P_eo().M11 = P11(inde, inde);
+      output[i]->st_4M_P_eo().M22 = P22(indo, indo);
+      output[i]->st_4M_P_eo().m = m;
+      output[i]->st_4M_P_eo().ind1 = inde;
+      output[i]->st_4M_P_eo().ind2 = indo;
 
-      output->at(i).st_4M_P_oe->M12 = P12(indo, inde);
-      output->at(i).st_4M_P_oe->M21 = P21(inde, indo);
-      output->at(i).st_4M_P_oe->M11 = P11(indo, indo);
-      output->at(i).st_4M_P_oe->M22 = P22(inde, inde);
-      output->at(i).st_4M_P_oe->m = m;
-      output->at(i).st_4M_P_oe->ind1 = inde;
-      output->at(i).st_4M_P_oe->ind2 = indo;
+      output[i]->st_4M_P_oe().M12 = P12(indo, inde);
+      output[i]->st_4M_P_oe().M21 = P21(inde, indo);
+      output[i]->st_4M_P_oe().M11 = P11(indo, indo);
+      output[i]->st_4M_P_oe().M22 = P22(inde, inde);
+      output[i]->st_4M_P_oe().m = m;
+      output[i]->st_4M_P_oe().ind1 = inde;
+      output[i]->st_4M_P_oe().ind2 = indo;
 
-      output->at(i).mat_list.push_back("st_4M_Q");
-      output->at(i).mat_list.push_back("st_4M_P");
+      output[i]->mat_list.push_back("st_4M_Q");
+      output[i]->mat_list.push_back("st_4M_P");
     }
     return output;
   }
@@ -624,5 +627,5 @@ namespace Raman {
   template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const ArrayXr<double>*);
   template size_t sphCheckBesselConvergence(size_t, double, const ArrayXr<double>&, double, size_t);
   template size_t sphEstimateNB(size_t, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
-  template unique_ptr<vector<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
+  template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
 }

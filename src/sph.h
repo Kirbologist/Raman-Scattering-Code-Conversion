@@ -62,18 +62,23 @@ namespace Raman {
   };
 
   template <class Real>
-  struct stPQ {
-    unique_ptr<st4M<Real>> st_4M_P_eo;
-    unique_ptr<st4M<Real>> st_4M_P_oe;
-    unique_ptr<st4M<Real>> st_4M_Q_eo;
-    unique_ptr<st4M<Real>> st_4M_Q_oe;
+  struct stMat {
+    std::array<st4M<Real>, 4> st_4M_list;
     vector<string> mat_list;
+  };
+
+  template <class Real>
+  struct stPQ : stMat<Real> {
+    inline st4M<Real>& st_4M_P_eo() { return this->st_4M_list[0]; }
+    inline st4M<Real>& st_4M_P_oe() { return this->st_4M_list[1]; }
+    inline st4M<Real>& st_4M_Q_eo() { return this->st_4M_list[2]; }
+    inline st4M<Real>& st_4M_Q_oe() { return this->st_4M_list[3]; }
 
     stPQ() {
-      this->st_4M_P_eo = make_unique<st4M<Real>>();
-      this->st_4M_P_oe = make_unique<st4M<Real>>();
-      this->st_4M_Q_eo = make_unique<st4M<Real>>();
-      this->st_4M_Q_oe = make_unique<st4M<Real>>();
+      this->st_4M_P_eo() = st4M<Real>();
+      this->st_4M_P_oe() = st4M<Real>();
+      this->st_4M_Q_eo() = st4M<Real>();
+      this->st_4M_Q_oe() = st4M<Real>();
     }
   };
 
@@ -107,7 +112,7 @@ namespace Raman {
   size_t sphEstimateNB(size_t NQ, const unique_ptr<stRtfunc<Real>>& stGeometry, const unique_ptr<stParams<Real>>& params, Real acc = 1e-13);
 
   template <class Real>
-  unique_ptr<vector<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const unique_ptr<stRtfunc<Real>>& Rt_func, const unique_ptr<stParams<Real>>& params, int NB = -1);
+  vector<unique_ptr<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec, const unique_ptr<stRtfunc<Real>>& Rt_func, const unique_ptr<stParams<Real>>& params, int NB = -1);
 }
 
 #endif
