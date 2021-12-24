@@ -68,6 +68,46 @@ namespace Raman {
     return U.lu().solve(Y).array();
   }
 
+  // Expects base_array.dimensions() = bool_array.dimensions()
+  template <class Real>
+  ArrayXr<Real> logicalSlice(ArrayXr<Real>& base_array, ArrayXb& bool_array) {
+    size_t output_size = bool_array.count();
+    ArrayXr<Real> output(output_size);
+    int base_index = 0;
+    for (size_t i = 0; i < output_size && base_index < bool_array.size(); i++, base_index++) {
+      while (!bool_array(base_index))
+        base_index++;
+      output(i) = base_array(base_index);
+    }
+    return output;
+  }
+
+  // Expects base_array.dimensions() = bool_array.dimensions()
+  template <class Real>
+  RowArrayXr<Real> logicalSlice(RowArrayXr<Real>& base_array, RowArrayXb& bool_array) {
+    size_t output_size = bool_array.count();
+    RowArrayXr<Real> output(output_size);
+    int base_index = 0;
+    for (size_t i = 0; i < output_size && base_index < bool_array.size(); i++, base_index++) {
+      while (!bool_array(base_index))
+        base_index++;
+      output(i) = base_array(base_index);
+    }
+    return output;
+  }
+
+  ArrayXi logicalIndices(ArrayXb& bool_array) {
+    size_t output_size = bool_array.count();
+    ArrayXi output(output_size);
+    int index = 0;
+    for (size_t i = 0; i < output_size && index < bool_array.size(); i++, index++) {
+      while (!bool_array(index))
+        index++;
+      output(i) = index;
+    }
+    return output;
+  }
+
   template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
@@ -90,6 +130,9 @@ namespace Raman {
       ArithmeticSequence<long int, long int, long int>);
   template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
   template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
+  template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
+  template RowArrayXr<double> logicalSlice(RowArrayXr<double>&, RowArrayXb&);
+  template ArrayXr<double> logicalSlice(ArrayXr<double>&, ArrayXb&);
   template ArrayXr<double> arr_bessel_j(ArrayXr<double>&, double);
   template ArrayXr<double> arr_bessel_y(ArrayXr<double>&, double);
 }

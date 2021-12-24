@@ -78,21 +78,14 @@ namespace Raman {
           max_term_S.row(k) = max_term_S.row(k).max(abs(current_term));
         } else {
           test.fill(false);
-          for (int i = 0; i < num_x; i++) {
-            if (x_not_converged(i)) {
-              current_term(i) = alpha_q(i) * gamma_qnk;
-              test(i) = abs(current_term(i)) > EPS * abs(S(k, i));
-            }
-          }
+          current_term = x_not_converged.select(alpha_q * gamma_qnk, current_term);
+          if (x_not_converged.any())
+            test = x_not_converged.select(abs(current_term) > EPS * abs(S.row(k)), test);
           if (test.any()) {
-            if ((1 - test + current_term.isInf()).all()) // if all non-converged x values are infinite
+            if (logicalSlice(current_term, test).isInf().all()) // if all non-converged x values are infinite
               cout << "Problem (1) in sphGetFpovx..." << endl;
-            for (int i = 0; i < num_x; i++) {
-              if (test(i)) {
-                S(k, i) += current_term(i);
-                max_term_S(k, i) = max(abs(current_term(i)), max_term_S(k, i));
-              }
-            }
+            S.row(k) += test.select(current_term, 0);
+            max_term_S.row(k) = test.select(abs(current_term).max(max_term_S.row(k)), max_term_S.row(k));
           }
 
           counter += 1 - test.template cast<int>();
@@ -593,8 +586,8 @@ namespace Raman {
       output[i]->st_4M_Q_oe().M11 = Q11(indo, indo);
       output[i]->st_4M_Q_oe().M22 = Q22(inde, inde);
       output[i]->st_4M_Q_oe().m = m;
-      output[i]->st_4M_Q_oe().ind1 = inde;
-      output[i]->st_4M_Q_oe().ind2 = indo;
+      output[i]->st_4M_Q_oe().ind1 = indo;
+      output[i]->st_4M_Q_oe().ind2 = inde;
 
       output[i]->st_4M_P_eo().M12 = P12(inde, indo);
       output[i]->st_4M_P_eo().M21 = P21(indo, inde);
@@ -609,8 +602,8 @@ namespace Raman {
       output[i]->st_4M_P_oe().M11 = P11(indo, indo);
       output[i]->st_4M_P_oe().M22 = P22(inde, inde);
       output[i]->st_4M_P_oe().m = m;
-      output[i]->st_4M_P_oe().ind1 = inde;
-      output[i]->st_4M_P_oe().ind2 = indo;
+      output[i]->st_4M_P_oe().ind1 = indo;
+      output[i]->st_4M_P_oe().ind2 = inde;
 
       output[i]->mat_list.push_back("st_4M_Q");
       output[i]->mat_list.push_back("st_4M_P");

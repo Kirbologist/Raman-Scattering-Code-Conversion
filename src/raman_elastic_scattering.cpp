@@ -1,4 +1,5 @@
 #include "raman_elastic_scattering.h"
+#include "math.h"
 #include "sph.h"
 #include "rvh.h"
 
@@ -21,9 +22,14 @@ int main(int argc, char** argv) {
   cout << test2[0]->st_4M_P_oe().m << endl;
   cout << "Now trying to access test2[10]:" << endl;
   cout << test2[10]->st_4M_P_oe().m << endl;
-  rvhTruncateMatrices<double>(test2, 8);
-  cout << test2.size() << endl;
-  cout << "Now trying to access test2[0]:" << endl;
-  cout << test2[0]->st_4M_P_oe().m << endl;
+  vector<unique_ptr<stPQ<double>>> test3 = rvhTruncateMatrices<double>(test2, 8);
+  cout << test3.size() << endl;
+  cout << "Now trying to access test3[0]:" << endl;
+  cout << test3[0]->st_4M_P_oe().M11 << endl;
+  cout << test3[0]->st_4M_P_oe().M12 << endl;
+  cout << test3[0]->st_4M_P_oe().M21 << endl;
+  cout << test3[0]->st_4M_P_oe().M22 << endl;
+  cout << test3[0]->st_4M_P_oe().ind1 << endl;
+  cout << test3[0]->st_4M_P_oe().ind2 << endl;
   return 0;
 }

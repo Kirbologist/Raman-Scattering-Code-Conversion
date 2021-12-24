@@ -32,6 +32,14 @@ namespace Raman {
   ArrayXXc<Real> invertLUcol(MatrixXc<Real>& B);
 
   template <class Real>
+  ArrayXr<Real> logicalSlice(ArrayXr<Real>& base_array, ArrayXb& bool_array);
+
+  template <class Real>
+  RowArrayXr<Real> logicalSlice(RowArrayXr<Real>& base_array, RowArrayXb& bool_array);
+
+  ArrayXi logicalIndices(ArrayXb& bool_array);
+
+  template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x);
 
   template <class Real>

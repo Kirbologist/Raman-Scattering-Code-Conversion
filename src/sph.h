@@ -8,6 +8,7 @@ using namespace Eigen;
 
 namespace Raman {
 
+  // Might be worth re-testing
   template <class Real>
   struct stFprow {
     ArrayXXr<Real> S;
@@ -65,21 +66,26 @@ namespace Raman {
   struct stMat {
     std::array<st4M<Real>, 4> st_4M_list;
     vector<string> mat_list;
+
+    stMat() {
+      for (int i = 0; i < 4; i++)
+        this->st_4M_list[i] = st4M<Real>();
+    }
+
+    stMat(st4M<Real>& base) {
+      for (int i = 0; i < 4; i++)
+        this->st_4M_list[i] = base.st_4M_list[i];
+      this->mat_list = base.mat_list;
+    }
   };
 
   template <class Real>
   struct stPQ : stMat<Real> {
+    using stMat<Real>::stMat;
     inline st4M<Real>& st_4M_P_eo() { return this->st_4M_list[0]; }
     inline st4M<Real>& st_4M_P_oe() { return this->st_4M_list[1]; }
     inline st4M<Real>& st_4M_Q_eo() { return this->st_4M_list[2]; }
     inline st4M<Real>& st_4M_Q_oe() { return this->st_4M_list[3]; }
-
-    stPQ() {
-      this->st_4M_P_eo() = st4M<Real>();
-      this->st_4M_P_oe() = st4M<Real>();
-      this->st_4M_Q_eo() = st4M<Real>();
-      this->st_4M_Q_oe() = st4M<Real>();
-    }
   };
 
   template <class Real>
