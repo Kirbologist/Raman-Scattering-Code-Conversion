@@ -12,7 +12,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] aux* functions (2/2)
   - [x] vsh* functions (9/9)
   - [x] sph* functions (11/11)
-  - [ ] rvh* functions (3/5)
+  - [ ] rvh* functions (4/5)
   - [ ] slv* functions (0/2)
   - [ ] main function (0/1)
   - [ ] arbitrary-precision support
@@ -45,7 +45,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 ## Notes
 
 - Although most of the code is based on the SMARTIES v1.01 MATLAB package, only the functions necessary for calculating Raman scattering will be converted.
-- The coding style is loosely based on Google's C++ style guide, with variable, struct and function names matching closely with the ones given in the original SMARTIES code, which themselves closely match the names given in "Scattering, Absorption, and Emission of Light by Small Particles" by Mishchenko et al.
+- The coding style is loosely based on Google's C++ style guide, with variable, struct and function names matching closely with the ones given in the original SMARTIES code.
 - The code was written to be compiled with G++ and on hardware that correctly implements the IEEE 754 standard. If IEEE 754 is not supported, compiling or executing the code may cause a divide-by-zero hardware exception.
 
 ## Copyright Disclaimer
