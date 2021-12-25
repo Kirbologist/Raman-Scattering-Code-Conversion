@@ -83,7 +83,7 @@ namespace Raman {
   template <class Real>
   struct stOptions {
     bool get_R = false;
-    int Delta = 0;
+    int delta = 0;
     int NB = 0;
     ArrayXi abs_m_vec;
     bool get_symmetric_T = false;

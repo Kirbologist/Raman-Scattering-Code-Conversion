@@ -107,7 +107,7 @@ namespace Raman {
   unique_ptr<stBesselProducts<Real>> sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB);
 
   template <class Real>
-  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta = nullptr);
+  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c, const unique_ptr<ArrayXr<Real>> theta = unique_ptr<ArrayXr<Real>>());
 
   // Could use some more thorough testing
   template <class Real>

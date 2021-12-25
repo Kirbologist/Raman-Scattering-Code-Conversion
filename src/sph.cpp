@@ -297,7 +297,7 @@ namespace Raman {
   }
 
   template <class Real>
-  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c, const ArrayXr<Real>* theta) {
+  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c, const unique_ptr<ArrayXr<Real>> theta) {
     sInt type;
     auto output = make_unique<stRtfunc<Real>>();
     if (theta) {
@@ -617,7 +617,7 @@ namespace Raman {
   template unique_ptr<stBessel<double>> sphGetXiPsi(int, double, const ArrayXr<double>&, int);
   template unique_ptr<stBesselPrimes<double>> sphGetBesselProductsPrimes(const Tensor3c<double>&);
   template unique_ptr<stBesselProducts<double>> sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
-  template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const ArrayXr<double>*);
+  template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const unique_ptr<ArrayXr<double>>);
   template size_t sphCheckBesselConvergence(size_t, double, const ArrayXr<double>&, double, size_t);
   template size_t sphEstimateNB(size_t, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
   template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);

@@ -40,7 +40,7 @@ namespace Raman {
   vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R = false);
 
   template <class Real>
-  vector<unique_ptr<stPQ<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<Real>>>& st_mat_list, int N_max);
+  vector<unique_ptr<stTR<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<Real>>>& st_mat_list, int N_max);
 
   // Untested
   template <class Real>
@@ -49,7 +49,7 @@ namespace Raman {
   // Untested
   template <class Real>
   unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max, const vector<unique_ptr<stTR<Real>>>& st_TR_list,
-      const unique_ptr<stIncPar<Real>>& st_inc_par, stIncEabnm<Real>* st_inc_E_abnm = nullptr);
+      const unique_ptr<stIncPar<Real>>& st_inc_par, unique_ptr<stIncEabnm<Real>> st_inc_E_abnm = unique_ptr<stIncEabnm<Real>>());
 
   // Untested
   template <class Real>

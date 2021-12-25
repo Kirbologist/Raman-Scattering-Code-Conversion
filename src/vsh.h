@@ -71,7 +71,7 @@ namespace Raman {
   unique_ptr<stEAllPhi<Real>> vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
-      sBessel type, const stPinmTaunm<Real>* stPT = nullptr);
+      sBessel type, unique_ptr<stPinmTaunm<Real>> stPT = unique_ptr<stPinmTaunm<Real>>());
 
   template <class Real>
   unique_ptr<stEforPhi<Real>> vshEthetaForPhi(const unique_ptr<stEAllPhi<Real>>& stEsurf, Real phi0);

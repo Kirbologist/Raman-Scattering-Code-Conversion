@@ -228,7 +228,7 @@ namespace Raman {
   unique_ptr<stEAllPhi<Real>> vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
-      sBessel type, const stPinmTaunm<Real>* stPT) {
+      sBessel type, unique_ptr<stPinmTaunm<Real>> stPT) {
     int P_max = p_nm.cols(), N_max = static_cast<int>(round(sqrt(P_max) - 1)),
         Nb_lambda = lambda.size();
     if (rt.size() != theta.size() && rt(0) != 0 && !isinf(rt(0)))
@@ -290,7 +290,7 @@ namespace Raman {
     }
 
     if (!stPT)
-      stPT = vshPinmTaunm<Real>(N_max, theta.transpose()).get();
+      stPT = vshPinmTaunm<Real>(N_max, theta.transpose());
 
     ArrayXi n_vec, p_vec;
     ArrayXr<Real> pi_nm, tau_nm, d_nm;
@@ -404,7 +404,7 @@ namespace Raman {
   template unique_ptr<stZnAll<double>> vshGetZnAll(size_t, const ArrayXr<double>&, sBessel);
   template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXr<double>&,
       const ArrayXr<double>&, const ArrayXXc<double>&, const ArrayXXc<double>&,
-      const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, const stPinmTaunm<double>*);
+      const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, unique_ptr<stPinmTaunm<double>>);
   template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
   template ArrayXXc<double> vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
   template ArrayXXc<double> vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);

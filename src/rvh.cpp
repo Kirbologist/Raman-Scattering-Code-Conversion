@@ -130,15 +130,15 @@ namespace Raman {
   }
 
   template <class Real>
-  vector<unique_ptr<stPQ<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<Real>>>& st_mat_list, int N_max) {
-    vector<unique_ptr<stPQ<Real>>> output;
+  vector<unique_ptr<stTR<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<Real>>>& st_mat_list, int N_max) {
+    vector<unique_ptr<stTR<Real>>> output;
 
     for (size_t i = 0 ; i < st_mat_list.size(); i++) {
       size_t num_st_4M = st_mat_list[i]->mat_list.size() * 2;
       int m;
       if (num_st_4M > 0 && (m = st_mat_list[i]->st_4M_list[0].m) <= N_max) {
-        unique_ptr<stPQ<Real>> output_st_PQ = make_unique<stPQ<Real>>();
-        output_st_PQ->mat_list = st_mat_list[i]->mat_list;
+        unique_ptr<stTR<Real>> output_st_TR = make_unique<stTR<Real>>();
+        output_st_TR->mat_list = st_mat_list[i]->mat_list;
         for (size_t j = 0; j < num_st_4M; j++) {
           int new_size = N_max - max(1, m) + 1;
           ArrayXb ind1_valid = st_mat_list[i]->st_4M_list[j].ind1 <= new_size;
@@ -147,20 +147,20 @@ namespace Raman {
           ArrayXi new_ind1 = logicalIndices(ind1_valid);
           ArrayXi new_ind2 = logicalIndices(ind2_valid);
 
-          output_st_PQ->st_4M_list[j].ind1 = st_mat_list[i]->st_4M_list[j].ind1(new_ind1);
-          output_st_PQ->st_4M_list[j].ind2 = st_mat_list[i]->st_4M_list[j].ind2(new_ind2);
-          output_st_PQ->st_4M_list[j].m = m;
+          output_st_TR->st_4M_list[j].ind1 = st_mat_list[i]->st_4M_list[j].ind1(new_ind1);
+          output_st_TR->st_4M_list[j].ind2 = st_mat_list[i]->st_4M_list[j].ind2(new_ind2);
+          output_st_TR->st_4M_list[j].m = m;
 
           ArrayXXc<Real> current_matrix = st_mat_list[i]->st_4M_list[j].M11;
-          output_st_PQ->st_4M_list[j].M11 = current_matrix(new_ind1, new_ind1);
+          output_st_TR->st_4M_list[j].M11 = current_matrix(new_ind1, new_ind1);
           current_matrix = st_mat_list[i]->st_4M_list[j].M12;
-          output_st_PQ->st_4M_list[j].M12 = current_matrix(new_ind1, new_ind2);
+          output_st_TR->st_4M_list[j].M12 = current_matrix(new_ind1, new_ind2);
           current_matrix = st_mat_list[i]->st_4M_list[j].M21;
-          output_st_PQ->st_4M_list[j].M21 = current_matrix(new_ind2, new_ind1);
+          output_st_TR->st_4M_list[j].M21 = current_matrix(new_ind2, new_ind1);
           current_matrix = st_mat_list[i]->st_4M_list[j].M22;
-          output_st_PQ->st_4M_list[j].M22 = current_matrix(new_ind2, new_ind2);
+          output_st_TR->st_4M_list[j].M22 = current_matrix(new_ind2, new_ind2);
         }
-        output.push_back(move(output_st_PQ));
+        output.push_back(move(output_st_TR));
       }
     }
     return output;
@@ -226,9 +226,9 @@ namespace Raman {
 
   template <class Real>
   unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max, const vector<unique_ptr<stTR<Real>>>& st_TR_list,
-      const unique_ptr<stIncPar<Real>>& st_inc_par, stIncEabnm<Real>* st_inc_E_abnm) {
+      const unique_ptr<stIncPar<Real>>& st_inc_par, unique_ptr<stIncEabnm<Real>> st_inc_E_abnm) {
     if (!st_inc_E_abnm)
-      st_inc_E_abnm = vshGetIncidentCoeffs(N_max, st_inc_par).get();
+      st_inc_E_abnm = vshGetIncidentCoeffs(N_max, st_inc_par);
 
     bool get_R = false;
     if (find(st_TR_list[0]->mat_list.begin(), st_TR_list[0]->mat_list.end(), "st_4M_R") != st_TR_list[0]->mat_list.end())
@@ -422,10 +422,10 @@ namespace Raman {
   }
 
   template vector<unique_ptr<stTR<double>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<double>>>&, bool);
-  template vector<unique_ptr<stPQ<double>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<double>>>&, int);
+  template vector<unique_ptr<stTR<double>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<double>>>&, int);
   template vector<unique_ptr<stTR<double>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<double>>>&, vector<string>);
   template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
-      const unique_ptr<stIncPar<double>>&, stIncEabnm<double>*);
+      const unique_ptr<stIncPar<double>>&, unique_ptr<stIncEabnm<double>>);
   template unique_ptr<stCrossSection<double>> rvhGetAverageCrossSections(
       const ArrayXr<double>&, const vector<vector<unique_ptr<stTR<double>>>>&);
 }

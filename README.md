@@ -12,15 +12,15 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] aux* functions (2/2)
   - [x] vsh* functions (9/9)
   - [x] sph* functions (11/11)
-  - [ ] rvh* functions (4/5)
-  - [ ] slv* functions (0/2)
+  - [x] rvh* functions (5/5)
+  - [x] slv* functions (2/2)
   - [ ] main function (0/1)
   - [ ] arbitrary-precision support
   - [ ] parallel computing support
 
 ## Notable differences from smarties
 
-- Expansion coefficients and other arrays that store using p-indices now include values for when n=0, m=0. This makes P (the length of the p-vectors) equal to (N+1)^2 and makes the code more convenient in a index-by-zero language without compromising any calculations. As a side effect, many other functions that only calculate values that depend only on n are affected as well. Functions that are affected by this include:
+- Expansion coefficients and other arrays that store using p-indices now include values for when n=0, m=0. This makes P (the length of the p-vectors) equal to (N+1)^2 and makes the code more convenient in a index-by-zero language without compromising any calculations. As a side effect, many other functions that calculate values for various values n are affected as well. Functions that are affected by this include:
   - vshPinmTaunm
   - vshGetIncidentCoeffs
   - vshEgenThetaAllPhi
@@ -28,13 +28,15 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - sphGetBesselProductsPrimes
   - sphGetModifiedBesselProducts
   - sphCalculatePQ
+  - rvhGetFieldCoefficients
 - Functions that take 'scheme/mode' argument of type string now take them as enum types instead. This causes these functions to theoretically behave slightly differently for non-standard values of the 'scheme/mode' argument, although such behaviour shouldn't be able to manifest at compile-time. Functions that are affected by this include:
   - auxPrepareIntegrals
   - vshMakeIncidentParams
   - vshEgenThetaAllPhi
   - vshGetZnAll
-- sphGetBesselProductsPrimes has its signature changed so that it now the int N is an argument, where N is the the number of Eigen Arrays in prods - 2, or the original int N_max that was used to produce prods. This is because of the limitations of C++ arrays. This issue would be mitigated if the array of Eigen Arrays can easily be implemented using Eigen's tensor module instead.
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
+- sphCalculatePQ doesn't check the value of stParams.output, since by the specification, such a member shouldn't exist. Such a member does exist in stOptions however, so future implementations are likely to also take stOptions as an argument type.
+- The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 
 ## Dependencies
 

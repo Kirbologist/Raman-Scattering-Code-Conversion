@@ -22,6 +22,11 @@ int main(int argc, char** argv) {
   cout << test2[0]->st_4M_P_oe().m << endl;
   cout << "Now trying to access test2[10]:" << endl;
   cout << test2[10]->st_4M_P_oe().m << endl;
+
+  unique_ptr<stPQ<double>> test3 = unique_ptr<stPQ<double>>();
+  if (!test3)
+    cout << "it worked!!" << endl;
+  /*
   vector<unique_ptr<stPQ<double>>> test3 = rvhTruncateMatrices<double>(test2, 8);
   cout << test3.size() << endl;
   cout << "Now trying to access test3[0]:" << endl;
@@ -31,5 +36,6 @@ int main(int argc, char** argv) {
   cout << test3[0]->st_4M_P_oe().M22 << endl;
   cout << test3[0]->st_4M_P_oe().ind1 << endl;
   cout << test3[0]->st_4M_P_oe().ind2 << endl;
+  */
   return 0;
 }
