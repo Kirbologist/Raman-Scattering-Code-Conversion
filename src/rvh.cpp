@@ -378,9 +378,54 @@ namespace Raman {
     return output;
   }
 
+  template <class Real>
+  unique_ptr<stCrossSection<Real>> rvhGetAverageCrossSections(
+      const ArrayXr<Real>& k1, const vector<vector<unique_ptr<stTR<Real>>>>& st_TR_list) {
+    int L = st_TR_list.size();
+    int M = st_TR_list[0].size();
+
+    ArrayXc<Real> ext_sum = ArrayXc<Real>::Zero(L);
+    ArrayXc<Real> sca_sum = ArrayXc<Real>::Zero(L);
+
+    for (int l = 0; l < L; l++) {
+      if (st_TR_list[l][0]->st_4M_T_eo().ind1.size() + st_TR_list[l][0]->st_4M_T_eo().ind2.size() != M)
+        cout << "Warning in rvhGetAverageCrossSections: CstTRa does not seem to contain T-matrices for all m" << endl;
+      for (int m = 0; m < M; m++) {
+        if (st_TR_list[l][m]->st_4M_T_eo().m != m || st_TR_list[l][m]->st_4M_T_oe().m != m)
+          cout << "Warning in rvhGetAverageCrossSections: CstTRa does not seem to contain T-matrices for all m" << endl;
+        Real m_factor = m ? 1 : 0.5;
+
+        ext_sum(l) += m_factor * (
+            st_TR_list[l][m]->st_4M_T_eo().M11.matrix().diagonal().sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M11.matrix().diagonal().sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M22.matrix().diagonal().sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M22.matrix().diagonal().sum());
+
+        sca_sum(l) += m_factor * (
+            st_TR_list[l][m]->st_4M_T_eo().M11.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M12.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M21.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M22.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M11.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M12.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M21.pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M22.pow(2).sum());
+      }
+    }
+
+    unique_ptr<stCrossSection<Real>> output = make_unique<stCrossSection<Real>>();
+    output->ext = -4*PI/k1.pow(2) * ext_sum.real();
+    output->sca = 4*PI/k1.pow(2) * sca_sum.real();
+    output->abs = -4*PI/k1.pow(2) * (ext_sum.real() + sca_sum.real());
+
+    return output;
+  }
+
   template vector<unique_ptr<stTR<double>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<double>>>&, bool);
   template vector<unique_ptr<stPQ<double>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<double>>>&, int);
   template vector<unique_ptr<stTR<double>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<double>>>&, vector<string>);
   template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
       const unique_ptr<stIncPar<double>>&, stIncEabnm<double>*);
+  template unique_ptr<stCrossSection<double>> rvhGetAverageCrossSections(
+      const ArrayXr<double>&, const vector<vector<unique_ptr<stTR<double>>>>&);
 }

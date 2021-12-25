@@ -30,10 +30,10 @@ namespace Raman {
 
   template <class Real>
   struct stCrossSection {
-    ArrayXc<Real> ext;
-    ArrayXc<Real> sca;
-    ArrayXc<Real> abs;
-  }
+    ArrayXr<Real> ext;
+    ArrayXr<Real> sca;
+    ArrayXr<Real> abs;
+  };
 
   // Untested
   template <class Real>
@@ -51,8 +51,10 @@ namespace Raman {
   unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max, const vector<unique_ptr<stTR<Real>>>& st_TR_list,
       const unique_ptr<stIncPar<Real>>& st_inc_par, stIncEabnm<Real>* st_inc_E_abnm = nullptr);
 
+  // Untested
   template <class Real>
-  unique_ptr<stCrossSection<Real>> rvhGetAverageCrossSection(ArrayXr<Real> k1, vector<vector<unique_ptr<stTR<Real>>>> st_TR_list);
+  unique_ptr<stCrossSection<Real>> rvhGetAverageCrossSections(
+      const ArrayXr<Real>& k1, const vector<vector<unique_ptr<stTR<Real>>>>& st_TR_list);
 }
 
 #endif
