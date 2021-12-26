@@ -77,7 +77,7 @@ namespace Raman {
     int Nb_theta_pst;
     Real lambda;
     Real epsilon1;
-    complex<Real> epsilon2;
+    ArrayXc<Real> epsilon2;
   };
 
   template <class Real>

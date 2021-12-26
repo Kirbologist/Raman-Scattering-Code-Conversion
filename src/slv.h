@@ -1,3 +1,6 @@
+#ifndef SLV_H
+#define SLV_H
+
 #include "raman_elastic_scattering.h"
 #include "rvh.h"
 #include "vsh.h"
@@ -17,3 +20,5 @@ namespace Raman {
   unique_ptr<stTmatrix<Real>> slvForT(const unique_ptr<stParams<Real>>& params,
       const unique_ptr<stOptions<Real>>& options, unique_ptr<stRtfunc<Real>> stGeometry);
 }
+
+#endif

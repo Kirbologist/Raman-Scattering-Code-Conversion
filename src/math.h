@@ -2,7 +2,6 @@
 #define MY_MATH_H
 
 #include "raman_elastic_scattering.h"
-#include <boost/math/special_functions/bessel.hpp>
 
 using namespace std;
 using namespace Eigen;

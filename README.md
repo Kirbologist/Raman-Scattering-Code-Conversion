@@ -14,6 +14,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] sph* functions (11/11)
   - [x] rvh* functions (5/5)
   - [x] slv* functions (2/2)
+  - [ ] pst* functions (1/2)
   - [ ] main function (0/1)
   - [ ] arbitrary-precision support
   - [ ] parallel computing support
@@ -37,6 +38,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
 - sphCalculatePQ doesn't check the value of stParams.output, since by the specification, such a member shouldn't exist. Such a member does exist in stOptions however, so future implementations are likely to also take stOptions as an argument type.
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
+- The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept
 
 ## Dependencies
 
