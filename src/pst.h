@@ -20,6 +20,28 @@ namespace Raman {
     Real c;
   };
 
+  template <class Real>
+  struct stSM {
+    Real L_max;
+    ArrayXr<Real> ALF1n;
+    ArrayXr<Real> ALF2n;
+    ArrayXr<Real> ALF3n;
+    ArrayXr<Real> ALF4n;
+    ArrayXr<Real> BET1n;
+    ArrayXr<Real> BET2n;
+    Real asym_par;
+    ArrayXr<Real> theta;
+    ArrayXr<Real> theta_deg;
+    ArrayXr<Real> F11;
+    ArrayXr<Real> F22;
+    ArrayXr<Real> F33;
+    ArrayXr<Real> F44;
+    ArrayXr<Real> F12;
+    ArrayXr<Real> F34;
+    Array<Real, Dynamic, 7> all_AB;
+    Array<Real, Dynamic, 7> all_F;
+  };
+
   // Untested
   template <class Real>
   unique_ptr<stRes<Real>> pstMakeStructForField(
@@ -31,6 +53,10 @@ namespace Raman {
   template <class Real>
   unique_ptr<stRes<Real>> pstMakeStructForField(
       unique_ptr<stAbcdnm<Real>> st_abcdnm, unique_ptr<stParams<Real>> params);
+
+  template <class Real>
+  unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<Real>>& st_TR_list,
+      Real lambda, const ArrayXr<Real>& sca, int Nb_theta = 2);
 }
 
 #endif

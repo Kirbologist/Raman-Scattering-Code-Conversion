@@ -5,7 +5,7 @@ Project supervisor is A/Prof Taras Plakhotnik.
 
 ## Introduction
 
-The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (lent to me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support multiprecision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
+The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (shared with me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support arbitrary precision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
 
 ## Progress
 
@@ -15,11 +15,11 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] rvh* functions (5/5)
   - [x] slv* functions (2/2)
   - [ ] pst* functions (1/2)
-  - [ ] main function (0/1)
+  - [ ] Non-SMARTIES functions (1/2)
   - [ ] arbitrary-precision support
   - [ ] parallel computing support
 
-## Notable differences from smarties
+## Notable differences from SMARTIES
 
 - Expansion coefficients and other arrays that store using p-indices now include values for when n=0, m=0. This makes P (the length of the p-vectors) equal to (N+1)^2 and makes the code more convenient in a index-by-zero language without compromising any calculations. As a side effect, many other functions that calculate values for various values n are affected as well. Functions that are affected by this include:
   - vshPinmTaunm
@@ -30,13 +30,14 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - sphGetModifiedBesselProducts
   - sphCalculatePQ
   - rvhGetFieldCoefficients
-- Functions that take 'scheme/mode' argument of type string now take them as enum types instead. This causes these functions to theoretically behave slightly differently for non-standard values of the 'scheme/mode' argument, although such behaviour shouldn't be able to manifest at compile-time. Functions that are affected by this include:
+  - pstScatteringMatrixOA
+- Functions that take an argument of type string (for specifying method of calculation) now take them as enum types instead. This causes these functions to theoretically behave slightly differently for unexpected values of the argument, although such behaviour shouldn't be able to manifest at compile-time. Functions that are affected by this include:
   - auxPrepareIntegrals
   - vshMakeIncidentParams
   - vshEgenThetaAllPhi
   - vshGetZnAll
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
-- sphCalculatePQ doesn't check the value of stParams.output, since by the specification, such a member shouldn't exist. Such a member does exist in stOptions however, so future implementations are likely to also take stOptions as an argument type.
+- sphCalculatePQ doesn't try to access stParams.output, since stParams is expected to be the same struct type as the one given in the specification, in which case output is not a member of stParams. Such a member does exist in stOptions however, so future implementations may take stOptions as an argument type. (For calculating Raman scattering, this option is true by default.)
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 - The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept
 
