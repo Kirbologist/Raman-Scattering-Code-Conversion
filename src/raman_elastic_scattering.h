@@ -48,6 +48,9 @@ namespace Raman {
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
 
   template <class Real>
+  using Tensor3r = Tensor<Real, 3>;
+
+  template <class Real>
   using Tensor3c = Tensor<complex<Real>, 3>;
 
   template <class Real>

@@ -1,5 +1,6 @@
 #include "pst.h"
 #include "vsh.h"
+#include "math.h"
 
 using namespace Eigen;
 using namespace std;
@@ -46,11 +47,11 @@ namespace Raman {
   }
 
   template <class Real>
-  Real CCGIN(int n, int n1, int m, int mm, ArrayXr<Real> F, ArrayXr<Real> sign) {
+  Real CCGIN(int n, int n1, int m, int mm, ArrayXr<Real> F, ArrayXi s_sign) {
     int m1 = mm - m;
     if (n < abs(m) || n1 < abs(m1) || abs(mm) > n + n1) {
       cout << "ERROR IN SUBROUTINE CCGIN" << endl;
-      return ArrayXXr<Real>::Zero(1, 1);
+      return 0;
     }
     if (abs(mm) > abs(n - n1)) {
       if (n1 > n) {
@@ -59,7 +60,7 @@ namespace Raman {
       }
       int N2 = 2*n;
       int N12 = 2*n1;
-      return sign(n1 + m1) * exp(F(n + m) + F(n - m) + F(N12) + F(N2 - N12 + 1)
+      return s_sign(n1 + m1) * exp(F(n + m) + F(n - m) + F(N12) + F(N2 - N12 + 1)
           - F(N2 + 1) - F(n1 + m1) - F(n1 - m1) - F(n - n1 + mm) - F(n - n1 - mm));
     }
     int A = 1;
@@ -67,9 +68,9 @@ namespace Raman {
       mm = -mm;
       m = -m;
       m1 = -m1;
-      A = sign(mm + n + n1);
+      A = s_sign(mm + n + n1);
     }
-    return A * sign(n1 + m1) * exp(F(2 * mm + 1) + F(n + n1 - mm) + F(n + m) + F(n1 + m1)
+    return A * s_sign(n1 + m1) * exp(F(2 * mm + 1) + F(n + n1 - mm) + F(n + m) + F(n1 + m1)
         - F(n + n1 + mm + 1) - F(n - n1 + mm) - F(-n + n1 + mm) - F(n - m) - F(n1 - m1));
   }
 
@@ -81,7 +82,7 @@ namespace Raman {
   }
 
   template <class Real>
-  ArrayXXr<Real> CCG(int n, int n1, int N_max, int K1, int K2, ArrayXr<Real> log_fact, ArrayXr<Real> sign) {
+  ArrayXXr<Real> CCG(int n, int n1, int N_max, int K1, int K2, ArrayXr<Real> log_fact, ArrayXi s_sign) {
     if (n1 < 0 || n1 > N_max + n || n < 1 || n > N_max) {
       cout << "ERROR IN CCG" << endl;
       return ArrayXXr<Real>::Zero(1, 1);
@@ -107,7 +108,7 @@ namespace Raman {
       int NNM = (NNU + NNL) / 2;
       if (NNU == NNL)
         NNM = NNL;
-      Real C = CCGIN(n, n1, m, mm, log_fact, sign);
+      Real C = CCGIN(n, n1, m, mm, log_fact, s_sign);
       CU(NNL) = C;
       if (NNL != NNF) {
         Real C2 = 0;
@@ -148,9 +149,9 @@ namespace Raman {
               A = (4 * (nn + 1) * (nn + 1)) / A;
               A *= (2*nn + 1) * (2*nn + 3);
               A = sqrt(A);
-              B = static_cast<Real>(2 * (nn + 2) * (nn + 1));
-              B = ((2 * m - mm) * (nn + 2) * (nn + 1) - mm * n * (n + 1) + mm * n1 * (n1 + 1)) / B
-              D = static_cast<Real>(4 * (nn + 2) * (nn + 2));
+              Real B = static_cast<Real>(2 * (nn + 2) * (nn + 1));
+              B = ((2 * m - mm) * (nn + 2) * (nn + 1) - mm * n * (n + 1) + mm * n1 * (n1 + 1)) / B;
+              Real D = static_cast<Real>(4 * (nn + 2) * (nn + 2));
               D *= (2 * nn + 5) * (2 * nn + 3);
               D = ((nn + mm + 2) * (nn - mm + 2) * (n1 - n + nn + 2)) / D;
               D *= (n - n1 + nn + 2) * ( n + n1 - nn - 1) * (n + n1 + nn + 3);
@@ -175,26 +176,26 @@ namespace Raman {
   }
 
   template <class Real>
-  unique_ptr<stSM<Real>> pstScatteringMatrixOA(vector<unique_ptr<stTR>> st_TR_list,
-      Real lambda, const ArrayXr<Real>& sca, int Nb_theta) {
+  unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<Real>>>& st_TR_list,
+      Real lambda, Real sca, int Nb_theta) {
     int K1 = 0, K2 = 0, K3 = 0, K4 = 1, K5 = 1, K6 = 2;
     int N = st_TR_list.size() - 1;
 
-    RowArrayXr<Real> n_vec = RowArrayXi::LinSpaced(N, 1, N);
-    ArrayXr<Real> k_vec = ArrayXi::LinSpaced(N, 1, N);
+    RowArrayXr<Real> n_vec = RowArrayXr<Real>::LinSpaced(N, 1, N);
+    ArrayXr<Real> k_vec = ArrayXr<Real>::LinSpaced(N, 1, N);
     ArrayXXr<Real> FF_kn = sqrt((2*n_vec + 1).replicate(N, 1).colwise() / (2*k_vec + 1));
     ArrayXXc<Real> FA_kn = (pow(I, -n_vec).replicate(N, 1).colwise() * (pow(I, k_vec) / sqrt(2*k_vec + 1)));
-    ArrayXr<Real> log_fact = ArrayXXr<Real>::Zero(4*(N + 1));
+    ArrayXr<Real> log_fact = ArrayXr<Real>::Zero(4*(N + 1));
     for (int i = 2; i < 4*(N + 1); i++)
       log_fact(i) = log_fact(i - 1) + 0.5*log(i - 1);
 
-    ArrayXi sign = pow(-1, ArrayXi::LinSpaced(4*(N + 1), 0, 4*N + 3));
+    ArrayXi s_sign = pow(-1, ArrayXi::LinSpaced(4*(N + 1), 0, 4*N + 3));
 
     ArrayXXc<Real> T1_mk = ArrayXXc<Real>::Zero(2*N + 1, N);
     ArrayXXc<Real> T2_mk = ArrayXXc<Real>::Zero(2*N + 1, N);
     Tensor3c<Real> B1_n1_mn(N + 1, 2*N + 1, N);
-    B2_n1_mn.setZero();
-    Tensor3c<Real> B1_n1_mn(N + 1, 2*N + 1, N);
+    B1_n1_mn.setZero();
+    Tensor3c<Real> B2_n1_mn(N + 1, 2*N + 1, N);
     B2_n1_mn.setZero();
 
     vector<ArrayXXc<Real>> CT11(N + 1, ArrayXXc<Real>::Zero(N, N));
@@ -202,17 +203,348 @@ namespace Raman {
     vector<ArrayXXc<Real>> CT21(N + 1, ArrayXXc<Real>::Zero(N, N));
     vector<ArrayXXc<Real>> CT22(N + 1, ArrayXXc<Real>::Zero(N, N));
 
-    /**
     for (int m = 0; m <= N; m++) {
-      CT11[m]()
+      CT11[m] = ArrayXXc<Real>::Zero(N, N);
+      CT12[m] = ArrayXXc<Real>::Zero(N, N);
+      CT21[m] = ArrayXXc<Real>::Zero(N, N);
+      CT22[m] = ArrayXXc<Real>::Zero(N, N);
+      for (int i = 0; i < st_TR_list[m]->st_4M_T_eo().ind1.size(); i++) {
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind1.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_eo().ind1(i), m + st_TR_list[m]->st_4M_T_eo().ind1(j)) = st_TR_list[m]->st_4M_T_eo().M11(i, j);
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind2.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_eo().ind1(i), m + st_TR_list[m]->st_4M_T_eo().ind2(j)) = st_TR_list[m]->st_4M_T_eo().M12(i, j);
+      }
+      for (int i = 0; i < st_TR_list[m]->st_4M_T_eo().ind2.size(); i++) {
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind1.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_eo().ind2(i), m + st_TR_list[m]->st_4M_T_eo().ind1(j)) = st_TR_list[m]->st_4M_T_eo().M21(i, j);
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind2.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_eo().ind2(i), m + st_TR_list[m]->st_4M_T_eo().ind2(j)) = st_TR_list[m]->st_4M_T_eo().M22(i, j);
+      }
+      for (int i = 0; i < st_TR_list[m]->st_4M_T_oe().ind1.size(); i++) {
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind1.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_oe().ind1(i), m + st_TR_list[m]->st_4M_T_oe().ind1(j)) = st_TR_list[m]->st_4M_T_oe().M11(i, j);
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind2.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_oe().ind1(i), m + st_TR_list[m]->st_4M_T_oe().ind2(j)) = st_TR_list[m]->st_4M_T_oe().M12(i, j);
+      }
+      for (int i = 0; i < st_TR_list[m]->st_4M_T_oe().ind2.size(); i++) {
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind1.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_oe().ind2(i), m + st_TR_list[m]->st_4M_T_oe().ind1(j)) = st_TR_list[m]->st_4M_T_oe().M21(i, j);
+        for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind2.size(); j++)
+          CT11[m](m + st_TR_list[m]->st_4M_T_oe().ind2(i), m + st_TR_list[m]->st_4M_T_oe().ind2(j)) = st_TR_list[m]->st_4M_T_oe().M22(i, j);
+      }
     }
-    */
 
-    return unique_ptr<stSM<Real>>();
+    for (int n = 0; n < N; n++) {
+      for (int nn = 0; nn < N; n++) {
+        int m_max = min(n, nn);
+        for (int m = 0; m <= m_max; m++) {
+          int m_ind = m + 1 + N;
+          complex<Real> TT1 = CT11[m](n, nn);
+          complex<Real> TT2 = CT12[m](n, nn);
+          complex<Real> TT3 = CT21[m](n, nn);
+          complex<Real> TT4 = CT22[m](n, nn);
+          complex<Real> T1 = TT1 + TT2;
+          complex<Real> T2 = TT3 + TT4;
+          T1_mk(m_ind, nn) = T1 + T2;
+          T2_mk(m_ind, nn) = T1 - T2;
+          if (m > 0) {
+            T1 = TT1 - TT2;
+            T2 = TT3 - TT4;
+            m_ind = N + 1 - m;
+            T1_mk(m_ind, nn) = T1 - T2;
+            T2_mk(m_ind, nn) = T1 + T2;
+          }
+        }
+      }
+
+      int nn1_max = N + 1 + n;
+      for (int n1 = 0; n1 < nn1_max; n1++) {
+        ArrayXXr<Real> G1 = CCG(n, n1, N, K1, K2, log_fact, s_sign);
+        int nn_max = min(N, n1 + n);
+        int nn_min = max(1, abs(n - n1));
+        int kn = n + n1;
+        ArrayXc<Real> A1k = ArrayXc<Real>::Zero(N);
+        ArrayXc<Real> A2k = ArrayXc<Real>::Zero(N);
+        for (int nn = nn_min; nn <= nn_max; nn++) {
+          int SIG = s_sign(kn + nn);
+          int m_max = min(n, nn);
+          complex<Real> AA1 = 0;
+          complex<Real> AA2 = 0;
+          for (int m = 0; m <= m_max; m++) {
+            int m_ind = m + N;
+            complex<Real> SSS = G1(m_ind, nn);
+            complex<Real> R1 = T1_mk(m_ind, nn - 1);
+            complex<Real> R2 = T1_mk(m_ind, nn - 1);
+            if (m > 0) {
+              int m_ind_n = N - m;
+              R1 += T1_mk(m_ind_n, nn) * static_cast<complex<Real>>(SIG);
+              R2 += T2_mk(m_ind_n, nn) * static_cast<complex<Real>>(SIG);
+            }
+            AA1 += SSS * R1;
+            AA2 += SSS * R2;
+          }
+          A1k(nn) = AA1 * FA_kn(nn - 1, n);
+          A2k(nn) = AA2 * FA_kn(nn - 1, n);
+        }
+
+        ArrayXXr<Real> G2 = CCG(n, n1, N, K3, K4, log_fact, s_sign);
+        int m_max = min(n1 + 1, n);
+        int m_min = max(-n1 + 1, -n);
+        for (int m = m_min; m_min < m_max; m_min++) {
+          int m_ind = m + N;
+          complex<Real> BB1 = 0;
+          complex<Real> BB2 = 0;
+          for (int nn = nn_min; nn <= nn_max; nn++) {
+            complex<Real> SSS = G2(m_ind, nn);
+            BB1 += SSS * A1k(nn - 1);
+            BB2 += SSS * A2k(nn - 1);
+          }
+          B1_n1_mn(n1, m_ind, n) = BB1;
+          B2_n1_mn(n1, m_ind, n) = BB2;
+        }
+      }
+    }
+
+    Tensor3r<Real> D1_m_kn(2*N + 1, N, N);
+    Tensor3r<Real> D2_m_kn(2*N + 1, N, N);
+    Tensor3r<Real> D3_m_kn(2*N + 1, N, N);
+    Tensor3r<Real> D4_m_kn(2*N + 1, N, N);
+    Tensor3c<Real> D5_m_kn(2*N + 1, N, N);
+    D1_m_kn.setZero();
+    D2_m_kn.setZero();
+    D3_m_kn.setZero();
+    D4_m_kn.setZero();
+    D5_m_kn.setZero();
+
+    for (int n = 0; n < N; n++) {
+      for (int nn = 0; nn < N; nn++) {
+        int m_ind = min(n, nn);
+        int m_ind_max = N + m_ind;
+        int m_ind_min = N - m_ind;
+        int n1_max = m_ind_max;
+        for (m_ind = m_ind_min; m_ind <= m_ind_max; m_ind++) {
+          int m = m_ind - N;
+          int n1_min = abs(m - 1);
+          Real DD1 = 0;
+          Real DD2 = 0;
+          for (int n1 = n1_min; n1 <= n1_max; n1++) {
+            int XX = 2*n1 + 1;
+            DD1 += XX * real(B1_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind, nn)));
+            DD2 += XX * real(B2_n1_mn(n1, m_ind, n) * conj(B2_n1_mn(n1, m_ind, nn)));
+          }
+          D1_m_kn(m_ind, nn, n) = DD1;
+          D2_m_kn(m_ind, nn, n) = DD2;
+        }
+        int m_max = min(n, nn + 2);
+        int m_min = max(-n, -nn + 2);
+        m_ind_max = N + 1 + m_max;
+        m_ind_min = N + 1 + m_min;
+        for (int m_ind = m_ind_min; m_ind <= m_ind_max; m_ind++) {
+          int m = m_ind - N;
+          int n1_min = abs(m - 1);
+          Real DD3 = 0;
+          Real DD4 = 0;
+          complex<Real> DD5 = 0;
+          int m_ind2 = -m + N + 3;
+          for (int n1 = n1_min; n1 <= n1_max; n1++) {
+            int XX = 2*n1 + 1;
+            DD3 += static_cast<Real>(XX) * real(B1_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind2, nn)));
+            DD4 += static_cast<Real>(XX) * real(B2_n1_mn(n1, m_ind, n) * conj(B2_n1_mn(n1, m_ind2, nn)));
+            DD5 += static_cast<Real>(XX) * B2_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind2, nn));
+          }
+          D3_m_kn(m_ind, nn, n) = DD3;
+          D4_m_kn(m_ind, nn, n) = DD4;
+          D5_m_kn(m_ind, nn, n) = DD5;
+        }
+      }
+    }
+
+    unique_ptr<stSM<Real>> output = make_unique<stSM<Real>>();
+    output->ALF1n = ArrayXr<Real>::Zero(2*N + 1);
+    output->ALF2n = ArrayXr<Real>::Zero(2*N + 1);
+    output->ALF3n = ArrayXr<Real>::Zero(2*N + 1);
+    output->ALF4n = ArrayXr<Real>::Zero(2*N + 1);
+    output->BET1n = ArrayXr<Real>::Zero(2*N + 1);
+    output->BET1n = ArrayXr<Real>::Zero(2*N + 1);
+
+    ArrayXXr<Real> G2;
+    Real asym_par = 0;
+    Real DK = pow(lambda, 2) / (4*sca*PI);
+    for (int l = 0; l < 2*N + 1; l++) {
+      Real G1L = 0;
+      Real G2L = 0;
+      Real G3L = 0;
+      Real G4L = 0;
+      complex<Real> G5L = 0;
+      Real SL = (2*l + 1)*DK;
+      for (int n = 0; n < N; n++) {
+        int nn_min = max(1, abs(n - l));
+        int nn_max = min(N, n + l);
+        if (nn_min <= nn_max) {
+          ArrayXXr<Real> G1 = CCG(n, l, N, K1, K2, log_fact, s_sign);
+          ArrayXXr<Real> G2;
+          if (l >= 2)
+            G2 = CCG(n, l, N, K5, K6, log_fact, s_sign);
+          for (int nn = nn_min; nn <= nn_max; nn++) {
+            int m_max = min(n, nn);
+            int m_ind_min = N - m_max;
+            int m_ind_max = N + m_max;
+            int SI = s_sign(n + l + nn);
+            Real DM1 = 0;
+            Real DM2 = 0;
+            for (int m_ind = m_ind_min; m_ind <= m_ind_max; m_ind++) {
+              int m = m_ind - N;
+              Real SSS1;
+              if (m >= 0)
+                SSS1 = G1(m_ind, nn);
+              else
+                SSS1 = G1(m_ind, nn) * SI;
+              DM1 += SSS1 * D1_m_kn(m_ind, nn - 1, n);
+              DM2 += SSS1 * D2_m_kn(m_ind, nn - 1, n);
+            }
+            Real FFN = FF_kn(nn - 1, n);
+            Real SSS = G1(N + 2, nn) * FFN;
+            G1L += SSS * DM1;
+            G2L += SSS * DM2 * SI;
+            if (l >= 2) {
+              Real DM3 = 0;
+              Real DM4 = 0;
+              complex<Real> DM5 = 0;
+              int m_max = min(n, nn + 2);
+              int m_min = max(-n, -nn + 2);
+              int m_ind_max = N + m_max;
+              int m_ind_min = N + m_min;
+              for (int m_ind = m_ind_min; m_ind <= m_ind_max; m_ind++) {
+                int m = m_ind - N;
+                int m_ind_n = N - m;
+                Real SSS1 = G2(m_ind_n, nn);
+                DM3 += SSS1 * D3_m_kn(m_ind, nn - 1, n);
+                DM4 += SSS1 * D4_m_kn(m_ind, nn - 1, n);
+                DM5 += SSS1 * D5_m_kn(m_ind, nn - 1, n);
+              }
+              G5L -= SSS * DM5;
+              SSS = G2(N, nn) * FFN;
+              G3L += SSS * DM3;
+              G4L += SSS * DM4 * SI;
+            }
+          }
+        }
+      }
+      G1L *= SL;
+      G2L *= SL;
+      G3L *= SL;
+      G4L *= SL;
+      G5L *= SL;
+      output->ALF1n(l) = G1L + G2L;
+      output->ALF2n(l) = G3L + G4L;
+      output->ALF3n(l) = G3L - G4L;
+      output->ALF4n(l) = G1L - G2L;
+      output->BET1n(l) = real(G5L) * 2;
+      output->BET2n(l) = imag(G5L) * 2;
+      if (l == 1)
+        asym_par = (G1L + G2L) / 3;
+      if (abs(G1L) < EPS)
+        break;
+      int L_max = 2*N;
+      output->L_max = L_max;
+      output->asym_par = asym_par;
+
+      ArrayXr<Real> theta = ArrayXr<Real>::LinSpaced(Nb_theta, 0, PI);
+      ArrayXr<Real> theta_deg = theta * 180 / PI;
+      output->theta = theta;
+      output->theta_deg = theta_deg;
+      output->F11 = ArrayXr<Real>::Zero(Nb_theta);
+      output->F22 = ArrayXr<Real>::Zero(Nb_theta);
+      output->F33 = ArrayXr<Real>::Zero(Nb_theta);
+      output->F44 = ArrayXr<Real>::Zero(Nb_theta);
+      output->F12 = ArrayXr<Real>::Zero(Nb_theta);
+      output->F34 = ArrayXr<Real>::Zero(Nb_theta);
+
+      output->all_AB = ArrayXXr<Real>::Zero(2*N + 1, 7);
+      output->all_F = ArrayXXr<Real>::Zero(2, 7);
+
+      Real DN = static_cast<Real>(1.0)/(Nb_theta - 1);
+      Real DA = DN * PI;
+      Real DB = DN * 180;
+      Real TB = -DB;
+      Real TAA = -DA;
+      Real D6 = sqrt(static_cast<Real>(6.0)) / 4;
+      int PL1 = 0;
+
+      for (int I1 = 0; I1 < Nb_theta; I1++) {
+        TAA += DA;
+        TB += DB;
+        Real U = cos(TAA);
+        Real F11, F2, F3, F44, F12, F34, P1, P2, P3, P4;
+        F11 = F2 = F3 = F44 = F12 = F34 = P1 = P2 = P3 = P4 = 0;
+        Real PP1 = 1;
+        Real PP2 = pow(1 + U, 2)/4;
+        Real PP3 = pow(1 - U, 2)/4;
+        Real PP4 = D6 * (pow(U, 2) - 1);
+        for (int L = 0, L1 = 1; L <= L_max; L++, L1++) {
+          F11 += output->ALF1n(L) * PP1;
+          F44 += output->ALF4n(L) * PP1;
+          if (L != L_max) {
+            PL1 = 2*L + 1;
+            Real P = (PL1 * U * PP1 - L * P1) / L1;
+            P1 = PP1;
+            PP1 = P;
+          }
+          if (L >= 2) {
+            F2 += (output->ALF2n(L1) + output->ALF3n(L1)) * PP2;
+            F3 += (output->ALF2n(L1) - output->ALF3n(L1)) * PP3;
+            F12 += output->BET1n(L1) * PP4;
+            F34 += output->BET2n(L1) * PP4;
+            if (L != L_max) {
+              Real PL2 = L * L1 * U;
+              int PL3 = L1 * (L*L - 4);
+              Real PL4 = static_cast<Real>(1.0) / (L*(L1*L1 - 4));
+              Real P = (PL1 * (PL2 - 4) * PP3 - PL3 * P2) * PL4;
+              P2 = PP2;
+              PP2 = P;
+              P = (PL1 * (PL2 + 4) * PP3 - PL3 * P3) * PL4;
+              P3 = PP3;
+              PP3 = P;
+              P = (PL1 * U * PP4 - sqrt(static_cast<Real>(L*L) - 4) * P4) / sqrt(static_cast<Real>(L1*L1) - 4);
+              P4 = PP4;
+              PP4 = P;
+            }
+          }
+        }
+        Real F22 = (F2 + F3) / 2;
+        Real F33 = (F2 - F3) / 2;
+        output->F11(I1) = F11;
+        output->F22(I1) = F22;
+        output->F33(I1) = F33;
+        output->F44(I1) = F44;
+        output->F12(I1) = F12;
+        output->F34(I1) = F34;
+      }
+
+      output->all_AB.col(0) = ArrayXr<Real>::LinSpaced(2*N + 1, 1, 2*N + 1);
+      output->all_AB.col(1) = output->ALF1n;
+      output->all_AB.col(2) = output->ALF2n;
+      output->all_AB.col(3) = output->ALF3n;
+      output->all_AB.col(4) = output->ALF4n;
+      output->all_AB.col(5) = output->BET1n;
+      output->all_AB.col(6) = output->BET2n;
+
+      output->all_F.col(0) = theta_deg;
+      output->all_F.col(1) = output->F11;
+      output->all_F.col(2) = output->F22;
+      output->all_F.col(3) = output->F33;
+      output->all_F.col(4) = output->F44;
+      output->all_F.col(5) = output->F12;
+      output->all_F.col(6) = output->F34;
+    }
+
+    return output;
   }
 
   template unique_ptr<stRes<double>> pstMakeStructForField(unique_ptr<stAbcdnm<double>>,
       int, ArrayXr<double>, ArrayXr<double>, double, unique_ptr<stIncPar<double>>, double, double);
   template unique_ptr<stRes<double>> pstMakeStructForField(
       unique_ptr<stAbcdnm<double>>, unique_ptr<stParams<double>>);
+  template unique_ptr<stSM<double>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<double>>>&,
+      double, double, int);
 }

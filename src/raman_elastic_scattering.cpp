@@ -39,7 +39,7 @@ void RamanElasticScattering(int argc, char** argv) {
   ArrayXr<Real> dia_var = par(ArrayXi::LinSpaced(par_per_cpu, 0, par_per_cpu - 1) + cpu_n*par_per_cpu);
   ArrayXr<Real> rad_var = dia_var/2;
   ArrayXr<Real> theta_p_var = ArrayXd::LinSpaced(0, PI/2, N_theta_p);
-  Real hvar = 1.0/3.0;
+  Real hvar = static_cast<Real>(1.0)/3;
 
   ArrayXXr<Real> sigma_yz = ArrayXXd::Zero(par_per_cpu, N_theta_p);
   ArrayXXr<Real> sigma_zy = ArrayXXd::Zero(par_per_cpu, N_theta_p);

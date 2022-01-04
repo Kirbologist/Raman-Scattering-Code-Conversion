@@ -549,7 +549,7 @@ namespace Raman {
       ArrayXXc<Real> P22 = prefactor2 * L6P;
 
       ArrayXc<Real> prefact_diag1 = -I/s * (2*n_vec_real + 1) / (2*n_vec_real*(n_vec_real + 1));
-      ArrayXc<Real> prefact_diag2 = -I*(s - 1)*(s + 1)/s/2.0 * (2*n_vec_real + 1);
+      ArrayXc<Real> prefact_diag2 = -I*(s - 1)*(s + 1)/(2*s) * (2*n_vec_real + 1);
       ArrayXXc<Real> pi2_p_tau2 = (pi_nm.pow(2) + tau_nm.pow(2));
 
       ArrayXc<Real> Ltilde1 = ((pi2_p_tau2 * for_Q_diag_Lt1(n_vec, all)).matrix() * Rt_func->w_theta.matrix()).array();

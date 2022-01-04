@@ -22,7 +22,7 @@ namespace Raman {
 
   template <class Real>
   struct stSM {
-    Real L_max;
+    int L_max;
     ArrayXr<Real> ALF1n;
     ArrayXr<Real> ALF2n;
     ArrayXr<Real> ALF3n;
@@ -55,8 +55,8 @@ namespace Raman {
       unique_ptr<stAbcdnm<Real>> st_abcdnm, unique_ptr<stParams<Real>> params);
 
   template <class Real>
-  unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<Real>>& st_TR_list,
-      Real lambda, const ArrayXr<Real>& sca, int Nb_theta = 2);
+  unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<Real>>>& st_TR_list,
+      Real lambda, Real sca, int Nb_theta = 2);
 }
 
 #endif
