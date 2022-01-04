@@ -109,6 +109,20 @@ namespace Raman {
   }
 
   template <class Real>
+  Tensor4c<Real> tensor_conj(Tensor4c<Real>& base) {
+    Tensor4c<Real> output = base;
+    for (int i = 0; i < base.dimension(0); i++) {
+      for (int j = 0; j < base.dimension(1); j++) {
+        for (int k = 0; k < base.dimension(2); k++) {
+          for (int l = 0; l < base.dimension(3); l++)
+            output(i, j, k, l) = conj(base(i, j, k, l));
+        }
+      }
+    }
+    return output;
+  }
+
+  template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
     for (int i = 0; i < nu.size(); i++)
@@ -133,6 +147,7 @@ namespace Raman {
   template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
   template RowArrayXr<double> logicalSlice(RowArrayXr<double>&, RowArrayXb&);
   template ArrayXr<double> logicalSlice(ArrayXr<double>&, ArrayXb&);
+  template Tensor4c<double> tensor_conj(Tensor4c<double>&);
   template ArrayXr<double> arr_bessel_j(ArrayXr<double>&, double);
   template ArrayXr<double> arr_bessel_y(ArrayXr<double>&, double);
 }

@@ -39,6 +39,9 @@ namespace Raman {
   ArrayXi logicalIndices(ArrayXb& bool_array);
 
   template <class Real>
+  Tensor4c<Real> tensor_conj(Tensor4c<Real>& base);
+
+  template <class Real>
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x);
 
   template <class Real>

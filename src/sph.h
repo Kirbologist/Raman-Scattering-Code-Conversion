@@ -72,7 +72,7 @@ namespace Raman {
         this->st_4M_list[i] = st4M<Real>();
     }
 
-    stMat(st4M<Real>& base) {
+    stMat(const st4M<Real>& base) {
       for (int i = 0; i < 4; i++)
         this->st_4M_list[i] = base.st_4M_list[i];
       this->mat_list = base.mat_list;

@@ -7,17 +7,17 @@ using namespace std;
 
 namespace Raman {
   template <class Real>
-  unique_ptr<stRes<Real>> pstMakeStructForField(unique_ptr<stAbcdnm<Real>> st_abcdnm,
+  unique_ptr<stRes<Real>> pstMakeStructForField(const unique_ptr<stAbcdnm<Real>>& st_abcdnm,
     int N_max, ArrayXr<Real> lambda, ArrayXr<Real> epsilon2, Real epsilon1,
     unique_ptr<stIncPar<Real>> inc_par, Real a, Real c) {
     if (!st_abcdnm->c_nm.size())
       cout << "Pb in  pstMakeStructForField: the structure stAbcdnm should contain c_nm and d_nm for internal fields" << endl;
-    unique_ptr<stRes<Real>> output = make_unique<stRes<Real>>();
+    unique_ptr<stRes<Real>> output = make_unique<stRes<Real>>(*st_abcdnm);
     output->N_max = N_max;
     output->lambda = lambda;
     output->epsilon1 = epsilon1;
     output->epsilon2 = epsilon2;
-    output->inc_par = move(inc_par);
+    output->inc_par = make_unique<stIncPar<Real>>(*inc_par);
     if (!isnan(a))
       output->a = a;
     if (!isnan(c))
@@ -27,10 +27,10 @@ namespace Raman {
 
   template <class Real>
   unique_ptr<stRes<Real>> pstMakeStructForField(
-      unique_ptr<stAbcdnm<Real>> st_abcdnm, unique_ptr<stParams<Real>> params) {
+      const unique_ptr< stAbcdnm<Real>>& st_abcdnm, const unique_ptr<stParams<Real>>& params) {
     if (!st_abcdnm->c_nm.size())
       cout << "Pb in  pstMakeStructForField: the structure stAbcdnm should contain c_nm and d_nm for internal fields" << endl;
-    unique_ptr<stRes<Real>> output = make_unique<stRes<Real>>();
+    unique_ptr<stRes<Real>> output = make_unique<stRes<Real>>(*st_abcdnm);
     output->N_max = params->N;
     output->lambda = params->lambda;
     output->epsilon1 = params->epsilon1;
@@ -38,7 +38,7 @@ namespace Raman {
     output->a = params->a;
     output->c = params->c;
     if (params->inc_par)
-      output->inc_par = move(params->inc_par);
+      output->inc_par = make_unique<stIncPar<Real>>(*(params->inc_par));
     else {
       sIncType inc_type = params->inc_type;
       output->inc_par = vshMakeIncidentParams<Real>(inc_type, params->N);
@@ -521,30 +521,22 @@ namespace Raman {
         output->F34(I1) = F34;
       }
 
-      output->all_AB.col(0) = ArrayXr<Real>::LinSpaced(2*N + 1, 1, 2*N + 1);
-      output->all_AB.col(1) = output->ALF1n;
-      output->all_AB.col(2) = output->ALF2n;
-      output->all_AB.col(3) = output->ALF3n;
-      output->all_AB.col(4) = output->ALF4n;
-      output->all_AB.col(5) = output->BET1n;
-      output->all_AB.col(6) = output->BET2n;
+      output->all_AB = Array<Real, Dynamic, 7>(2*N + 1, 7);
+      output->all_AB << ArrayXr<Real>::LinSpaced(2*N + 1, 1, 2*N + 1),
+          output->ALF1n, output->ALF2n, output->ALF3n, output->ALF4n, output->BET1n, output->BET2n;
 
-      output->all_F.col(0) = theta_deg;
-      output->all_F.col(1) = output->F11;
-      output->all_F.col(2) = output->F22;
-      output->all_F.col(3) = output->F33;
-      output->all_F.col(4) = output->F44;
-      output->all_F.col(5) = output->F12;
-      output->all_F.col(6) = output->F34;
+      output->all_F = Array<Real, Dynamic, 7>(Nb_theta, 7);
+      output->all_F << theta_deg, output->F11, output->F22, output->F33, output->F44,
+          output->F12, output->F34;
     }
 
     return output;
   }
 
-  template unique_ptr<stRes<double>> pstMakeStructForField(unique_ptr<stAbcdnm<double>>,
+  template unique_ptr<stRes<double>> pstMakeStructForField(const unique_ptr<stAbcdnm<double>>&,
       int, ArrayXr<double>, ArrayXr<double>, double, unique_ptr<stIncPar<double>>, double, double);
   template unique_ptr<stRes<double>> pstMakeStructForField(
-      unique_ptr<stAbcdnm<double>>, unique_ptr<stParams<double>>);
+      const unique_ptr<stAbcdnm<double>>&, const unique_ptr<stParams<double>>&);
   template unique_ptr<stSM<double>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<double>>>&,
       double, double, int);
 }

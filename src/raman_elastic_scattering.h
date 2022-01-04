@@ -54,6 +54,9 @@ namespace Raman {
   using Tensor3c = Tensor<complex<Real>, 3>;
 
   template <class Real>
+  using Tensor4c = Tensor<complex<Real>, 4>;
+
+  template <class Real>
   using Tensor1c = Tensor<complex<Real>, 1>;
 
   enum sIncType {KxEz, KxEy, KyEx, KyEz, KzEx, KzEy, GENERAL};
@@ -65,6 +68,16 @@ namespace Raman {
     Real phi_p;
     Real alpha_p;
     ArrayXi abs_m_vec;
+
+    stIncPar() {};
+
+    stIncPar(const stIncPar<Real>& base) {
+      this->type = base.type;
+      this->theta_p = base.theta_p;
+      this->phi_p = base.phi_p;
+      this->alpha_p = base.alpha_p;
+      this->abs_m_vec = base.abs_m_vec;
+    }
   };
 
   template <class Real>
@@ -80,7 +93,7 @@ namespace Raman {
     int Nb_theta_pst;
     Real lambda;
     Real epsilon1;
-    ArrayXc<Real> epsilon2;
+    ArrayXr<Real> epsilon2;
   };
 
   template <class Real>
@@ -91,6 +104,8 @@ namespace Raman {
     ArrayXi abs_m_vec;
     bool get_symmetric_T = false;
     bool output = true;
+
+    stOptions() {};
 
     stOptions(int N) {
       this.abs_m_vec = ArrayXi::LinSpaced(N + 1, 0, N);
