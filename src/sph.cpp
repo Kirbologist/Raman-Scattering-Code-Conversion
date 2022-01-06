@@ -474,8 +474,9 @@ namespace Raman {
 
     for (int i = 0; i < M; i++) {
       int m = abs_m_vec(i);
-      int Nm = N_max - m + 1;
-      ArrayXi n_vec = ArrayXi::LinSpaced(Nm, m, N_max);
+      int N_min = max(m, 1);
+      int Nm = N_max - N_min + 1;
+      ArrayXi n_vec = ArrayXi::LinSpaced(Nm, N_min, N_max);
       ArrayXi p_vec = n_vec*(n_vec + 1) + m;
       ArrayXr<Real> n_vec_real = n_vec.template cast<Real>();
       ArrayXXr<Real> pi_nm = stPT->pi_nm(all, p_vec).transpose();
@@ -491,8 +492,8 @@ namespace Raman {
       ArrayXXc<Real> K1, K2, L5, L6, K1P, K2P, L5P, L6P;
       K1 = K2 = L5 = L6 = K1P = K2P = L5P = L6P = ArrayXXc<Real>::Zero(Nm, Nm);
 
-      for (int k = m; k <= N_max; k++) {
-        int k_ind = k - m;
+      for (int k = N_min; k <= N_max; k++) {
+        int k_ind = k - N_min;
         ArrayXr<Real> d_k = d_n.row(k_ind).transpose();
         ArrayXr<Real> tau_k = tau_nm.row(k_ind).transpose();
 
@@ -573,8 +574,8 @@ namespace Raman {
         P22(j, j) = prefact_diag1(j) * Ltilde2(j) + prefact_diag2(j) * Ltilde3(j);
       }
 
-      ArrayXi inde = seq2Array(m % 2, Nm - 1, 2);
-      ArrayXi indo = seq2Array(1 - m % 2, Nm - 1, 2);
+      ArrayXi inde = seq2Array(N_min % 2, Nm - 1, 2);
+      ArrayXi indo = seq2Array(1 - N_min % 2, Nm - 1, 2);
 
       output[i]->st_4M_Q_eo().M12 = Q12(inde, indo);
       output[i]->st_4M_Q_eo().M21 = Q21(indo, inde);

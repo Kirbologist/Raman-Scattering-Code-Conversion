@@ -262,9 +262,10 @@ namespace Raman {
     for (size_t m_ind11 = 0; m_ind11 < M; m_ind11++) {
       int m_ind = m_for_T(m_ind11);
       int m = abs_m_vec(m_ind11);
+      int N_min = max(m, 1);
 
-      ArrayXi n_vec_e = seq2Array(m + m % 2, N_max, 2);
-      ArrayXi n_vec_o = seq2Array(m + 1 - m % 2, N_max, 2);
+      ArrayXi n_vec_e = seq2Array(N_min + N_min % 2, N_max, 2);
+      ArrayXi n_vec_o = seq2Array(N_min + 1 - N_min % 2, N_max, 2);
 
       ArrayXi p_vec_e = n_vec_e * (n_vec_e + 1) + m;
       ArrayXi p_vec_o = n_vec_o * (n_vec_o + 1) + m;

@@ -205,33 +205,42 @@ namespace Raman {
     vector<ArrayXXc<Real>> CT22(N, ArrayXXc<Real>::Zero(N, N));
 
     for (int m = 0; m < N; m++) {
+      int N_min_m1 = max(1, m);
       CT11[m] = ArrayXXc<Real>::Zero(N, N);
       CT12[m] = ArrayXXc<Real>::Zero(N, N);
       CT21[m] = ArrayXXc<Real>::Zero(N, N);
       CT22[m] = ArrayXXc<Real>::Zero(N, N);
       for (int i = 0; i < st_TR_list[m]->st_4M_T_eo().ind1.size(); i++) {
         for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind1.size(); j++)
-          CT11[m](m + st_TR_list[m]->st_4M_T_eo().ind1(i), m + st_TR_list[m]->st_4M_T_eo().ind1(j)) = st_TR_list[m]->st_4M_T_eo().M11(i, j);
+          CT11[m](N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind1(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind1(j)) = st_TR_list[m]->st_4M_T_eo().M11(i, j);
         for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind2.size(); j++)
-          CT12[m](m + st_TR_list[m]->st_4M_T_eo().ind1(i), m + st_TR_list[m]->st_4M_T_eo().ind2(j)) = st_TR_list[m]->st_4M_T_eo().M12(i, j);
+          CT12[m](N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind1(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind2(j)) = st_TR_list[m]->st_4M_T_eo().M12(i, j);
       }
       for (int i = 0; i < st_TR_list[m]->st_4M_T_eo().ind2.size(); i++) {
         for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind1.size(); j++)
-          CT21[m](m + st_TR_list[m]->st_4M_T_eo().ind2(i), m + st_TR_list[m]->st_4M_T_eo().ind1(j)) = st_TR_list[m]->st_4M_T_eo().M21(i, j);
+          CT21[m](N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind2(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind1(j)) = st_TR_list[m]->st_4M_T_eo().M21(i, j);
         for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind2.size(); j++)
-          CT22[m](m + st_TR_list[m]->st_4M_T_eo().ind2(i), m + st_TR_list[m]->st_4M_T_eo().ind2(j)) = st_TR_list[m]->st_4M_T_eo().M22(i, j);
+          CT22[m](N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind2(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind2(j)) = st_TR_list[m]->st_4M_T_eo().M22(i, j);
       }
       for (int i = 0; i < st_TR_list[m]->st_4M_T_oe().ind1.size(); i++) {
         for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind1.size(); j++)
-          CT11[m](m + st_TR_list[m]->st_4M_T_oe().ind1(i), m + st_TR_list[m]->st_4M_T_oe().ind1(j)) = st_TR_list[m]->st_4M_T_oe().M11(i, j);
+          CT11[m](N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind1(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind1(j)) = st_TR_list[m]->st_4M_T_oe().M11(i, j);
         for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind2.size(); j++)
-          CT12[m](m + st_TR_list[m]->st_4M_T_oe().ind1(i), m + st_TR_list[m]->st_4M_T_oe().ind2(j)) = st_TR_list[m]->st_4M_T_oe().M12(i, j);
+          CT12[m](N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind1(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind2(j)) = st_TR_list[m]->st_4M_T_oe().M12(i, j);
       }
       for (int i = 0; i < st_TR_list[m]->st_4M_T_oe().ind2.size(); i++) {
         for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind1.size(); j++)
-          CT21[m](m + st_TR_list[m]->st_4M_T_oe().ind2(i), m + st_TR_list[m]->st_4M_T_oe().ind1(j)) = st_TR_list[m]->st_4M_T_oe().M21(i, j);
+          CT21[m](N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind2(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind1(j)) = st_TR_list[m]->st_4M_T_oe().M21(i, j);
         for (int j = 0; j < st_TR_list[m]->st_4M_T_oe().ind2.size(); j++)
-          CT22[m](m + st_TR_list[m]->st_4M_T_oe().ind2(i), m + st_TR_list[m]->st_4M_T_oe().ind2(j)) = st_TR_list[m]->st_4M_T_oe().M22(i, j);
+          CT22[m](N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind2(i),
+              N_min_m1 + st_TR_list[m]->st_4M_T_oe().ind2(j)) = st_TR_list[m]->st_4M_T_oe().M22(i, j);
       }
     }
 

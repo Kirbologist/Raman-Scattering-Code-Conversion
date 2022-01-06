@@ -239,6 +239,7 @@ namespace Raman {
     ArrayXr<Real> n = ArrayXr<Real>::LinSpaced(N_max + 1, 0, N_max);
     ArrayXr<Real> mu_n_times = sqrt((2*n + 1)*n*(n + 1)/(4*mp_pi<Real>()));
     ArrayXr<Real> mu_n_divd_gen = mu_n_times/(n*(n + 1));
+    mu_n_divd_gen(0) = 0;
 
     auto output = make_unique<stEAllPhi<Real>>();
     output->theta = theta;
