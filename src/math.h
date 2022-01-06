@@ -46,9 +46,6 @@ namespace Raman {
 
   template <class Real>
   ArrayXr<Real> arr_bessel_y(ArrayXr<Real>& nu, Real x);
-
-  const double PI = mp_pi<double>(), EPS = mp_eps<double>();
-  const complex<double> I = mp_im_unit<double>();
 }
 
 #endif

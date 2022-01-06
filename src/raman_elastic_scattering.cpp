@@ -16,14 +16,13 @@ unique_ptr<stParams<Real>> loadParam(string type = "") {
   unique_ptr<stParams<Real>> params = make_unique<stParams<Real>>();
   params->epsilon1 = 1;
   if (type == "rm") {
-    params->lambda = 403.7;
-    params->epsilon2 = pow(1.344, 2);
-    params->k1 = 2*PI/params->lambda;
+    params->lambda = {{403.7}};
+    params->epsilon2 = {{pow(1.344, 2)}};
+    params->k1 = 2*mp_pi<Real>()/params->lambda;
   } else {
-    params->lambda = 355;
-    params->epsilon2 = ArrayXr<Real>(1);
-    params->epsilon2(0) = pow(1.35, 2);
-    params->k1 = 2*PI/params->lambda;
+    params->lambda = {{355}};
+    params->epsilon2 = {{pow(1.35, 2)}};
+    params->k1 = 2*mp_pi<Real>()/params->lambda;
   }
   params->s = ArrayXr<Real>(1);
   params->s(0) = 1.35;
@@ -32,6 +31,7 @@ unique_ptr<stParams<Real>> loadParam(string type = "") {
 
 template <class Real>
 void RamanElasticScattering(int argc, char** argv) {
+  Real PI = mp_pi<Real>();
   int cpu_n = (argc > 1 && isdigit(argv[1][0])) ? stoi(argv[1], nullptr) : 0;
   int cpus = (argc > 2 && isdigit(argv[2][0])) ? stoi(argv[2], nullptr) : 1;
   Real dia_min = (argc > 3 && isdigit(argv[3][0])) ? stof(argv[3], nullptr) : 1000.0;
@@ -42,7 +42,7 @@ void RamanElasticScattering(int argc, char** argv) {
   int par_per_cpu = N_rad / cpus;
   ArrayXr<Real> dia_var = par(ArrayXi::LinSpaced(par_per_cpu, 0, par_per_cpu - 1) + cpu_n*par_per_cpu);
   ArrayXr<Real> rad_var = dia_var/2;
-  ArrayXr<Real> theta_p_var = ArrayXd::LinSpaced(0, PI/2, N_theta_p);
+  ArrayXr<Real> theta_p_var = ArrayXd::LinSpaced(N_theta_p, 0, PI/2);
   ArrayXr<Real> h_var = {{static_cast<Real>(1.0)/3}};
 
   Tensor3r<Real> sigma_yz(par_per_cpu, h_var.size(), N_theta_p);
@@ -70,7 +70,7 @@ void RamanElasticScattering(int argc, char** argv) {
   ArrayXr<Real> theta_surf = ArrayXr<Real>::LinSpaced(N_theta, 0, PI);
   ArrayXr<Real> r_surf_u = ArrayXr<Real>::LinSpaced(N_r, 1/static_cast<Real>(N_r), 1).pow(static_cast<Real>(1.0)/3);
   ArrayXXr<Real> r_mat_u = r_surf_u.transpose().replicate(N_theta, 1);
-  ArrayXXr<Real> theta_mat = theta_surf.replicate(1, N_r).transpose();
+  ArrayXXr<Real> theta_mat = theta_surf.replicate(1, N_r);
 
   int Nb_theta = 1000;
   int Nb_theta_pst = 1;
@@ -108,17 +108,20 @@ void RamanElasticScattering(int argc, char** argv) {
       RowArrayXr<Real> theta_row = theta_mat.reshaped().transpose();
 
       chrono::steady_clock::time_point begin, end;
+      chrono::duration<double> elapsed_seconds;
 
       begin = chrono::steady_clock::now();
       unique_ptr<stTmatrix<Real>> T_mat = slvForT(params, options);
       end = chrono::steady_clock::now();
-      cout << (end - begin).count() << endl;
+      elapsed_seconds = end - begin;
+      cout << elapsed_seconds.count() << endl;
       cout << "T-matrix calculatred for excitation" << endl;
 
       begin = chrono::steady_clock::now();
       unique_ptr<stTmatrix<Real>> T_mat_rm = slvForT(params_rm, options);
       end = chrono::steady_clock::now();
-      cout << (end - begin).count() << endl;
+      elapsed_seconds = end - begin;
+      cout << elapsed_seconds.count() << endl;
       cout << "T-matrix calculatred for Raman" << endl;
 
       sca(k) = T_mat->st_coa->sca(0); // st_coa->sca should only contain 1 element
@@ -128,7 +131,7 @@ void RamanElasticScattering(int argc, char** argv) {
       cout << "Cext " << ext(k) << endl;
       cout << "Cabs " << abs(k) << endl;
 
-      stSM_list[k] = pstScatteringMatrixOA(T_mat->st_TR_list, params->lambda, sca(k));
+      stSM_list[k] = pstScatteringMatrixOA(T_mat->st_TR_list, params->lambda(0), sca(k));
 
       for (int t = 0; t < theta_p_var.size(); t++) {
         begin = chrono::steady_clock::now();
@@ -138,13 +141,13 @@ void RamanElasticScattering(int argc, char** argv) {
         params->inc_par = vshMakeIncidentParams(sIncType::GENERAL, N, theta_p, phi_p, alpha_p);
         unique_ptr<stAbcdnm<Real>> st_abcdnm = rvhGetFieldCoefficients(N, T_mat->st_TR_list, params->inc_par);
         unique_ptr<stRes<Real>> st_res_E = pstMakeStructForField(st_abcdnm, params);
-        ArrayXXc<Real> c_nm = Map<ArrayXc<Real>>(st_res_E->c_nm.data(), st_res_E->c_nm.size());
-        ArrayXXc<Real> d_nm = Map<ArrayXc<Real>>(st_res_E->d_nm.data(), st_res_E->d_nm.size());
+        ArrayXXc<Real> c_nm = Map<RowArrayXc<Real>>(st_res_E->c_nm.transpose().data(), st_res_E->c_nm.size());
+        ArrayXXc<Real> d_nm = Map<RowArrayXc<Real>>(st_res_E->d_nm.transpose().data(), st_res_E->d_nm.size());
         unique_ptr<stEAllPhi<Real>> st_E_surf = vshEgenThetaAllPhi(st_res_E->lambda,
             st_res_E->epsilon2, c_nm, d_nm, r_row, theta_row, sBessel::J);
-        std::array<int, 3> new_dims = {N_r, N_theta, 3};
+        std::array<long int, 3> new_dims = {N_theta, N_r, 3};
         ArrayXr<Real> phi_var = ArrayXr<Real>::LinSpaced(N_phi + 1, 0, 2*PI);
-        Tensor4c<Real> E_field_z(N_r, N_theta, N_phi + 1, 3);
+        Tensor4c<Real> E_field_z(N_theta, N_r, N_phi + 1, 3);
         E_field_z.setZero();
         for (int m = 0; m <= N_phi; m++) {
           Real phi = phi_var(m);
@@ -159,7 +162,7 @@ void RamanElasticScattering(int argc, char** argv) {
         params->inc_par = vshMakeIncidentParams(sIncType::GENERAL, N, theta_p, phi_p, alpha_p);
         st_abcdnm = rvhGetFieldCoefficients(N, T_mat->st_TR_list, params->inc_par);
         st_res_E = pstMakeStructForField(st_abcdnm, params);
-        Tensor4c<Real> E_field_y(N_r, N_theta, N_phi + 1, 3);
+        Tensor4c<Real> E_field_y(N_theta, N_r, N_phi + 1, 3);
         E_field_y.setZero();
         for (int m = 0; m <= N_phi; m++) {
           Real phi = phi_var(m);
@@ -174,7 +177,7 @@ void RamanElasticScattering(int argc, char** argv) {
         params_rm->inc_par = vshMakeIncidentParams(sIncType::GENERAL, N, theta_p, phi_p, alpha_p);
         st_abcdnm = rvhGetFieldCoefficients(N, T_mat_rm->st_TR_list, params_rm->inc_par);
         st_res_E = pstMakeStructForField(st_abcdnm, params_rm);
-        Tensor4c<Real> E_field_rm_z(N_r, N_theta, N_phi + 1, 3);
+        Tensor4c<Real> E_field_rm_z(N_theta, N_r, N_phi + 1, 3);
         E_field_rm_z.setZero();
         for (int m = 0; m <= N_phi; m++) {
           Real phi = phi_var(m);
@@ -189,7 +192,7 @@ void RamanElasticScattering(int argc, char** argv) {
         params_rm->inc_par = vshMakeIncidentParams(sIncType::GENERAL, N, theta_p, phi_p, alpha_p);
         st_abcdnm = rvhGetFieldCoefficients(N, T_mat_rm->st_TR_list, params_rm->inc_par);
         st_res_E = pstMakeStructForField(st_abcdnm, params_rm);
-        Tensor4c<Real> E_field_rm_y(N_r, N_theta, N_phi + 1, 3);
+        Tensor4c<Real> E_field_rm_y(N_theta, N_r, N_phi + 1, 3);
         E_field_rm_y.setZero();
         for (int m = 0; m <= N_phi; m++) {
           Real phi = phi_var(m);
@@ -201,38 +204,34 @@ void RamanElasticScattering(int argc, char** argv) {
         }
 
         std::array<int, 1> dim3 = {3}, dim2 = {2};
-        Tensor3c<Real> inter_step1 = (E_field_rm_z * tensor_conj(E_field_z)).sum(dim3);
-        Tensor3r<Real> inter_step2 = inter_step1.abs().pow(static_cast<Real>(2));
-        Tensor<Real, 2> inter_step3 = 2*PI/N_phi*inter_step2.sum(dim2);
-        ArrayXXc<Real> M_mat = MatrixCast(inter_step2, N_r, N_theta).real().array();
-        ArrayXXr<Real> F = M_mat.real().array() * r_mat.pow(2) * sin(theta_mat);
+        Tensor<Real, 2> inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
+            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+        ArrayXXr<Real> M_mat = MatrixCast(inter_step, N_theta, N_r).array();
+        ArrayXXr<Real> F = M_mat * r_mat.pow(2) * sin(theta_mat);
         ArrayXXr<Real> tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_zz(k, h_ind, t) = (tmp * dt_dr).sum()/(4/3*PI*a*a*c);
 
-        inter_step1 = (E_field_rm_y * tensor_conj(E_field_z)).sum(dim3);
-        inter_step2 = inter_step1.abs().pow(static_cast<Real>(2));
-        inter_step3 = 2*PI/N_phi*inter_step2.sum(dim2);
-        M_mat = MatrixCast(inter_step2, N_r, N_theta).real().array();
-        F = M_mat.real().array() * r_mat.pow(2) * sin(theta_mat);
+        inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
+            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+        M_mat = MatrixCast(inter_step, N_theta, N_r).array();
+        F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_yz(k, h_ind, t) = (tmp * dt_dr).sum()/(4/3*PI*a*a*c);
 
-        inter_step1 = (E_field_rm_y * tensor_conj(E_field_y)).sum(dim3);
-        inter_step2 = inter_step1.abs().pow(static_cast<Real>(2));
-        inter_step3 = 2*PI/N_phi*inter_step2.sum(dim2);
-        M_mat = MatrixCast(inter_step2, N_r, N_theta).real().array();
-        F = M_mat.real().array() * r_mat.pow(2) * sin(theta_mat);
+        inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
+            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+        M_mat = MatrixCast(inter_step, N_theta, N_r).array();
+        F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_yy(k, h_ind, t) = (tmp * dt_dr).sum()/(4/3*PI*a*a*c);
 
-        inter_step1 = (E_field_rm_z * tensor_conj(E_field_y)).sum(dim3);
-        inter_step2 = inter_step1.abs().pow(static_cast<Real>(2));
-        inter_step3 = 2*PI/N_phi*inter_step2.sum(dim2);
-        M_mat = MatrixCast(inter_step2, N_r, N_theta).real().array();
-        F = M_mat.real().array() * r_mat.pow(2) * sin(theta_mat);
+        inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
+            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+        M_mat = MatrixCast(inter_step, N_theta, N_r).array();
+        F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_zy(k, h_ind, t) = (tmp * dt_dr).sum()/(4/3*PI*a*a*c);
@@ -248,7 +247,8 @@ void RamanElasticScattering(int argc, char** argv) {
         cout << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
 
         end = chrono::steady_clock::now();
-        cout << (end - begin).count();
+        elapsed_seconds = end - begin;
+        cout << elapsed_seconds.count() << endl;
       }
     }
   }
@@ -258,20 +258,8 @@ template unique_ptr<stParams<double>> loadParam(string);
 template void RamanElasticScattering<double>(int, char**);
 
 int main(int argc, char** argv) {
+  string calc_type = (argc > 7) ? argv[7] : "double";
   RamanElasticScattering<double>(argc, argv);
-  //ArrayXr<double> x = ArrayXr<double>::LinSpaced(5, 1, 5);
-  //stBesselProducts<double>* test = sphGetModifiedBesselProducts<double>(10, 0.5, x, 12);
-  //destructStBesselProducts<double>(test);
-  unique_ptr<stRtfunc<double>> test = sphMakeGeometry<double>(5, 100, 150);
-  unique_ptr<stParams<double>> params = make_unique<stParams<double>>();
-  params->k1 = {{2*M_PI/355}};
-  params->s = {{1.35}};
-  //size_t test2 = sphEstimateNB<double>(8, test, params);
-  vector<unique_ptr<stPQ<double>>> test2 = sphCalculatePQ(10, ArrayXi::LinSpaced(11, 0, 10), test, params, 12);
-  cout << test2.size() << endl;
-  cout << "Now trying to access test2[0]" << endl;
-  cout << test2[0]->st_4M_P_oe().m << endl;
-  cout << "Now trying to access test2[10]:" << endl;
-  cout << test2[10]->st_4M_P_oe().m << endl;
+  cout << "success!" << endl;
   return 0;
 }

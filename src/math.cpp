@@ -138,6 +138,10 @@ namespace Raman {
     return output;
   }
 
+  template double mp_pi<double>();
+  template double mp_eps<double>();
+  template complex<double> mp_im_unit<double>();
+
   template Tensor3c<double> subtensor(Tensor3c<double>&,
       ArithmeticSequence<long int, long int, long int>,
       ArithmeticSequence<long int, long int, long int>,

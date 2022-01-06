@@ -12,13 +12,13 @@ namespace Raman {
     ArrayXXr<Real> L(N1, N2);
 
     xu = ArrayXr<Real>::LinSpaced(N1, -1, 1);
-    y = cos((2*ArrayXr<Real>::LinSpaced(N1, 0, N) + 1)*PI/(2*N + 2)) +
-        (0.27/N1)*sin(PI*xu*N/N2);
+    y = cos((2*ArrayXr<Real>::LinSpaced(N1, 0, N) + 1)*mp_pi<Real>()/(2*N + 2)) +
+        (0.27/N1)*sin(mp_pi<Real>()*xu*N/N2);
     y0.fill(2);
     L.col(0).setOnes();
 
     int n_iter = 0;
-    while ((n_iter < 15) && EPS <
+    while ((n_iter < 15) && mp_eps<Real>() <
         abs(acos(y) - acos(y0.template cast<complex<Real>>())).maxCoeff()) {
       n_iter++;
       L.col(1) = y;
@@ -55,8 +55,8 @@ namespace Raman {
       }
 
       case RECTANGLE: {
-        output->theta = ArrayXr<Real>::LinSpaced(N_int, 0, PI);
-        Real d_theta = PI/(N_int - 1);
+        output->theta = ArrayXr<Real>::LinSpaced(N_int, 0, mp_pi<Real>());
+        Real d_theta = mp_pi<Real>()/(N_int - 1);
         output->w_theta = d_theta*sin(output->theta);
         break;
       }

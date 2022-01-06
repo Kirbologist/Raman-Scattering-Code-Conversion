@@ -10,6 +10,7 @@ namespace Raman {
     size_t num_entries = st_PQ_list.size();
     vector<unique_ptr<stTR<Real>>> output(num_entries);
     for (size_t i = 0; i < num_entries; i++) {
+      output[i] = make_unique<stTR<Real>>();
       unique_ptr<stPQ<Real>>& st_PQ = st_PQ_list[i];
       unique_ptr<stTR<Real>>& st_TR = output[i];
       MatrixXc<Real> P11_ee = st_PQ->st_4M_P_eo().M11;
@@ -317,8 +318,8 @@ namespace Raman {
       }
 
       if (m) {
-        ArrayXi p_vec_n_o = n_vec_e * (n_vec_e + 1) - m;
-        ArrayXi p_vec_n_e = n_vec_o * (n_vec_o + 1) - m;
+        ArrayXi p_vec_n_e = n_vec_e * (n_vec_e + 1) - m;
+        ArrayXi p_vec_n_o = n_vec_o * (n_vec_o + 1) - m;
 
         VectorXc<Real> p_nm_n_e = st_TR_list[m_ind]->st_4M_T_eo().M11(n_vec_T_e, n_vec_T_e).matrix() *
             a_nm(p_vec_n_e).matrix() - st_TR_list[m_ind]->st_4M_T_eo().M12(n_vec_T_e, n_vec_T_o).matrix() *
@@ -414,9 +415,9 @@ namespace Raman {
     }
 
     unique_ptr<stCrossSection<Real>> output = make_unique<stCrossSection<Real>>();
-    output->ext = -4*PI/k1.pow(2) * ext_sum.real();
-    output->sca = 4*PI/k1.pow(2) * sca_sum.real();
-    output->abs = -4*PI/k1.pow(2) * (ext_sum.real() + sca_sum.real());
+    output->ext = -4*mp_pi<Real>()/k1.pow(2) * ext_sum.real();
+    output->sca = 4*mp_pi<Real>()/k1.pow(2) * sca_sum.real();
+    output->abs = -4*mp_pi<Real>()/k1.pow(2) * (ext_sum.real() + sca_sum.real());
 
     return output;
   }

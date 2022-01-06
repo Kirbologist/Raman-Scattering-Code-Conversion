@@ -80,7 +80,7 @@ namespace Raman {
           test.fill(false);
           current_term = x_not_converged.select(alpha_q * gamma_qnk, current_term);
           if (x_not_converged.any())
-            test = x_not_converged.select(abs(current_term) > EPS * abs(S.row(k)), test);
+            test = x_not_converged.select(abs(current_term) > mp_eps<Real>() * abs(S.row(k)), test);
           if (test.any()) {
             if (logicalSlice(current_term, test).isInf().all()) // if all non-converged x values are infinite
               cout << "Problem (1) in sphGetFpovx..." << endl;
@@ -114,7 +114,7 @@ namespace Raman {
         for (int i = 0; i < num_x; i++) {
           if (x_not_converged(i)) {
             current_term(i) = alpha_q(i) * gamma_qnk;
-            test(i) = abs(current_term(i)) > EPS * abs(S(k, i));
+            test(i) = abs(current_term(i)) > mp_eps<Real>() * abs(S(k, i));
           }
         }
         if (test.any()) {
@@ -202,7 +202,7 @@ namespace Raman {
     }
 
     std::array<int, 3> offsets = {0, 0, 0}, extents = {N_max + 2, N_max + 2, num_x};
-    output->xi_psi = output->psi_psi + output->psi_psi.constant(I) *
+    output->xi_psi = output->psi_psi + output->psi_psi.constant(mp_im_unit<Real>()) *
         chi_psi_prod->Fpovx.slice(offsets, extents);
     output->chi_n = chi_psi_prod->rb_chi.leftCols(N_max + 2);
     output->psi_k = chi_psi_prod->rb_psi.leftCols(N_max + 2);
@@ -277,12 +277,15 @@ namespace Raman {
 
     ArrayXXc<Real> psi_np1_psi_n = (prods->psi_n(all, seq(1, last)) * prods->psi_k(all, seq(0, last - 1))).transpose();
     ArrayXXc<Real> psi_n_psi_np1 = (prods->psi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(1, last))).transpose();
-    ArrayXXc<Real> xi_np1_psi_n = psi_np1_psi_n + I*(prods->chi_n(all, seq(1, last)) * prods->psi_k(all, seq(0, last - 1))).transpose();
-    ArrayXXc<Real> xi_n_psi_np1 = psi_n_psi_np1 + I*(prods->chi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(1, last))).transpose();
+    ArrayXXc<Real> xi_np1_psi_n = psi_np1_psi_n + mp_im_unit<Real>() *
+        (prods->chi_n(all, seq(1, last)) * prods->psi_k(all, seq(0, last - 1))).transpose();
+    ArrayXXc<Real> xi_n_psi_np1 = psi_n_psi_np1 + mp_im_unit<Real>() *
+        (prods->chi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(1, last))).transpose();
     output->st_psi_psi_all->for_diag_Lt1 = s*psi_n_psi_np1 - psi_np1_psi_n;
     output->st_xi_psi_all->for_diag_Lt1 = s*xi_n_psi_np1 - xi_np1_psi_n;
     ArrayXXc<Real> psi_n_psi_n = (prods->psi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(0, last - 1))).transpose();
-    ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + I*(prods->chi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(0, last - 1))).transpose();
+    ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + mp_im_unit<Real>() *
+        (prods->chi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(0, last - 1))).transpose();
 
     ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(N_max + 1, 1, N_max + 1);
     output->st_psi_psi_all->for_diag_Lt2 = psi_n_psi_np1 - s*psi_np1_psi_n + (s - 1)*(s + 1)/s *
@@ -536,7 +539,7 @@ namespace Raman {
       ArrayXXc<Real> tmp2 = (n_vec_real * (n_vec_real + 1)).replicate(1, Nm).rowwise() -
       (n_vec_real * (n_vec_real + 1)).transpose();
       ArrayXXc<Real> prefactor1 = (s - 1)*(s + 1) / s * An_Ak(n_vec, n_vec);
-      ArrayXXc<Real> prefactor2 = I * prefactor1 / tmp2;
+      ArrayXXc<Real> prefactor2 = mp_im_unit<Real>() * prefactor1 / tmp2;
 
       ArrayXXc<Real> Q12 = prefactor1 * K1;
       ArrayXXc<Real> Q21 = -prefactor1 * K2;
@@ -548,8 +551,8 @@ namespace Raman {
       ArrayXXc<Real> P11 = prefactor2 * L5P;
       ArrayXXc<Real> P22 = prefactor2 * L6P;
 
-      ArrayXc<Real> prefact_diag1 = -I/s * (2*n_vec_real + 1) / (2*n_vec_real*(n_vec_real + 1));
-      ArrayXc<Real> prefact_diag2 = -I*(s - 1)*(s + 1)/(2*s) * (2*n_vec_real + 1);
+      ArrayXc<Real> prefact_diag1 = -mp_im_unit<Real>()/s * (2*n_vec_real + 1) / (2*n_vec_real*(n_vec_real + 1));
+      ArrayXc<Real> prefact_diag2 = -mp_im_unit<Real>()*(s - 1)*(s + 1)/(2*s) * (2*n_vec_real + 1);
       ArrayXXc<Real> pi2_p_tau2 = (pi_nm.pow(2) + tau_nm.pow(2));
 
       ArrayXc<Real> Ltilde1 = ((pi2_p_tau2 * for_Q_diag_Lt1(n_vec, all)).matrix() * Rt_func->w_theta.matrix()).array();
