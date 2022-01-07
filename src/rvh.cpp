@@ -404,14 +404,14 @@ namespace Raman {
             st_TR_list[l][m]->st_4M_T_oe().M22.matrix().diagonal().sum());
 
         sca_sum(l) += m_factor * (
-            st_TR_list[l][m]->st_4M_T_eo().M11.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_eo().M12.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_eo().M21.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_eo().M22.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_oe().M11.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_oe().M12.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_oe().M21.pow(2).sum() +
-            st_TR_list[l][m]->st_4M_T_oe().M22.pow(2).sum());
+            st_TR_list[l][m]->st_4M_T_eo().M11.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M12.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M21.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_eo().M22.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M11.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M12.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M21.abs().pow(2).sum() +
+            st_TR_list[l][m]->st_4M_T_oe().M22.abs().pow(2).sum());
       }
     }
 

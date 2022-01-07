@@ -77,13 +77,13 @@ namespace Raman {
   template <class Real>
   Real CGDIRECT(int n, int m, int n1, int m1, ArrayXr<Real> F) {
     Real C = F(2*n) + F(2*n1) + F(n + n1 + m + m1) + F(n + n1 - m - m1);
-    C -= F(2*(n + n1)) + F(n + m) + F(n - m) + F(n1 + m1) - F(n1 - m1);
+    C -= F(2*(n + n1)) + F(n + m) + F(n - m) + F(n1 + m1) + F(n1 - m1);
     return exp(C);
   }
 
   template <class Real>
   ArrayXXr<Real> CCG(int n, int n1, int N_max, int K1, int K2, ArrayXr<Real> log_fact, ArrayXi s_sign) {
-    if (n1 < 0 || n1 > N_max + n || n < 1 || n > N_max) {
+    if (n1 < 0 || n1 > N_max + n || n < 0 || n > N_max) {
       cout << "ERROR IN CCG" << endl;
       return ArrayXXr<Real>::Zero(1, 1);
     }
@@ -93,7 +93,7 @@ namespace Raman {
 
     int NPN6 = N_max;
     int NNF = min(n + n1, N_max);
-    int m_init = (K1 == 1 && K2 == 0) ? NPN6 - n : NPN6;
+    int m_init = (K1 == 1 && K2 == 0) ? NPN6 : NPN6 - n;
     int m_fin = NPN6 + n;
 
     for (int m_ind = m_init; m_ind <= m_fin; m_ind++) {
@@ -117,7 +117,7 @@ namespace Raman {
           Real A = static_cast<Real>((nn + mm) * (nn - mm) * (n1 - n + nn));
           A *= (n - n1 + nn) * (n + n1 - nn + 1) * (n + n1 + nn + 1);
           A = (4 * nn * nn) / A;
-          A *= (2*nn + 1) * (2*nn + 1);
+          A *= (2*nn + 1) * (2*nn - 1);
           A = sqrt(A);
           Real B, D;
           if (nn == 1) {
@@ -178,38 +178,39 @@ namespace Raman {
   template <class Real>
   unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<Real>>>& st_TR_list,
       Real lambda, Real sca, int Nb_theta) {
-    int K1 = 0, K2 = 0, K3 = 0, K4 = 1, K5 = 1, K6 = 2;
-    int N = st_TR_list.size();
+    int K1 = 1, K2 = 0, K3 = 0, K4 = 1, K5 = 1, K6 = 2;
+    int N1 = st_TR_list.size();
+    int N = N1 - 1;
 
-    RowArrayXr<Real> n_vec = RowArrayXr<Real>::LinSpaced(N, 1, N);
-    ArrayXr<Real> k_vec = ArrayXr<Real>::LinSpaced(N, 1, N);
-    ArrayXXr<Real> FF_kn = sqrt((2*n_vec + 1).replicate(N, 1).colwise() / (2*k_vec + 1));
-    ArrayXXc<Real> FA_kn = pow(mp_im_unit<Real>(), -n_vec).replicate(N, 1).colwise() *
+    RowArrayXr<Real> n_vec = RowArrayXr<Real>::LinSpaced(N1, 0, N);
+    ArrayXr<Real> k_vec = ArrayXr<Real>::LinSpaced(N1, 0, N);
+    ArrayXXr<Real> FF_kn = sqrt((2*n_vec + 1).replicate(N1, 1).colwise() / (2*k_vec + 1));
+    ArrayXXc<Real> FA_kn = pow(mp_im_unit<Real>(), -n_vec).replicate(N1, 1).colwise() *
         (pow(mp_im_unit<Real>(), k_vec) / sqrt(2*k_vec + 1));
-    ArrayXr<Real> log_fact = ArrayXr<Real>::Zero(4*(N + 1));
-    for (int i = 2; i < 4*(N + 1); i++)
-      log_fact(i) = log_fact(i - 1) + 0.5*log(i - 1);
+    ArrayXr<Real> log_fact = ArrayXr<Real>::Zero(4*N1);
+    for (int i = 2; i < 4*N1; i++)
+      log_fact(i) = log_fact(i - 1) + 0.5*log(i);
 
-    ArrayXi s_sign = pow(-1, ArrayXi::LinSpaced(4*(N + 1), 0, 4*N + 3));
+    ArrayXi s_sign = pow(-1, ArrayXi::LinSpaced(4*N1, 0, 4*N1 - 1));
 
-    ArrayXXc<Real> T1_mk = ArrayXXc<Real>::Zero(2*N + 1, N);
-    ArrayXXc<Real> T2_mk = ArrayXXc<Real>::Zero(2*N + 1, N);
-    Tensor3c<Real> B1_n1_mn(N + 1, 2*N + 1, N);
+    ArrayXXc<Real> T1_mk = ArrayXXc<Real>::Zero(2*N + 1, N1);
+    ArrayXXc<Real> T2_mk = ArrayXXc<Real>::Zero(2*N + 1, N1);
+    Tensor3c<Real> B1_n1_mn(2*N, 2*N + 1, N1);
     B1_n1_mn.setZero();
-    Tensor3c<Real> B2_n1_mn(N + 1, 2*N + 1, N);
+    Tensor3c<Real> B2_n1_mn(2*N, 2*N + 1, N1);
     B2_n1_mn.setZero();
 
-    vector<ArrayXXc<Real>> CT11(N, ArrayXXc<Real>::Zero(N, N));
-    vector<ArrayXXc<Real>> CT12(N, ArrayXXc<Real>::Zero(N, N));
-    vector<ArrayXXc<Real>> CT21(N, ArrayXXc<Real>::Zero(N, N));
-    vector<ArrayXXc<Real>> CT22(N, ArrayXXc<Real>::Zero(N, N));
+    vector<ArrayXXc<Real>> CT11(N1);
+    vector<ArrayXXc<Real>> CT12(N1);
+    vector<ArrayXXc<Real>> CT21(N1);
+    vector<ArrayXXc<Real>> CT22(N1);
 
-    for (int m = 0; m < N; m++) {
+    for (int m = 0; m <= N; m++) {
       int N_min_m1 = max(1, m);
-      CT11[m] = ArrayXXc<Real>::Zero(N, N);
-      CT12[m] = ArrayXXc<Real>::Zero(N, N);
-      CT21[m] = ArrayXXc<Real>::Zero(N, N);
-      CT22[m] = ArrayXXc<Real>::Zero(N, N);
+      CT11[m] = ArrayXXc<Real>::Zero(N1, N1);
+      CT12[m] = ArrayXXc<Real>::Zero(N1, N1);
+      CT21[m] = ArrayXXc<Real>::Zero(N1, N1);
+      CT22[m] = ArrayXXc<Real>::Zero(N1, N1);
       for (int i = 0; i < st_TR_list[m]->st_4M_T_eo().ind1.size(); i++) {
         for (int j = 0; j < st_TR_list[m]->st_4M_T_eo().ind1.size(); j++)
           CT11[m](N_min_m1 + st_TR_list[m]->st_4M_T_eo().ind1(i),
@@ -244,11 +245,11 @@ namespace Raman {
       }
     }
 
-    for (int n = 0; n < N; n++) {
-      for (int nn = 0; nn < N; nn++) {
+    for (int n = 0; n <= N; n++) {
+      for (int nn = 0; nn <= N; nn++) {
         int m_max = min(n, nn);
         for (int m = 0; m <= m_max; m++) {
-          int m_ind = m + 1 + N;
+          int m_ind = N + m;
           complex<Real> TT1 = CT11[m](n, nn);
           complex<Real> TT2 = CT12[m](n, nn);
           complex<Real> TT3 = CT21[m](n, nn);
@@ -260,21 +261,21 @@ namespace Raman {
           if (m > 0) {
             T1 = TT1 - TT2;
             T2 = TT3 - TT4;
-            m_ind = N + 1 - m;
+            m_ind = N - m;
             T1_mk(m_ind, nn) = T1 - T2;
             T2_mk(m_ind, nn) = T1 + T2;
           }
         }
       }
 
-      int nn1_max = N + 1 + n;
-      for (int n1 = 0; n1 < nn1_max; n1++) {
-        ArrayXXr<Real> G1 = CCG(n + 1, n1, N, K1, K2, log_fact, s_sign);
+      int nn1_max = N + n;
+      for (int n1 = 0; n1 <= nn1_max; n1++) {
+        ArrayXXr<Real> G1 = CCG(n, n1, N, K1, K2, log_fact, s_sign);
         int nn_max = min(N, n1 + n);
         int nn_min = max(1, abs(n - n1));
         int kn = n + n1;
-        ArrayXc<Real> A1k = ArrayXc<Real>::Zero(N);
-        ArrayXc<Real> A2k = ArrayXc<Real>::Zero(N);
+        ArrayXc<Real> A1k = ArrayXc<Real>::Zero(N1);
+        ArrayXc<Real> A2k = ArrayXc<Real>::Zero(N1);
         for (int nn = nn_min; nn <= nn_max; nn++) {
           int SIG = s_sign(kn + nn);
           int m_ind_max = min(n, nn) + N;
@@ -283,31 +284,31 @@ namespace Raman {
           for (int m_ind = N; m_ind <= m_ind_max; m_ind++) {
             int m = m_ind - N;
             complex<Real> SSS = G1(m_ind, nn);
-            complex<Real> R1 = T1_mk(m_ind, nn - 1);
-            complex<Real> R2 = T1_mk(m_ind, nn - 1);
+            complex<Real> R1 = T1_mk(m_ind, nn);
+            complex<Real> R2 = T2_mk(m_ind, nn);
             if (m > 0) {
               int m_ind_n = N - m;
-              R1 += T1_mk(m_ind_n, nn - 1) * static_cast<complex<Real>>(SIG);
-              R2 += T2_mk(m_ind_n, nn - 1) * static_cast<complex<Real>>(SIG);
+              R1 += T1_mk(m_ind_n, nn) * static_cast<complex<Real>>(SIG);
+              R2 += T2_mk(m_ind_n, nn) * static_cast<complex<Real>>(SIG);
             }
             AA1 += SSS * R1;
             AA2 += SSS * R2;
           }
-          A1k(nn - 1) = AA1 * FA_kn(nn - 1, n);
-          A2k(nn - 1) = AA2 * FA_kn(nn - 1, n);
+          A1k(nn) = AA1 * FA_kn(nn, n);
+          A2k(nn) = AA2 * FA_kn(nn, n);
         }
 
-        ArrayXXr<Real> G2 = CCG(n + 1, n1, N, K3, K4, log_fact, s_sign);
+        ArrayXXr<Real> G2 = CCG(n, n1, N, K3, K4, log_fact, s_sign);
         int m_max = min(n1 + 1, n);
         int m_min = max(-n1 + 1, -n);
-        for (int m = m_min; m_min < m_max; m_min++) {
+        for (int m = m_min; m <= m_max; m++) {
           int m_ind = m + N;
           complex<Real> BB1 = 0;
           complex<Real> BB2 = 0;
           for (int nn = nn_min; nn <= nn_max; nn++) {
             complex<Real> SSS = G2(m_ind, nn);
-            BB1 += SSS * A1k(nn - 1);
-            BB2 += SSS * A2k(nn - 1);
+            BB1 += SSS * A1k(nn);
+            BB2 += SSS * A2k(nn);
           }
           B1_n1_mn(n1, m_ind, n) = BB1;
           B2_n1_mn(n1, m_ind, n) = BB2;
@@ -391,10 +392,10 @@ namespace Raman {
         int nn_min = max(1, abs(n - l));
         int nn_max = min(N, n + l);
         if (nn_min <= nn_max) {
-          ArrayXXr<Real> G1 = CCG(n + 1, l, N, K1, K2, log_fact, s_sign);
+          ArrayXXr<Real> G1 = CCG(n, l, N, K1, K2, log_fact, s_sign);
           ArrayXXr<Real> G2;
           if (l >= 2)
-            G2 = CCG(n + 1, l, N, K5, K6, log_fact, s_sign);
+            G2 = CCG(n, l, N, K5, K6, log_fact, s_sign);
           for (int nn = nn_min; nn <= nn_max; nn++) {
             int m_max = min(n, nn);
             int m_ind_min = N - m_max;

@@ -35,7 +35,6 @@ namespace Raman {
     ArrayXr<Real> abs;
   };
 
-  // Untested
   template <class Real>
   vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R = false);
 
@@ -51,7 +50,6 @@ namespace Raman {
   unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max, const vector<unique_ptr<stTR<Real>>>& st_TR_list,
       const unique_ptr<stIncPar<Real>>& st_inc_par, unique_ptr<stIncEabnm<Real>> st_inc_E_abnm = unique_ptr<stIncEabnm<Real>>());
 
-  // Untested
   template <class Real>
   unique_ptr<stCrossSection<Real>> rvhGetAverageCrossSections(
       const ArrayXr<Real>& k1, const vector<vector<unique_ptr<stTR<Real>>>>& st_TR_list);

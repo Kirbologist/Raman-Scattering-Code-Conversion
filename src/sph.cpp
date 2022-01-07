@@ -415,7 +415,7 @@ namespace Raman {
       NB = N_max;
     int M = abs_m_vec.size();
     //if (params->output) (params shouldn't have an output member, perhaps use stOptions instead)
-    cout << "sphCalculatePQ: Calculate P, Q for " << M << "m-values with N_Q = " <<
+    cout << "sphCalculatePQ: Calculate P, Q for " << M << " m-values with N_Q = " <<
         N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
     vector<unique_ptr<stPQ<Real>>> output(M);
