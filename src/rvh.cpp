@@ -390,7 +390,7 @@ namespace Raman {
     ArrayXc<Real> sca_sum = ArrayXc<Real>::Zero(L);
 
     for (int l = 0; l < L; l++) {
-      if (st_TR_list[l][0]->st_4M_T_eo().ind1.size() + st_TR_list[l][0]->st_4M_T_eo().ind2.size() != M)
+      if (st_TR_list[l][0]->st_4M_T_eo().ind1.size() + st_TR_list[l][0]->st_4M_T_eo().ind2.size() + 1 != M)
         cout << "Warning in rvhGetAverageCrossSections: CstTRa does not seem to contain T-matrices for all m" << endl;
       for (int m = 0; m < M; m++) {
         if (st_TR_list[l][m]->st_4M_T_eo().m != m || st_TR_list[l][m]->st_4M_T_oe().m != m)

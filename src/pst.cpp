@@ -316,19 +316,19 @@ namespace Raman {
       }
     }
 
-    Tensor3r<Real> D1_m_kn(2*N + 1, N, N);
-    Tensor3r<Real> D2_m_kn(2*N + 1, N, N);
-    Tensor3r<Real> D3_m_kn(2*N + 1, N, N);
-    Tensor3r<Real> D4_m_kn(2*N + 1, N, N);
-    Tensor3c<Real> D5_m_kn(2*N + 1, N, N);
+    Tensor3r<Real> D1_m_kn(2*N + 1, N1, N1);
+    Tensor3r<Real> D2_m_kn(2*N + 1, N1, N1);
+    Tensor3r<Real> D3_m_kn(2*N + 1, N1, N1);
+    Tensor3r<Real> D4_m_kn(2*N + 1, N1, N1);
+    Tensor3c<Real> D5_m_kn(2*N + 1, N1, N1);
     D1_m_kn.setZero();
     D2_m_kn.setZero();
     D3_m_kn.setZero();
     D4_m_kn.setZero();
     D5_m_kn.setZero();
 
-    for (int n = 0; n < N; n++) {
-      for (int nn = 0; nn < N; nn++) {
+    for (int n = 0; n <= N; n++) {
+      for (int nn = 0; nn <= N; nn++) {
         int m_ind = min(n, nn);
         int m_ind_max = N + m_ind;
         int m_ind_min = N - m_ind;
@@ -348,20 +348,20 @@ namespace Raman {
         }
         int m_max = min(n, nn + 2);
         int m_min = max(-n, -nn + 2);
-        m_ind_max = N + 1 + m_max;
-        m_ind_min = N + 1 + m_min;
+        m_ind_max = N + m_max;
+        m_ind_min = N + m_min;
         for (int m_ind = m_ind_min; m_ind <= m_ind_max; m_ind++) {
           int m = m_ind - N;
           int n1_min = abs(m - 1);
           Real DD3 = 0;
           Real DD4 = 0;
           complex<Real> DD5 = 0;
-          int m_ind2 = -m + N + 3;
+          int m_ind2 = -m + 2 + N;
           for (int n1 = n1_min; n1 <= n1_max; n1++) {
-            int XX = 2*n1 + 1;
-            DD3 += static_cast<Real>(XX) * real(B1_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind2, nn)));
-            DD4 += static_cast<Real>(XX) * real(B2_n1_mn(n1, m_ind, n) * conj(B2_n1_mn(n1, m_ind2, nn)));
-            DD5 += static_cast<Real>(XX) * B2_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind2, nn));
+            Real XX = 2*n1 + 1;
+            DD3 += XX * real(B1_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind2, nn)));
+            DD4 += XX * real(B2_n1_mn(n1, m_ind, n) * conj(B2_n1_mn(n1, m_ind2, nn)));
+            DD5 += XX * B2_n1_mn(n1, m_ind, n) * conj(B1_n1_mn(n1, m_ind2, nn));
           }
           D3_m_kn(m_ind, nn, n) = DD3;
           D4_m_kn(m_ind, nn, n) = DD4;
@@ -378,8 +378,7 @@ namespace Raman {
     output->BET1n = ArrayXr<Real>::Zero(2*N + 1);
     output->BET2n = ArrayXr<Real>::Zero(2*N + 1);
 
-    ArrayXXr<Real> G2;
-    Real asym_par = 0;
+    int L_max = 0;
     Real DK = pow(lambda, 2) / (4*sca*mp_pi<Real>());
     for (int l = 0; l < 2*N + 1; l++) {
       Real G1L = 0;
@@ -388,7 +387,7 @@ namespace Raman {
       Real G4L = 0;
       complex<Real> G5L = 0;
       Real SL = (2*l + 1)*DK;
-      for (int n = 0; n < N; n++) {
+      for (int n = 0; n <= N; n++) {
         int nn_min = max(1, abs(n - l));
         int nn_max = min(N, n + l);
         if (nn_min <= nn_max) {
@@ -408,13 +407,15 @@ namespace Raman {
               Real SSS1;
               if (m >= 0)
                 SSS1 = G1(m_ind, nn);
-              else
-                SSS1 = G1(m_ind, nn) * SI;
-              DM1 += SSS1 * D1_m_kn(m_ind, nn - 1, n);
-              DM2 += SSS1 * D2_m_kn(m_ind, nn - 1, n);
+              else {
+                int m_ind_n = N - m;
+                SSS1 = G1(m_ind_n, nn) * SI;
+              }
+              DM1 += SSS1 * D1_m_kn(m_ind, nn, n);
+              DM2 += SSS1 * D2_m_kn(m_ind, nn, n);
             }
-            Real FFN = FF_kn(nn - 1, n);
-            Real SSS = G1(N + 2, nn) * FFN;
+            Real FFN = FF_kn(nn, n);
+            Real SSS = G1(N + 1, nn) * FFN;
             G1L += SSS * DM1;
             G2L += SSS * DM2 * SI;
             if (l >= 2) {
@@ -429,12 +430,12 @@ namespace Raman {
                 int m = m_ind - N;
                 int m_ind_n = N - m;
                 Real SSS1 = G2(m_ind_n, nn);
-                DM3 += SSS1 * D3_m_kn(m_ind, nn - 1, n);
-                DM4 += SSS1 * D4_m_kn(m_ind, nn - 1, n);
-                DM5 += SSS1 * D5_m_kn(m_ind, nn - 1, n);
+                DM3 += SSS1 * D3_m_kn(m_ind, nn, n);
+                DM4 += SSS1 * D4_m_kn(m_ind, nn, n);
+                DM5 += SSS1 * D5_m_kn(m_ind, nn, n);
               }
               G5L -= SSS * DM5;
-              SSS = G2(N, nn) * FFN;
+              SSS = G2(N - 1, nn) * FFN;
               G3L += SSS * DM3;
               G4L += SSS * DM4 * SI;
             }
@@ -452,94 +453,90 @@ namespace Raman {
       output->ALF4n(l) = G1L - G2L;
       output->BET1n(l) = real(G5L) * 2;
       output->BET2n(l) = imag(G5L) * 2;
-      if (l == 1)
-        asym_par = (G1L + G2L) / 3;
+
+      L_max = l;
       if (abs(G1L) < mp_eps<Real>())
         break;
-      int L_max = 2*N;
-      output->L_max = L_max;
-      output->asym_par = asym_par;
+    }
+    output->L_max = L_max;
+    output->asym_par = output->ALF1n(1) / 3;
 
-      ArrayXr<Real> theta = ArrayXr<Real>::LinSpaced(Nb_theta, 0, mp_pi<Real>());
-      ArrayXr<Real> theta_deg = theta * 180 / mp_pi<Real>();
-      output->theta = theta;
-      output->theta_deg = theta_deg;
-      output->F11 = ArrayXr<Real>::Zero(Nb_theta);
-      output->F22 = ArrayXr<Real>::Zero(Nb_theta);
-      output->F33 = ArrayXr<Real>::Zero(Nb_theta);
-      output->F44 = ArrayXr<Real>::Zero(Nb_theta);
-      output->F12 = ArrayXr<Real>::Zero(Nb_theta);
-      output->F34 = ArrayXr<Real>::Zero(Nb_theta);
+    ArrayXr<Real> theta = ArrayXr<Real>::LinSpaced(Nb_theta, 0, mp_pi<Real>());
+    ArrayXr<Real> theta_deg = theta * 180 / mp_pi<Real>();
+    output->theta = theta;
+    output->theta_deg = theta_deg;
+    output->F11 = ArrayXr<Real>::Zero(Nb_theta);
+    output->F22 = ArrayXr<Real>::Zero(Nb_theta);
+    output->F33 = ArrayXr<Real>::Zero(Nb_theta);
+    output->F44 = ArrayXr<Real>::Zero(Nb_theta);
+    output->F12 = ArrayXr<Real>::Zero(Nb_theta);
+    output->F34 = ArrayXr<Real>::Zero(Nb_theta);
 
-      output->all_AB = ArrayXXr<Real>::Zero(2*N + 1, 7);
-      output->all_F = ArrayXXr<Real>::Zero(2, 7);
+    Real DN = static_cast<Real>(1.0)/(Nb_theta - 1);
+    Real DA = DN * mp_pi<Real>();
+    Real DB = DN * 180;
+    Real TB = -DB;
+    Real TAA = -DA;
+    Real D6 = sqrt(static_cast<Real>(6.0)) / 4;
 
-      Real DN = static_cast<Real>(1.0)/(Nb_theta - 1);
-      Real DA = DN * mp_pi<Real>();
-      Real DB = DN * 180;
-      Real TB = -DB;
-      Real TAA = -DA;
-      Real D6 = sqrt(static_cast<Real>(6.0)) / 4;
-      int PL1 = 0;
-
-      for (int I1 = 0; I1 < Nb_theta; I1++) {
-        TAA += DA;
-        TB += DB;
-        Real U = cos(TAA);
-        Real F11, F2, F3, F44, F12, F34, P1, P2, P3, P4;
-        F11 = F2 = F3 = F44 = F12 = F34 = P1 = P2 = P3 = P4 = 0;
-        Real PP1 = 1;
-        Real PP2 = pow(1 + U, 2)/4;
-        Real PP3 = pow(1 - U, 2)/4;
-        Real PP4 = D6 * (pow(U, 2) - 1);
-        for (int L = 0, L1 = 1; L <= L_max; L++, L1++) {
-          F11 += output->ALF1n(L) * PP1;
-          F44 += output->ALF4n(L) * PP1;
+    for (int I1 = 0; I1 < Nb_theta; I1++) {
+      TAA += DA;
+      TB += DB;
+      Real U = cos(TAA);
+      Real F11, F2, F3, F44, F12, F34, P1, P2, P3, P4;
+      F11 = F2 = F3 = F44 = F12 = F34 = P1 = P2 = P3 = P4 = 0;
+      Real PP1 = 1;
+      Real PP2 = pow(1 + U, 2)/4;
+      Real PP3 = pow(1 - U, 2)/4;
+      Real PP4 = D6 * (pow(U, 2) - 1);
+      for (int L = 0, L1 = 1; L <= L_max; L++, L1++) {
+        F11 += output->ALF1n(L) * PP1;
+        F44 += output->ALF4n(L) * PP1;
+        int PL1;
+        if (L != L_max) {
+          PL1 = 2*L + 1;
+          Real P = (PL1 * U * PP1 - L * P1) / L1;
+          P1 = PP1;
+          PP1 = P;
+        }
+        if (L >= 2) {
+          F2 += (output->ALF2n(L) + output->ALF3n(L)) * PP2;
+          F3 += (output->ALF2n(L) - output->ALF3n(L)) * PP3;
+          F12 += output->BET1n(L) * PP4;
+          F34 += output->BET2n(L) * PP4;
           if (L != L_max) {
-            PL1 = 2*L + 1;
-            Real P = (PL1 * U * PP1 - L * P1) / L1;
-            P1 = PP1;
-            PP1 = P;
-          }
-          if (L >= 2) {
-            F2 += (output->ALF2n(L) + output->ALF3n(L)) * PP2;
-            F3 += (output->ALF2n(L) - output->ALF3n(L)) * PP3;
-            F12 += output->BET1n(L) * PP4;
-            F34 += output->BET2n(L) * PP4;
-            if (L != L_max) {
-              Real PL2 = L * L1 * U;
-              int PL3 = L1 * (L*L - 4);
-              Real PL4 = static_cast<Real>(1.0) / (L*(L1*L1 - 4));
-              Real P = (PL1 * (PL2 - 4) * PP3 - PL3 * P2) * PL4;
-              P2 = PP2;
-              PP2 = P;
-              P = (PL1 * (PL2 + 4) * PP3 - PL3 * P3) * PL4;
-              P3 = PP3;
-              PP3 = P;
-              P = (PL1 * U * PP4 - sqrt(static_cast<Real>(L*L) - 4) * P4) / sqrt(static_cast<Real>(L1*L1) - 4);
-              P4 = PP4;
-              PP4 = P;
-            }
+            Real PL2 = L * L1 * U;
+            int PL3 = L1 * (L*L - 4);
+            Real PL4 = static_cast<Real>(1.0) / (L*(L1*L1 - 4));
+            Real P = (PL1 * (PL2 - 4) * PP2 - PL3 * P2) * PL4;
+            P2 = PP2;
+            PP2 = P;
+            P = (PL1 * (PL2 + 4) * PP3 - PL3 * P3) * PL4;
+            P3 = PP3;
+            PP3 = P;
+            P = (PL1 * U * PP4 - sqrt(static_cast<Real>(L*L) - 4) * P4) / sqrt(static_cast<Real>(L1*L1) - 4);
+            P4 = PP4;
+            PP4 = P;
           }
         }
-        Real F22 = (F2 + F3) / 2;
-        Real F33 = (F2 - F3) / 2;
-        output->F11(I1) = F11;
-        output->F22(I1) = F22;
-        output->F33(I1) = F33;
-        output->F44(I1) = F44;
-        output->F12(I1) = F12;
-        output->F34(I1) = F34;
       }
-
-      output->all_AB = Array<Real, Dynamic, 7>(2*N + 1, 7);
-      output->all_AB << ArrayXr<Real>::LinSpaced(2*N + 1, 1, 2*N + 1),
-          output->ALF1n, output->ALF2n, output->ALF3n, output->ALF4n, output->BET1n, output->BET2n;
-
-      output->all_F = Array<Real, Dynamic, 7>(Nb_theta, 7);
-      output->all_F << theta_deg, output->F11, output->F22, output->F33, output->F44,
-          output->F12, output->F34;
+      Real F22 = (F2 + F3) / 2;
+      Real F33 = (F2 - F3) / 2;
+      output->F11(I1) = F11;
+      output->F22(I1) = F22;
+      output->F33(I1) = F33;
+      output->F44(I1) = F44;
+      output->F12(I1) = F12;
+      output->F34(I1) = F34;
     }
+
+    output->all_AB = Array<Real, Dynamic, 7>(2*N + 1, 7);
+    output->all_AB << ArrayXr<Real>::LinSpaced(2*N + 1, 1, 2*N + 1),
+        output->ALF1n, output->ALF2n, output->ALF3n, output->ALF4n, output->BET1n, output->BET2n;
+
+    output->all_F = Array<Real, Dynamic, 7>(Nb_theta, 7);
+    output->all_F << theta_deg, output->F11, output->F22, output->F33, output->F44,
+        output->F12, output->F34;
 
     return output;
   }
