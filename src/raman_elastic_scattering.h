@@ -108,7 +108,7 @@ namespace Raman {
     stOptions() {};
 
     stOptions(int N) {
-      this.abs_m_vec = ArrayXi::LinSpaced(N + 1, 0, N);
+      this->abs_m_vec = ArrayXi::LinSpaced(N + 1, 0, N);
     }
   };
 }

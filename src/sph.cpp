@@ -217,7 +217,7 @@ namespace Raman {
     int X = prods.dimension(2);
 
     auto output = make_unique<stBesselPrimes<Real>>();
-    std::array<int, 3> offsets = {0, 0, 0}, extents = {N + 1, N + 1, X};
+    std::array<long int, 3> offsets = {0, 0, 0}, extents = {N + 1, N + 1, X};
     output->xi_psi = prods.slice(offsets, extents);
     output->xi_prime_psi = Tensor3c<Real>(N + 1, N + 1, X);
     output->xi_psi_prime = Tensor3c<Real>(N + 1, N + 1, X);
