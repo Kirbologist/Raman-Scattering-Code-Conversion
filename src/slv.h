@@ -1,7 +1,7 @@
 #ifndef SLV_H
 #define SLV_H
 
-#include "raman_elastic_scattering.h"
+#include "core.h"
 #include "rvh.h"
 #include "vsh.h"
 #include "sph.h"

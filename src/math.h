@@ -1,7 +1,7 @@
-#ifndef MY_MATH_H
-#define MY_MATH_H
+#ifndef SMARTIES_MATH_H
+#define SMARTIES_MATH_H
 
-#include "raman_elastic_scattering.h"
+#include "core.h"
 
 using namespace std;
 using namespace Eigen;

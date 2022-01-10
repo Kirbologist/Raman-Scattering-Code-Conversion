@@ -1,6 +1,7 @@
 # Raman-Scattering-Code-Conversion
 C++ code written as part of the UQ SMP project "Efficient code for calculation of Raman scattering by spheroids"
 
+Author is Siwan Li
 Project supervisor is A/Prof Taras Plakhotnik.
 
 ## Introduction
@@ -16,6 +17,7 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] slv* functions (2/2)
   - [x] pst* functions (2/2)
   - [x] Non-SMARTIES functions (2/2)
+  - [ ] Minimum viable product
   - [ ] arbitrary-precision support
   - [ ] parallel computing support
 
@@ -58,4 +60,6 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015); neither me, nor T. Plakhotnik wrote any of the original code. The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
 https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
 
-The code in TensorMatrixCast.h was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
+The code in tensor_matrix_cast.h was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
+
+Parts of the Eigen 3.4.0 library have been included under the MPL2 license and parts of the Boost 1.77.0 library have been included under the Boost license. Eigen and Boost were made by their respective developers listed on their websites, which neither myself nor T. Plakhotnik are a part of.

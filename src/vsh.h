@@ -1,7 +1,7 @@
 #ifndef VSH_H
 #define VSH_H
 
-#include "raman_elastic_scattering.h"
+#include "core.h"
 
 using namespace Eigen;
 

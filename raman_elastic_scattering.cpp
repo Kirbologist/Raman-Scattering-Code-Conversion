@@ -1,10 +1,4 @@
-#include "raman_elastic_scattering.h"
-#include "math.h"
-#include "sph.h"
-#include "rvh.h"
-#include "vsh.h"
-#include "slv.h"
-#include "pst.h"
+#include "src/smarties.h"
 #include <chrono>
 
 using namespace std;

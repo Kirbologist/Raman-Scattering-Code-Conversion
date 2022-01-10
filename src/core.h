@@ -1,5 +1,5 @@
-#ifndef RAMAN_ELASTC_SCATTERING_H
-#define RAMAN_ELASTC_SCATTERING_H
+#ifndef SMARTIES_CORE_H
+#define SMARTIES_CORE_H
 
 #include <cmath>
 #include <complex>
@@ -8,7 +8,7 @@
 #include <memory>
 #include <Eigen/Core>
 #include <Eigen/CXX11/Tensor>
-#include "TensorMatrixCast.h"
+#include "tensor_matrix_cast.h"
 
 using namespace std;
 using namespace Eigen;

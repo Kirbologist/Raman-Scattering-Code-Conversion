@@ -1,4 +1,4 @@
-#include "raman_aux.h"
+#include "smarties_aux.h"
 #include "math.h"
 
 using namespace Eigen;

@@ -1,8 +1,8 @@
 #ifndef SPH_H
 #define SPH_H
 
-#include "raman_elastic_scattering.h"
-#include "raman_aux.h"
+#include "core.h"
+#include "smarties_aux.h"
 
 using namespace Eigen;
 

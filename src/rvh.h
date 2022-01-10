@@ -1,7 +1,7 @@
 #ifndef RVH_H
 #define RVH_H
 
-#include "raman_elastic_scattering.h"
+#include "core.h"
 #include "sph.h"
 #include "vsh.h"
 

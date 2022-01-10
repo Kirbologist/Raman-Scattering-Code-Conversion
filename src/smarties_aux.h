@@ -1,7 +1,7 @@
-#ifndef AUX_H
-#define AUX_H
+#ifndef SMARTIES_AUX_H
+#define SMARTIES_AUX_H
 
-#include "raman_elastic_scattering.h"
+#include "core.h"
 
 using namespace Eigen;
 

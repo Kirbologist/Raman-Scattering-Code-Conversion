@@ -1,7 +1,7 @@
 #ifndef PST_H
 #define PST_H
 
-#include "raman_elastic_scattering.h"
+#include "core.h"
 #include "rvh.h"
 
 using namespace Eigen;
