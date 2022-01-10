@@ -2,6 +2,7 @@
 C++ code written as part of the UQ SMP project "Efficient code for calculation of Raman scattering by spheroids"
 
 Author is Siwan Li
+
 Project supervisor is A/Prof Taras Plakhotnik.
 
 ## Introduction
@@ -41,7 +42,8 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
 - sphCalculatePQ doesn't try to access stParams.output, since stParams is expected to be the same struct type as the one given in the specification, in which case output is not a member of stParams. Such a member does exist in stOptions however, so future implementations may take stOptions as an argument type. (For calculating Raman scattering, this option is true by default.)
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
-- The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept
+- The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept.
+- sphEstimateDelta doesn't get called in slvForT in the final program for this, so it isn't implemented.
 
 ## Dependencies
 
@@ -57,9 +59,11 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
 ## Copyright Disclaimer
 
-SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015); neither me, nor T. Plakhotnik wrote any of the original code. The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
+The following libraries are open-source and were written by their respective developers under their respective licenses. Neither S. Li (myself), nor T. Plakhotnik wrote any of the following code.
+
+SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015). The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
 https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
 
 The code in tensor_matrix_cast.h was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
 
-Parts of the Eigen 3.4.0 library have been included under the MPL2 license and parts of the Boost 1.77.0 library have been included under the Boost license. Eigen and Boost were made by their respective developers listed on their websites, which neither myself nor T. Plakhotnik are a part of.
+Parts of the Eigen 3.4.0 library have been included under the MPL2 license and parts of the Boost 1.77.0 library have been included under the Boost license. Eigen and Boost were made by their respective developers listed on their websites.

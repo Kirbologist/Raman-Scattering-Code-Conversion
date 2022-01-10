@@ -195,9 +195,9 @@ namespace Raman {
 
     ArrayXXc<Real> T1_mk = ArrayXXc<Real>::Zero(2*N + 1, N1);
     ArrayXXc<Real> T2_mk = ArrayXXc<Real>::Zero(2*N + 1, N1);
-    Tensor3c<Real> B1_n1_mn(2*N, 2*N + 1, N1);
+    Tensor3c<Real> B1_n1_mn(2*N + 1, 2*N + 1, N1);
     B1_n1_mn.setZero();
-    Tensor3c<Real> B2_n1_mn(2*N, 2*N + 1, N1);
+    Tensor3c<Real> B2_n1_mn(2*N + 1, 2*N + 1, N1);
     B2_n1_mn.setZero();
 
     vector<ArrayXXc<Real>> CT11(N1);

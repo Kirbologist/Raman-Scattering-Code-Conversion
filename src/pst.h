@@ -70,7 +70,6 @@ namespace Raman {
   unique_ptr<stRes<Real>> pstMakeStructForField(
       const unique_ptr<stAbcdnm<Real>>& st_abcdnm, const unique_ptr<stParams<Real>>& params);
 
-  // Untested
   template <class Real>
   unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<Real>>>& st_TR_list,
       Real lambda, Real sca, int Nb_theta = 2);
