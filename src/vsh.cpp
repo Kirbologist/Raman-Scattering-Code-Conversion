@@ -400,13 +400,13 @@ namespace Raman {
 
   template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, size_t);
   template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, size_t, double, double, double);
-  template unique_ptr<stPinmTaunm<double>> vshPinmTaunm(size_t, const ArrayXr<double>&);
+  template unique_ptr<stPinmTaunm<double>> vshPinmTaunm(size_t, const ArrayXd&);
   template unique_ptr<stIncEabnm<double>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<double>>&);
-  template unique_ptr<stZnAll<double>> vshGetZnAll(size_t, const ArrayXr<double>&, sBessel);
-  template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXr<double>&,
-      const ArrayXr<double>&, const ArrayXXc<double>&, const ArrayXXc<double>&,
+  template unique_ptr<stZnAll<double>> vshGetZnAll(size_t, const ArrayXd&, sBessel);
+  template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
+      const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
       const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, unique_ptr<stPinmTaunm<double>>);
   template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
-  template ArrayXXc<double> vshRBchi(ArrayXr<double>, const ArrayXr<double>&);
-  template ArrayXXc<double> vshRBpsi(ArrayXr<double>, const ArrayXr<double>&);
+  template ArrayXXc<double> vshRBchi(ArrayXd, const ArrayXd&);
+  template ArrayXXc<double> vshRBpsi(ArrayXd, const ArrayXd&);
 }

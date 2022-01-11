@@ -542,7 +542,7 @@ namespace Raman {
   }
 
   template unique_ptr<stRes<double>> pstMakeStructForField(const unique_ptr<stAbcdnm<double>>&,
-      int, ArrayXr<double>, ArrayXr<double>, double, unique_ptr<stIncPar<double>>, double, double);
+      int, ArrayXd, ArrayXd, double, unique_ptr<stIncPar<double>>, double, double);
   template unique_ptr<stRes<double>> pstMakeStructForField(
       const unique_ptr<stAbcdnm<double>>&, const unique_ptr<stParams<double>>&);
   template unique_ptr<stSM<double>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<double>>>&,

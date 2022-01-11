@@ -159,8 +159,8 @@ namespace Raman {
     int num_x = x.size();
 
     auto output = make_unique<stFpovx<Real>>();
-    output->rb_chi = vshRBchi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), x);
-    output->rb_psi = vshRBpsi<Real>(ArrayXr<double>::LinSpaced(N_max + 1, 0, N_max), s*x);
+    output->rb_chi = vshRBchi<Real>(ArrayXd::LinSpaced(N_max + 1, 0, N_max), x);
+    output->rb_psi = vshRBpsi<Real>(ArrayXd::LinSpaced(N_max + 1, 0, N_max), s*x);
     output->Fpovx = Tensor3c<Real>(N_max + 1, N_max + 1, num_x);
     output->Fpovx.setZero();
 
@@ -615,14 +615,14 @@ namespace Raman {
     return output;
   }
 
-  template unique_ptr<ArrayXXr<double>> sphGetUforFp(int);
-  template unique_ptr<stFprow<double>> sphGetFpRow(int, double, const ArrayXr<double>&);
-  template unique_ptr<stFpovx<double>> sphGetFpovx(int, double, const ArrayXr<double>&);
-  template unique_ptr<stBessel<double>> sphGetXiPsi(int, double, const ArrayXr<double>&, int);
+  template unique_ptr<ArrayXXd> sphGetUforFp(int);
+  template unique_ptr<stFprow<double>> sphGetFpRow(int, double, const ArrayXd&);
+  template unique_ptr<stFpovx<double>> sphGetFpovx(int, double, const ArrayXd&);
+  template unique_ptr<stBessel<double>> sphGetXiPsi(int, double, const ArrayXd&, int);
   template unique_ptr<stBesselPrimes<double>> sphGetBesselProductsPrimes(const Tensor3c<double>&);
-  template unique_ptr<stBesselProducts<double>> sphGetModifiedBesselProducts(int, double, const ArrayXr<double>&, int);
-  template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const unique_ptr<ArrayXr<double>>);
-  template size_t sphCheckBesselConvergence(size_t, double, const ArrayXr<double>&, double, size_t);
+  template unique_ptr<stBesselProducts<double>> sphGetModifiedBesselProducts(int, double, const ArrayXd&, int);
+  template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const unique_ptr<ArrayXd>);
+  template size_t sphCheckBesselConvergence(size_t, double, const ArrayXd&, double, size_t);
   template size_t sphEstimateNB(size_t, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
   template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
 }

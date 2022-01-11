@@ -429,5 +429,5 @@ namespace Raman {
   template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
       const unique_ptr<stIncPar<double>>&, unique_ptr<stIncEabnm<double>>);
   template unique_ptr<stCrossSection<double>> rvhGetAverageCrossSections(
-      const ArrayXr<double>&, const vector<vector<unique_ptr<stTR<double>>>>&);
+      const ArrayXd&, const vector<vector<unique_ptr<stTR<double>>>>&);
 }

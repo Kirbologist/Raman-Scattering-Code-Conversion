@@ -20,7 +20,6 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] Non-SMARTIES functions (2/2)
   - [x] Minimum viable product
   - [ ] arbitrary-precision support
-  - [ ] parallel computing support
 
 ## Notable differences from SMARTIES
 

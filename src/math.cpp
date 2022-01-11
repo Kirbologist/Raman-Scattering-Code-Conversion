@@ -150,8 +150,8 @@ namespace Raman {
   template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
   template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
   template RowArrayXr<double> logicalSlice(RowArrayXr<double>&, RowArrayXb&);
-  template ArrayXr<double> logicalSlice(ArrayXr<double>&, ArrayXb&);
+  template ArrayXd logicalSlice(ArrayXd&, ArrayXb&);
   template Tensor4c<double> tensor_conj(Tensor4c<double>&);
-  template ArrayXr<double> arr_bessel_j(ArrayXr<double>&, double);
-  template ArrayXr<double> arr_bessel_y(ArrayXr<double>&, double);
+  template ArrayXd arr_bessel_j(ArrayXd&, double);
+  template ArrayXd arr_bessel_y(ArrayXd&, double);
 }
