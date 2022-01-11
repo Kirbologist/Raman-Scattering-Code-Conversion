@@ -14,17 +14,17 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - [x] aux* functions (2/2)
   - [x] vsh* functions (9/9)
   - [x] sph* functions (11/11)
-  - [x] rvh* functions (5/5)
+  - [x] rvh* functions (5/3)
   - [x] slv* functions (2/2)
   - [x] pst* functions (2/2)
   - [x] Non-SMARTIES functions (2/2)
-  - [ ] Minimum viable product
+  - [x] Minimum viable product
   - [ ] arbitrary-precision support
   - [ ] parallel computing support
 
 ## Notable differences from SMARTIES
 
-- Expansion coefficients and other arrays that store using p-indices now include values for when n=0, m=0. This makes P (the length of the p-vectors) equal to (N+1)^2 and makes the code more convenient in a index-by-zero language without compromising any calculations. As a side effect, many other functions that calculate values for various values n are affected as well. Functions that are affected by this include:
+- Expansion coefficients and other arrays that store using p-indices now include values for when n=0, m=0. This makes P (the length of the p-vectors) equal to (N+1)^2 and makes the code more convenient in a index-by-zero language without compromising any calculations. As a side effect, many other functions that calculate values for various values n are affected as well. Functions that are affected by this include the following. (Note that in almost all cases, the extra values are 0, so they act as padding.)
   - vshPinmTaunm
   - vshGetIncidentCoeffs
   - vshEgenThetaAllPhi
@@ -39,11 +39,15 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
   - vshMakeIncidentParams
   - vshEgenThetaAllPhi
   - vshGetZnAll
+- Some structs that originally contained [1 x X] matrix members may now contain [X x 1] matrix members instead for slightly better syntax. Structs that have this include (but are not limited to):
+  - stAbcdnm
 - Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
 - sphCalculatePQ doesn't try to access stParams.output, since stParams is expected to be the same struct type as the one given in the specification, in which case output is not a member of stParams. Such a member does exist in stOptions however, so future implementations may take stOptions as an argument type. (For calculating Raman scattering, this option is true by default.)
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 - The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept.
-- sphEstimateDelta doesn't get called in slvForT in the final program for this, so it isn't implemented.
+- sphEstimateDelta doesn't get called in slvForT in the final program for this, so this function isn't implemented.
+- rvhGetSymmetricMat is not debugged since it's never used in the final raman_elastic_scattering program.
+- rvhTruncateMatrices, rvhGetSymmetricMat, rvhGetFieldCoefficients, rvhGetAverageCrossSections can only take stTR vectors as arguments and not stPR vectors. (Overloading these functions with versions that can take stPR vectors is relatively simple however.)
 
 ## Dependencies
 

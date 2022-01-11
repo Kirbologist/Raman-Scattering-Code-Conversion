@@ -244,10 +244,10 @@ namespace Raman {
 
     ArrayXc<Real> a_nm = st_inc_E_abnm->a_nm;
     ArrayXc<Real> b_nm = st_inc_E_abnm->b_nm;
-    ArrayXc<Real> p_nm(P_max);
-    ArrayXc<Real> q_nm(P_max);
-    ArrayXc<Real> c_nm = get_R ? ArrayXc<Real>(P_max) : ArrayXc<Real>::Zero(1);
-    ArrayXc<Real> d_nm = get_R ? ArrayXc<Real>(P_max) : ArrayXc<Real>::Zero(1);
+    ArrayXc<Real> p_nm = ArrayXc<Real>::Zero(P_max);
+    ArrayXc<Real> q_nm = ArrayXc<Real>::Zero(P_max);
+    ArrayXc<Real> c_nm = ArrayXc<Real>::Zero(get_R ? P_max : 1);
+    ArrayXc<Real> d_nm = ArrayXc<Real>::Zero(get_R ? P_max : 1);
     ArrayXi m_for_T(M);
 
     for (size_t m_ind11 = 0; m_ind11 < M; m_ind11++) {
@@ -295,26 +295,26 @@ namespace Raman {
       }
 
       if (get_R) {
-        VectorXc<Real> c_nm_e = st_TR_list[m_ind]->st_4M_T_eo().M11(n_vec_T_e, n_vec_T_e).matrix() *
-            a_nm(p_vec_e).matrix() + st_TR_list[m_ind]->st_4M_T_eo().M12(n_vec_T_e, n_vec_T_o).matrix() *
+        VectorXc<Real> c_nm_e = st_TR_list[m_ind]->st_4M_R_eo().M11(n_vec_T_e, n_vec_T_e).matrix() *
+            a_nm(p_vec_e).matrix() + st_TR_list[m_ind]->st_4M_R_eo().M12(n_vec_T_e, n_vec_T_o).matrix() *
             b_nm(p_vec_o).matrix();
-        VectorXc<Real> d_nm_o = st_TR_list[m_ind]->st_4M_T_eo().M21(n_vec_T_o, n_vec_T_e).matrix() *
-            a_nm(p_vec_e).matrix() + st_TR_list[m_ind]->st_4M_T_eo().M22(n_vec_T_o, n_vec_T_o).matrix() *
+        VectorXc<Real> d_nm_o = st_TR_list[m_ind]->st_4M_R_eo().M21(n_vec_T_o, n_vec_T_e).matrix() *
+            a_nm(p_vec_e).matrix() + st_TR_list[m_ind]->st_4M_R_eo().M22(n_vec_T_o, n_vec_T_o).matrix() *
             b_nm(p_vec_o).matrix();
-        VectorXc<Real> c_nm_o = st_TR_list[m_ind]->st_4M_T_oe().M11(n_vec_T_o, n_vec_T_o).matrix() *
-            a_nm(p_vec_o).matrix() + st_TR_list[m_ind]->st_4M_T_oe().M12(n_vec_T_o, n_vec_T_e).matrix() *
+        VectorXc<Real> c_nm_o = st_TR_list[m_ind]->st_4M_R_oe().M11(n_vec_T_o, n_vec_T_o).matrix() *
+            a_nm(p_vec_o).matrix() + st_TR_list[m_ind]->st_4M_R_oe().M12(n_vec_T_o, n_vec_T_e).matrix() *
             b_nm(p_vec_e).matrix();
-        VectorXc<Real> d_nm_e = st_TR_list[m_ind]->st_4M_T_oe().M21(n_vec_T_e, n_vec_T_o).matrix() *
-            a_nm(p_vec_o).matrix() + st_TR_list[m_ind]->st_4M_T_oe().M22(n_vec_T_e, n_vec_T_e).matrix() *
+        VectorXc<Real> d_nm_e = st_TR_list[m_ind]->st_4M_R_oe().M21(n_vec_T_e, n_vec_T_o).matrix() *
+            a_nm(p_vec_o).matrix() + st_TR_list[m_ind]->st_4M_R_oe().M22(n_vec_T_e, n_vec_T_e).matrix() *
             b_nm(p_vec_e).matrix();
 
         for (int i = 0; i < n_vec_e.size(); i++) {
-          c_nm(p_vec_e(i)) = p_nm_e(i);
-          d_nm(p_vec_e(i)) = q_nm_e(i);
+          c_nm(p_vec_e(i)) = c_nm_e(i);
+          d_nm(p_vec_e(i)) = d_nm_e(i);
         }
         for (int i = 0; i < n_vec_o.size(); i++) {
-          c_nm(p_vec_o(i)) = p_nm_o(i);
-          d_nm(p_vec_o(i)) = q_nm_o(i);
+          c_nm(p_vec_o(i)) = c_nm_o(i);
+          d_nm(p_vec_o(i)) = d_nm_o(i);
         }
       }
 
@@ -336,35 +336,35 @@ namespace Raman {
             b_nm(p_vec_n_e).matrix();
 
         for (int i = 0; i < n_vec_e.size(); i++) {
-          p_nm(p_vec_n_e(i)) = p_nm_e(i);
-          q_nm(p_vec_n_e(i)) = q_nm_e(i);
+          p_nm(p_vec_n_e(i)) = p_nm_n_e(i);
+          q_nm(p_vec_n_e(i)) = q_nm_n_e(i);
         }
         for (int i = 0; i < n_vec_o.size(); i++) {
-          p_nm(p_vec_n_o(i)) = p_nm_o(i);
-          q_nm(p_vec_n_o(i)) = q_nm_o(i);
+          p_nm(p_vec_n_o(i)) = p_nm_n_o(i);
+          q_nm(p_vec_n_o(i)) = q_nm_n_o(i);
         }
 
         if (get_R) {
-          VectorXc<Real> c_nm_n_e = st_TR_list[m_ind]->st_4M_T_eo().M11(n_vec_T_e, n_vec_T_e).matrix() *
-              a_nm(p_vec_n_e).matrix() - st_TR_list[m_ind]->st_4M_T_eo().M12(n_vec_T_e, n_vec_T_o).matrix() *
+          VectorXc<Real> c_nm_n_e = st_TR_list[m_ind]->st_4M_R_eo().M11(n_vec_T_e, n_vec_T_e).matrix() *
+              a_nm(p_vec_n_e).matrix() - st_TR_list[m_ind]->st_4M_R_eo().M12(n_vec_T_e, n_vec_T_o).matrix() *
               b_nm(p_vec_n_o).matrix();
-          VectorXc<Real> d_nm_n_o = -st_TR_list[m_ind]->st_4M_T_eo().M21(n_vec_T_o, n_vec_T_e).matrix() *
-              a_nm(p_vec_n_e).matrix() + st_TR_list[m_ind]->st_4M_T_eo().M22(n_vec_T_o, n_vec_T_o).matrix() *
+          VectorXc<Real> d_nm_n_o = -st_TR_list[m_ind]->st_4M_R_eo().M21(n_vec_T_o, n_vec_T_e).matrix() *
+              a_nm(p_vec_n_e).matrix() + st_TR_list[m_ind]->st_4M_R_eo().M22(n_vec_T_o, n_vec_T_o).matrix() *
               b_nm(p_vec_n_o).matrix();
-          VectorXc<Real> c_nm_n_o = st_TR_list[m_ind]->st_4M_T_oe().M11(n_vec_T_o, n_vec_T_o).matrix() *
-              a_nm(p_vec_n_o).matrix() - st_TR_list[m_ind]->st_4M_T_oe().M12(n_vec_T_o, n_vec_T_e).matrix() *
+          VectorXc<Real> c_nm_n_o = st_TR_list[m_ind]->st_4M_R_oe().M11(n_vec_T_o, n_vec_T_o).matrix() *
+              a_nm(p_vec_n_o).matrix() - st_TR_list[m_ind]->st_4M_R_oe().M12(n_vec_T_o, n_vec_T_e).matrix() *
               b_nm(p_vec_n_e).matrix();
-          VectorXc<Real> d_nm_n_e = -st_TR_list[m_ind]->st_4M_T_oe().M21(n_vec_T_e, n_vec_T_o).matrix() *
-              a_nm(p_vec_n_o).matrix() + st_TR_list[m_ind]->st_4M_T_oe().M22(n_vec_T_e, n_vec_T_e).matrix() *
+          VectorXc<Real> d_nm_n_e = -st_TR_list[m_ind]->st_4M_R_oe().M21(n_vec_T_e, n_vec_T_o).matrix() *
+              a_nm(p_vec_n_o).matrix() + st_TR_list[m_ind]->st_4M_R_oe().M22(n_vec_T_e, n_vec_T_e).matrix() *
               b_nm(p_vec_n_e).matrix();
 
           for (int i = 0; i < n_vec_e.size(); i++) {
-            c_nm(p_vec_n_e(i)) = p_nm_e(i);
-            d_nm(p_vec_n_e(i)) = q_nm_e(i);
+            c_nm(p_vec_n_e(i)) = c_nm_n_e(i);
+            d_nm(p_vec_n_e(i)) = d_nm_n_e(i);
           }
           for (int i = 0; i < n_vec_o.size(); i++) {
-            c_nm(p_vec_n_o(i)) = p_nm_o(i);
-            d_nm(p_vec_n_o(i)) = q_nm_o(i);
+            c_nm(p_vec_n_o(i)) = c_nm_n_o(i);
+            d_nm(p_vec_n_o(i)) = d_nm_n_o(i);
           }
         }
       }

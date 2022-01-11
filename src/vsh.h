@@ -35,7 +35,6 @@ namespace Raman {
     vector<unique_ptr<ArrayXXc<Real>>> Erm;
     vector<unique_ptr<ArrayXXc<Real>>> Etm;
     vector<unique_ptr<ArrayXXc<Real>>> Efm;
-    int N_max;
   };
 
   template <class Real>
@@ -47,11 +46,9 @@ namespace Raman {
     Real phi0;
   };
 
-  // Untested
   template <class Real>
   unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max);
 
-  // Untested
   template <class Real>
   unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max,
       Real theta_p, Real phi_p, Real alpha_p);
@@ -62,11 +59,9 @@ namespace Raman {
   template <class Real>
   unique_ptr<stIncEabnm<Real>> vshGetIncidentCoeffs(int N_max, const unique_ptr<stIncPar<Real>>& angles);
 
-  // Untested
   template <class Real>
   unique_ptr<stZnAll<Real>> vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type);
 
-  // Untested
   template <class Real>
   unique_ptr<stEAllPhi<Real>> vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,

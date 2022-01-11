@@ -218,9 +218,10 @@ namespace Raman {
 
     RowArrayXc<Real> n = RowArrayXc<Real>::LinSpaced(N_max, 1, N_max);
     auto output = make_unique<stZnAll<Real>>();
-    output->Z0 = f(all, seq(1, last));
+    output->Z0 = f;
     output->Z1 = (output->Z0).colwise() / rho.template cast<complex<Real>>();
-    output->Z2 = f(all, seq(0, last - 1)) - (output->Z1).rowwise() * n;
+    output->Z2 = ArrayXXc<Real>::Zero(rho.size(), N_max + 1);
+    output->Z2.rightCols(N_max) = f(all, seq(0, last - 1)) - (output->Z1.rightCols(N_max)).rowwise() * n;
     return output;
   }
 
@@ -244,7 +245,6 @@ namespace Raman {
     auto output = make_unique<stEAllPhi<Real>>();
     output->theta = theta;
     output->r_of_theta = rt;
-    output->N_max = N_max;
     output->Erm = vector<unique_ptr<ArrayXXc<Real>>>(2*N_max + 1);
     output->Etm = vector<unique_ptr<ArrayXXc<Real>>>(2*N_max + 1);
     output->Efm = vector<unique_ptr<ArrayXXc<Real>>>(2*N_max + 1);
@@ -262,17 +262,17 @@ namespace Raman {
       }
       Real coeff1 = 1/sqrt(6*mp_pi<Real>()), coeff2 = coeff1/sqrt(2);
 
-      output->Erm[N_max] = make_unique<ArrayXXc<Real>>(((coeff1 * q_nm.col(1)).matrix() * cos(theta).matrix()).array());
-      output->Etm[N_max] = make_unique<ArrayXXc<Real>>(((-coeff1 * q_nm.col(1)).matrix() * sin(theta).matrix()).array());
+      output->Erm[N_max] = make_unique<ArrayXXc<Real>>(((coeff1 * q_nm.col(2)).matrix() * cos(theta).matrix()).array());
+      output->Etm[N_max] = make_unique<ArrayXXc<Real>>(((-coeff1 * q_nm.col(2)).matrix() * sin(theta).matrix()).array());
       output->Efm[N_max] = make_unique<ArrayXXc<Real>>(ArrayXc<Real>::Zero(Nb_lambda, Nb_theta));
 
-      output->Erm[N_max + 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(2)).matrix() * sin(theta).matrix()).array());
-      output->Etm[N_max + 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(2)).matrix() * cos(theta).matrix()).array());
-      output->Efm[N_max + 1] = make_unique<ArrayXXc<Real>>((-mp_im_unit<Real>()*coeff2 * q_nm.col(2)).replicate(1, Nb_theta));
+      output->Erm[N_max + 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(3)).matrix() * sin(theta).matrix()).array());
+      output->Etm[N_max + 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(3)).matrix() * cos(theta).matrix()).array());
+      output->Efm[N_max + 1] = make_unique<ArrayXXc<Real>>((-mp_im_unit<Real>()*coeff2 * q_nm.col(3)).replicate(1, Nb_theta));
 
-      output->Erm[N_max - 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(0)).matrix() * sin(theta).matrix()).array());
-      output->Etm[N_max - 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(0)).matrix() * cos(theta).matrix()).array());
-      output->Efm[N_max - 1] = make_unique<ArrayXXc<Real>>((-mp_im_unit<Real>()*coeff2 * q_nm.col(0)).replicate(1, Nb_theta));
+      output->Erm[N_max - 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(1)).matrix() * sin(theta).matrix()).array());
+      output->Etm[N_max - 1] = make_unique<ArrayXXc<Real>>(((coeff2 * q_nm.col(1)).matrix() * cos(theta).matrix()).array());
+      output->Efm[N_max - 1] = make_unique<ArrayXXc<Real>>((-mp_im_unit<Real>()*coeff2 * q_nm.col(1)).replicate(1, Nb_theta));
 
       cout << "r0 = 0 in vshEgenThetaAllPhi" << endl;
       return output;
@@ -313,7 +313,7 @@ namespace Raman {
         mu_n_divd = mu_n_divd_gen*pow(-mp_im_unit<Real>(), n + 1);
       } else {
         q_nm_for_Z1 = q_nm(all, p_vec);
-        ip_nm_for_Z0 = q_nm(all, p_vec);
+        ip_nm_for_Z0 = mp_im_unit<Real>()*p_nm(all, p_vec);
         mu_n_divd = mu_n_divd_gen;
       }
       q_nm_for_Z2 = q_nm(all, p_vec);
@@ -323,9 +323,9 @@ namespace Raman {
         ind_in_rho_col = ArrayXi::LinSpaced(Nb_theta, 0, Nb_theta - 1) + l*Nb_theta;
         vec_n_dep = (q_nm_for_Z1.row(l) * mu_n_times(n_vec).transpose()).matrix();
         Er_sum.row(l) = ((d_nm*st_zn_all_col->Z1(ind_in_rho_col, n_vec)).matrix() * vec_n_dep).transpose().array();
-        tmp1 = mu_n_divd(0, n_vec);
-        vec_n_dep = (ip_nm_for_Z0.row(l) * tmp1).transpose().matrix();
-        vec_n_dep2 = (q_nm_for_Z2.row(l) * tmp1).transpose().matrix();
+        tmp1 = mu_n_divd(n_vec);
+        vec_n_dep = (ip_nm_for_Z0.row(l) * tmp1.transpose()).transpose().matrix();
+        vec_n_dep2 = (q_nm_for_Z2.row(l) * tmp1.transpose()).transpose().matrix();
 
         tmp1 = (pi_nm * st_zn_all_col->Z0(ind_in_rho_col, n_vec)).matrix() * vec_n_dep;
         tmp2 = (tau_nm * st_zn_all_col->Z2(ind_in_rho_col, n_vec)).matrix() * vec_n_dep2;
@@ -338,7 +338,7 @@ namespace Raman {
 
       output->Erm[m + N_max] = make_unique<ArrayXXc<Real>>(pow(-1, m) * Er_sum);
       output->Etm[m + N_max] = make_unique<ArrayXXc<Real>>(pow(-1, m) * Et_sum);
-      output->Efm[m + N_max] = make_unique<ArrayXXc<Real>>(pow(-1, m) * Ef_sum);
+      output->Efm[m + N_max] = make_unique<ArrayXXc<Real>>(mp_im_unit<Real>() * pow(-1, m) * Ef_sum);
     }
 
     return output;
@@ -347,7 +347,7 @@ namespace Raman {
   template <class Real>
   unique_ptr<stEforPhi<Real>> vshEthetaForPhi(const unique_ptr<stEAllPhi<Real>>& stEsurf, Real phi0) {
     auto output = make_unique<stEforPhi<Real>>();
-    int N_max = stEsurf->N_max;
+    int N_max = (stEsurf->Erm.size() - 1) / 2;
     output->theta = stEsurf->theta;
     output->phi0 = phi0;
 
