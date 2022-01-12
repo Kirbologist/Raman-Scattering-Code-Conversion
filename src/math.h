@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   Real mp_pi(void);
 

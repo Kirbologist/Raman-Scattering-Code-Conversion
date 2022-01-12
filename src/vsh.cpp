@@ -1,7 +1,7 @@
 #include "vsh.h"
 #include "math.h"
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max) {
     auto output = make_unique<stIncPar<Real>>();

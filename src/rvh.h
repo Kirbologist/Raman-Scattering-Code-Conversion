@@ -8,7 +8,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   struct stTR : stMat<Real> {
     using stMat<Real>::stMat;

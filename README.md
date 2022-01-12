@@ -9,6 +9,31 @@ Project supervisor is A/Prof Taras Plakhotnik.
 
 The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (shared with me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support arbitrary precision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
 
+## Instructions
+
+Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using double-precision floating points, simply type the following command:
+```
+make
+```
+
+For calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, type the following command:
+```
+make mp
+```
+
+In either case, once the binaries have been built, type the following to run the program:
+```
+output/raman_elastic_scattering [CPU_N] [CPUS] [DIA_MIN] [DIA_MAX] [N_RAD] [N_THETA_P] [CALC_TYPE]
+```
+Where:
+- `CPU_N` is the index of the current computer of a cluster of computers (note that index-by-0 is used, so the first computer of a cluster has `CPU_N` = 0, the second computer has `CPU_N` = 1, etc.). By default, `CPU_N` = 0.
+- `CPUS` is the number of computers in the cluster. By default, `CPUS` = 1.
+- `DIA_MIN` is the minimum equivalent spherical diameter (ESD) in nanometres of the spheroids you want to calculate the scattering of. By default, `DIA_MIN` = 1000.
+- `DIA_MAX` is the maximum equivalent spherical diameter (ESD) in nanometres of the spheroids you want to calculate the scattering of. By default, `DIA_MAX` = 2000.
+- `N_RAD` is the number of ESD's between `DIA_MIN` and `DIA_MAX` inclusive that you want to calculate with. These ESD's are equally spaced. By default, `N_RAD` = 100.
+- `N_THETA_P` is the number of spheroid orientations you want to calculate with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are equally spaced. By default, `N_THETA_P` = 19.
+- `CALC_TYPE` is the type of precision used for floating-point calculations. Use `double` for double precision and `mp` for arbitrary precision. Note that this parameter only matters if the binary was built using `make mp`. By default, `CALC_TYPE` = `double`.
+
 ## Progress
 
   - [x] aux* functions (2/2)
@@ -51,7 +76,8 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 ## Dependencies
 
 - Eigen 3.4.0, a free, open-source, efficient and comprehensive linear algebra library made for C++. Website: https://eigen.tuxfamily.org/index.php
-- Boost (C++ Libraries) 1.77.0, a free, open-source set of libraries with applications in a wide variety of areas. Currently only used for some special mathematical functions. Website: https://www.boost.org
+- Boost (C++ Libraries) 1.77.0, a free, open-source set of libraries with applications in a wide variety of areas. Used for some template maths functions and its MPFR class wrapper. Website: https://www.boost.org
+- The GNU Multi Precision Arithmetic Library (GMP), a C library that provides support for arbitrary precision arithmetic. While it has arbitrary-precision floating-point types, MPFR is preferred. This library is a prerequisite for MPFR. Website: https://gmplib.org/
 - The GNU Multiple Precision Floating-Point Reliable Library (GNU MPFR), a C library that provides support for arbitrary-precision floating-point computation. Website: https://www.mpfr.org
 
 ## Notes

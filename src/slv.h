@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   struct stTmatrix {
     unique_ptr<stCrossSection<Real>> st_coa;

@@ -7,7 +7,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   struct stRes {
     ArrayXc<Real> p_nm;

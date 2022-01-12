@@ -6,7 +6,7 @@
 
 using namespace Eigen;
 
-namespace Raman {
+namespace Smarties {
 
   // Might be worth re-testing
   template <class Real>

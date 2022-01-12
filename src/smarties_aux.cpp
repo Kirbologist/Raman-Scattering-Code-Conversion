@@ -4,7 +4,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(size_t N1, Real a, Real b) {
     int N = N1 - 1, N2 = N1 + 1;

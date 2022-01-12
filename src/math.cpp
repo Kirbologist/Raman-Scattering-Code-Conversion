@@ -1,15 +1,14 @@
 #include "math.h"
 #include <Eigen/LU>
 #include <boost/math/special_functions/bessel.hpp>
+#include <boost/math/constants/constants.hpp>
 
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
-  Real mp_pi(void) {
-    return 3.14159265359;
-  }
+  inline Real mp_pi(void) { return boost::math::constants::pi<Real>(); }
 
   template <class Real>
   Real mp_eps(void) {
@@ -17,10 +16,7 @@ namespace Raman {
   }
 
   template <class Real>
-  complex<Real> mp_im_unit(void) {
-    complex<Real> i(0.0, 1.0);
-    return i;
-  }
+  inline complex<Real> mp_im_unit(void) { return complex<Real>(0.0, 1.0); }
 
   template <class Real>
   Tensor3c<Real> subtensor(Tensor3c<Real>& tensor,

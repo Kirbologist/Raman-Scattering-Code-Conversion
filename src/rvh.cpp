@@ -4,7 +4,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R) {
     size_t num_entries = st_PQ_list.size();

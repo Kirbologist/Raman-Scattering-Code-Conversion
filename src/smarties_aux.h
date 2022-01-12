@@ -5,7 +5,7 @@
 
 using namespace Eigen;
 
-namespace Raman {
+namespace Smarties {
   enum sInt {GAUSS, RECTANGLE, PTS};
 
   template <class Real>

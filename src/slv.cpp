@@ -3,7 +3,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   unique_ptr<stTmatrix<Real>> slvForT(const unique_ptr<stParams<Real>>& params,
       const unique_ptr<stOptions<Real>>& options, unique_ptr<stRtfunc<Real>> stGeometry) {

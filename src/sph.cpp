@@ -6,7 +6,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   unique_ptr<ArrayXXr<Real>> sphGetUforFp(int n) {
     int b_max = n/2;

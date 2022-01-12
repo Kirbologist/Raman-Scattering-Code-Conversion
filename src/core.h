@@ -13,7 +13,7 @@
 using namespace std;
 using namespace Eigen;
 
-namespace Raman {
+namespace Smarties {
   using RowArrayXi = Array<int, 1, Dynamic>;
 
   using ArrayXb = Array<bool, Dynamic, 1>;

@@ -5,7 +5,7 @@
 
 using namespace Eigen;
 
-namespace Raman {
+namespace Smarties {
   enum sBessel {J, H1};
 
   template <class Real>

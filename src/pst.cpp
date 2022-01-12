@@ -5,7 +5,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace Raman {
+namespace Smarties {
   template <class Real>
   unique_ptr<stRes<Real>> pstMakeStructForField(const unique_ptr<stAbcdnm<Real>>& st_abcdnm,
     int N_max, ArrayXr<Real> lambda, ArrayXr<Real> epsilon2, Real epsilon1,
