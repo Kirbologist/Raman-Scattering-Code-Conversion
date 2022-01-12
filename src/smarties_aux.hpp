@@ -92,9 +92,6 @@ namespace Smarties {
 
     return output;
   }
-
-  template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(int, double, double);
-  template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(int, sInt);
 }
 
 #endif

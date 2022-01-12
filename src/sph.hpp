@@ -243,8 +243,8 @@ namespace Smarties {
     int num_x = x.size();
 
     auto output = make_unique<stFpovx<Real>>();
-    output->rb_chi = vshRBchi<Real>(ArrayXd::LinSpaced(N_max + 1, 0, N_max), x);
-    output->rb_psi = vshRBpsi<Real>(ArrayXd::LinSpaced(N_max + 1, 0, N_max), s*x);
+    output->rb_chi = vshRBchi<Real>(ArrayXr<Real>::LinSpaced(N_max + 1, 0, N_max), x);
+    output->rb_psi = vshRBpsi<Real>(ArrayXr<Real>::LinSpaced(N_max + 1, 0, N_max), s*x);
     output->Fpovx = Tensor3c<Real>(N_max + 1, N_max + 1, num_x);
     output->Fpovx.setZero();
 
@@ -325,27 +325,29 @@ namespace Smarties {
         nnp1 = n*(n + 1);
 
         output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(n, 0).chip(k, 0) = (
-            col_shape.constant((k + n + 1)*(k + 1)) * prods.chip(n - 1, 0).chip(k - 1, 0) +
-            col_shape.constant(kkp1 - k*(n + 1)) * prods.chip(n - 1, 0).chip(k + 1, 0) +
-            col_shape.constant(kkp1 - (k + 1)*n) * prods.chip(n + 1, 0).chip(k - 1, 0) +
-            col_shape.constant(kkp1 + k*n) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
-            col_shape.constant((2*n + 1)*(2*k + 1));
+            col_shape.constant(static_cast<complex<Real>>((k + n + 1)*(k + 1))) * prods.chip(n - 1, 0).chip(k - 1, 0) +
+            col_shape.constant(static_cast<complex<Real>>(kkp1 - k*(n + 1))) * prods.chip(n - 1, 0).chip(k + 1, 0) +
+            col_shape.constant(static_cast<complex<Real>>(kkp1 - (k + 1)*n)) * prods.chip(n + 1, 0).chip(k - 1, 0) +
+            col_shape.constant(static_cast<complex<Real>>(kkp1 + k*n)) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
+            col_shape.constant(static_cast<complex<Real>>((2*n + 1)*(2*k + 1)));
 
         output->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(n, 0).chip(k, 0) = (
-            col_shape.constant(nnp1 + (k + 1) * (n + 1))*prods.chip(n - 1, 0).chip(k - 1, 0) +
-            col_shape.constant((n - k)*(n + 1)) * prods.chip(n - 1, 0).chip(k + 1, 0) +
-            col_shape.constant((n - k)*n) * prods.chip(n + 1, 0).chip(k - 1, 0) +
-            col_shape.constant(nnp1 + k*n) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
-            col_shape.constant((2*n + 1)*(2*k + 1));
+            col_shape.constant(static_cast<complex<Real>>(nnp1 + (k + 1) * (n + 1)))*prods.chip(n - 1, 0).chip(k - 1, 0) +
+            col_shape.constant(static_cast<complex<Real>>((n - k)*(n + 1))) * prods.chip(n - 1, 0).chip(k + 1, 0) +
+            col_shape.constant(static_cast<complex<Real>>((n - k)*n)) * prods.chip(n + 1, 0).chip(k - 1, 0) +
+            col_shape.constant(static_cast<complex<Real>>(nnp1 + k*n)) * prods.chip(n + 1, 0).chip(k + 1, 0)) /
+            col_shape.constant(static_cast<complex<Real>>((2*n + 1)*(2*k + 1)));
       }
 
       for (int k = 1 + n % 2; k <= N; k += 2) {
         output->xi_prime_psi.chip(n, 0).chip(k, 0) =
-            (prods.chip(n - 1, 0).chip(k, 0) * col_shape.constant(n + 1) -
-            col_shape.constant(n)*prods.chip(n + 1, 0).chip(k, 0)) / col_shape.constant(2*n + 1);
+            (prods.chip(n - 1, 0).chip(k, 0) * col_shape.constant(static_cast<complex<Real>>(n + 1)) -
+            col_shape.constant(static_cast<complex<Real>>(n))*prods.chip(n + 1, 0).chip(k, 0)) /
+            col_shape.constant(static_cast<complex<Real>>(2*n + 1));
         output->xi_psi_prime.chip(n, 0).chip(k, 0) =
-            (prods.chip(n, 0).chip(k - 1, 0) * col_shape.constant(k + 1) -
-            col_shape.constant(k)*prods.chip(n, 0).chip(k + 1, 0)) / col_shape.constant(2*k + 1);
+            (prods.chip(n, 0).chip(k - 1, 0) * col_shape.constant(static_cast<complex<Real>>(k + 1)) -
+            col_shape.constant(static_cast<complex<Real>>(k))*prods.chip(n, 0).chip(k + 1, 0)) /
+            col_shape.constant(static_cast<complex<Real>>(2*k + 1));
       }
     }
     return output;
@@ -371,7 +373,7 @@ namespace Smarties {
     ArrayXXc<Real> xi_n_psi_n = psi_n_psi_n + mp_im_unit<Real>() *
         (prods->chi_n(all, seq(0, last - 1)) * prods->psi_k(all, seq(0, last - 1))).transpose();
 
-    ArrayXXc<Real> n_vec = ArrayXc<Real>::LinSpaced(N_max + 1, 1, N_max + 1);
+    ArrayXc<Real> n_vec = ArrayXr<Real>::LinSpaced(N_max + 1, 1, N_max + 1);
     output->st_psi_psi_all->for_diag_Lt2 = psi_n_psi_np1 - s*psi_np1_psi_n + (s - 1)*(s + 1)/s *
         (n_vec.matrix() * (1/x.transpose()).matrix()).array() * psi_n_psi_n;
     output->st_xi_psi_all->for_diag_Lt2 = xi_n_psi_np1 - s*xi_np1_psi_n + (s - 1)*(s + 1)/s *
@@ -436,10 +438,10 @@ namespace Smarties {
       NB_next = NB + NB_step;
       prod_new = sphGetFpovx<Real>(NB_next, s, x);
       tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
-          subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
+          subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
       rel_acc_ee = tmp.abs().real().maximum();
       tmp = subtensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
-          subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
+          subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
       rel_acc_oo = tmp.abs().real().maximum();
       rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
       if (rel_acc < acc)
@@ -458,10 +460,10 @@ namespace Smarties {
         NB += NB_step;
         prod = sphGetFpovx<Real>(NB, s, x);
         tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
-            subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(1);
+            subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
         rel_acc_ee = tmp.abs().maximum().real();
         tmp = subtensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
-            subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(1);
+            subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
         rel_acc_oo = tmp.abs().maximum().real();
         rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
         if (rel_acc < acc)
@@ -639,7 +641,7 @@ namespace Smarties {
       ArrayXXc<Real> P22 = prefactor2 * L6P;
 
       ArrayXc<Real> prefact_diag1 = -mp_im_unit<Real>()/s * (2*n_vec_real + 1) / (2*n_vec_real*(n_vec_real + 1));
-      ArrayXc<Real> prefact_diag2 = -mp_im_unit<Real>()*(s - 1)*(s + 1)/(2*s) * (2*n_vec_real + 1);
+      ArrayXc<Real> prefact_diag2 = -mp_im_unit<Real>()*static_cast<complex<Real>>((s - 1)*(s + 1)/(2*s)) * (2*n_vec_real + 1);
       ArrayXXc<Real> pi2_p_tau2 = (pi_nm.pow(2) + tau_nm.pow(2));
 
       ArrayXc<Real> Ltilde1 = ((pi2_p_tau2 * for_Q_diag_Lt1(n_vec, all)).matrix() * Rt_func->w_theta.matrix()).array();
@@ -700,17 +702,6 @@ namespace Smarties {
     }
     return output;
   }
-
-  template unique_ptr<ArrayXXd> sphGetUforFp(int);
-  template unique_ptr<stFprow<double>> sphGetFpRow(int, double, const ArrayXd&);
-  template unique_ptr<stFpovx<double>> sphGetFpovx(int, double, const ArrayXd&);
-  template unique_ptr<stBessel<double>> sphGetXiPsi(int, double, const ArrayXd&, int);
-  template unique_ptr<stBesselPrimes<double>> sphGetBesselProductsPrimes(const Tensor3c<double>&);
-  template unique_ptr<stBesselProducts<double>> sphGetModifiedBesselProducts(int, double, const ArrayXd&, int);
-  template unique_ptr<stRtfunc<double>> sphMakeGeometry(int, double, double, const unique_ptr<ArrayXd>);
-  template int sphCheckBesselConvergence(int, double, const ArrayXd&, double, int);
-  template int sphEstimateNB(int, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
-  template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
 }
 
 #endif

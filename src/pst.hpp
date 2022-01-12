@@ -335,8 +335,8 @@ namespace Smarties {
         for (int nn = nn_min; nn <= nn_max; nn++) {
           int SIG = s_sign(kn + nn);
           int m_ind_max = min(n, nn) + N;
-          complex<Real> AA1 = 0;
-          complex<Real> AA2 = 0;
+          complex<Real> AA1 = static_cast<complex<Real>>(0);
+          complex<Real> AA2 = static_cast<complex<Real>>(0);
           for (int m_ind = N; m_ind <= m_ind_max; m_ind++) {
             int m = m_ind - N;
             complex<Real> SSS = G1(m_ind, nn);
@@ -359,8 +359,8 @@ namespace Smarties {
         int m_min = max(-n1 + 1, -n);
         for (int m = m_min; m <= m_max; m++) {
           int m_ind = m + N;
-          complex<Real> BB1 = 0;
-          complex<Real> BB2 = 0;
+          complex<Real> BB1 = static_cast<complex<Real>>(0);
+          complex<Real> BB2 = static_cast<complex<Real>>(0);
           for (int nn = nn_min; nn <= nn_max; nn++) {
             complex<Real> SSS = G2(m_ind, nn);
             BB1 += SSS * A1k(nn);
@@ -411,7 +411,7 @@ namespace Smarties {
           int n1_min = abs(m - 1);
           Real DD3 = 0;
           Real DD4 = 0;
-          complex<Real> DD5 = 0;
+          complex<Real> DD5 = static_cast<complex<Real>>(0);
           int m_ind2 = -m + 2 + N;
           for (int n1 = n1_min; n1 <= n1_max; n1++) {
             Real XX = 2*n1 + 1;
@@ -441,7 +441,7 @@ namespace Smarties {
       Real G2L = 0;
       Real G3L = 0;
       Real G4L = 0;
-      complex<Real> G5L = 0;
+      complex<Real> G5L = static_cast<complex<Real>>(0);
       Real SL = (2*l + 1)*DK;
       for (int n = 0; n <= N; n++) {
         int nn_min = max(1, abs(n - l));
@@ -477,7 +477,7 @@ namespace Smarties {
             if (l >= 2) {
               Real DM3 = 0;
               Real DM4 = 0;
-              complex<Real> DM5 = 0;
+              complex<Real> DM5 = static_cast<complex<Real>>(0);
               int m_max = min(n, nn + 2);
               int m_min = max(-n, -nn + 2);
               int m_ind_max = N + m_max;
@@ -511,7 +511,7 @@ namespace Smarties {
       output->BET2n(l) = imag(G5L) * 2;
 
       L_max = l;
-      if (abs(G1L) < mp_eps<Real>())
+      if (abs(G1L) < 1e-15)
         break;
     }
     output->L_max = L_max;
@@ -596,13 +596,6 @@ namespace Smarties {
 
     return output;
   }
-
-  template unique_ptr<stRes<double>> pstMakeStructForField(const unique_ptr<stAbcdnm<double>>&,
-      int, ArrayXd, ArrayXd, double, unique_ptr<stIncPar<double>>, double, double);
-  template unique_ptr<stRes<double>> pstMakeStructForField(
-      const unique_ptr<stAbcdnm<double>>&, const unique_ptr<stParams<double>>&);
-  template unique_ptr<stSM<double>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<double>>>&,
-      double, double, int);
 }
 
 #endif

@@ -44,7 +44,7 @@ Where:
   - [x] pst* functions (2/2)
   - [x] Non-SMARTIES functions (2/2)
   - [x] Minimum viable product
-  - [ ] arbitrary-precision support
+  - [x] arbitrary-precision support
 
 ## Notable differences from SMARTIES
 

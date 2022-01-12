@@ -37,20 +37,20 @@ void RamanElasticScattering(int argc, char** argv) {
   Real dia_max = (argc > 4 && isdigit(argv[4][0])) ? stof(argv[4], nullptr) : 2000.0;
   int N_rad = (argc > 5 && isdigit(argv[5][0])) ? stoi(argv[5], nullptr) : 100;
   int N_theta_p = (argc > 6 && isdigit(argv[6][0])) ? stoi(argv[6], nullptr) : 19;
-  ArrayXr<Real> par = ArrayXd::LinSpaced(N_rad, dia_min, dia_max);
+  ArrayXr<Real> par = ArrayXr<Real>::LinSpaced(N_rad, dia_min, dia_max);
   int par_per_cpu = N_rad / cpus;
   ArrayXr<Real> dia_var = par(ArrayXi::LinSpaced(par_per_cpu, 0, par_per_cpu - 1) + cpu_n*par_per_cpu);
   ArrayXr<Real> rad_var = dia_var/2;
-  ArrayXr<Real> theta_p_var = ArrayXd::LinSpaced(N_theta_p, 0, PI/2);
+  ArrayXr<Real> theta_p_var = ArrayXr<Real>::LinSpaced(N_theta_p, 0, PI/2);
   ArrayXr<Real> h_var = {{static_cast<Real>(1.0)/3}};
 
   Tensor3r<Real> sigma_yz(par_per_cpu, h_var.size(), N_theta_p);
   Tensor3r<Real> sigma_zy(par_per_cpu, h_var.size(), N_theta_p);
   Tensor3r<Real> sigma_zz(par_per_cpu, h_var.size(), N_theta_p);
   Tensor3r<Real> sigma_yy(par_per_cpu, h_var.size(), N_theta_p);
-  ArrayXr<Real> sca = ArrayXd::Zero(par_per_cpu);
-  ArrayXr<Real> ext = ArrayXd::Zero(par_per_cpu);
-  ArrayXr<Real> abs = ArrayXd::Zero(par_per_cpu);
+  ArrayXr<Real> sca = ArrayXr<Real>::Zero(par_per_cpu);
+  ArrayXr<Real> ext = ArrayXr<Real>::Zero(par_per_cpu);
+  ArrayXr<Real> abs = ArrayXr<Real>::Zero(par_per_cpu);
   vector<unique_ptr<stSM<Real>>> stSM_list(rad_var.size());
 
   unique_ptr<stOptions<Real>> options = make_unique<stOptions<Real>>();
@@ -269,8 +269,5 @@ void RamanElasticScattering(int argc, char** argv) {
     }
   }
 }
-
-template unique_ptr<stParams<double>> loadParam(string);
-template void RamanElasticScattering<double>(int, char**);
 
 #endif

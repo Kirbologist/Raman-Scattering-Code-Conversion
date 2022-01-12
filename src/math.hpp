@@ -35,14 +35,7 @@ namespace Smarties {
     return output;
   }
 
-  ArrayXi seq2Array(long int first, long int last, long int stride) {
-    ArithmeticSequence<long int, long int, long int> sequence = seq(first, last, stride);
-    int rows = sequence.size();
-    ArrayXi output(rows);
-    for (int i = 0; i < rows; i++)
-      output(i) = sequence[i];
-    return output;
-  }
+  ArrayXi seq2Array(long int first, long int last, long int stride);
 
   template <class Real>
   ArrayXXc<Real> reduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows) {
@@ -93,17 +86,7 @@ namespace Smarties {
     return output;
   }
 
-  ArrayXi logicalIndices(ArrayXb& bool_array) {
-    int output_size = bool_array.count();
-    ArrayXi output(output_size);
-    int index = 0;
-    for (int i = 0; i < output_size && index < bool_array.size(); i++, index++) {
-      while (!bool_array(index))
-        index++;
-      output(i) = index;
-    }
-    return output;
-  }
+  ArrayXi logicalIndices(ArrayXb& bool_array);
 
   template <class Real>
   Tensor4c<Real> tensor_conj(Tensor4c<Real>& base) {
@@ -134,23 +117,6 @@ namespace Smarties {
       output(i) = boost::math::cyl_neumann<Real>(nu(i), x);
     return output;
   }
-
-  template double mp_pi<double>();
-  template double mp_eps<double>();
-  template complex<double> mp_im_unit<double>();
-
-  template Tensor3c<double> subtensor(Tensor3c<double>&,
-      ArithmeticSequence<long int, long int, long int>,
-      ArithmeticSequence<long int, long int, long int>,
-      ArithmeticSequence<long int, long int, long int>);
-  template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
-  template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
-  template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
-  template RowArrayXr<double> logicalSlice(RowArrayXr<double>&, RowArrayXb&);
-  template ArrayXd logicalSlice(ArrayXd&, ArrayXb&);
-  template Tensor4c<double> tensor_conj(Tensor4c<double>&);
-  template ArrayXd arr_bessel_j(ArrayXd&, double);
-  template ArrayXd arr_bessel_y(ArrayXd&, double);
 }
 
 #endif

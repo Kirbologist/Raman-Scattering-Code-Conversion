@@ -459,14 +459,6 @@ namespace Smarties {
 
     return output;
   }
-
-  template vector<unique_ptr<stTR<double>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<double>>>&, bool);
-  template vector<unique_ptr<stTR<double>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<double>>>&, int);
-  template vector<unique_ptr<stTR<double>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<double>>>&, vector<string>);
-  template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
-      const unique_ptr<stIncPar<double>>&, unique_ptr<stIncEabnm<double>>);
-  template unique_ptr<stCrossSection<double>> rvhGetAverageCrossSections(
-      const ArrayXd&, const vector<vector<unique_ptr<stTR<double>>>>&);
 }
 
 #endif

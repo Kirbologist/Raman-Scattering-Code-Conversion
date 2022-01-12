@@ -63,9 +63,6 @@ namespace Smarties {
 
     return output;
   }
-
-  template unique_ptr<stTmatrix<double>> slvForT(const unique_ptr<stParams<double>>&,
-      const unique_ptr<stOptions<double>>&, unique_ptr<stRtfunc<double>>);
 }
 
 #endif

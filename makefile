@@ -9,18 +9,22 @@ CC=g++
 CPP_FLAGS=-std=c++17 -Wall -g -msse2 -O2 $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)
+DEF_OBJS=$(OUTDIR)/math.o $(OUTDIR)/defs_default.o
+MP_OBJS=$(OUTDIR)/mp_part1.o $(OUTDIR)/mp_part2.o $(OUTDIR)/mp_part3.o $(OUTDIR)/mp_part4.o
 
 
 ### Recipes
 .PHONY=build clean info
 
-build : $(OUTDIR) $(OUTDIR)/main.o
-	$(CC) -o $(PRODUCT) $(OUTDIR)/main.o
+build : $(OUTDIR) $(DEF_OBJS) $(OUTDIR)/main.o
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(OUTDIR)/main.o
 
-mp : $(OUTDIR) $(OUTDIR)/main_mp.o
-	$(CC) -o $(PRODUCT) $(OUTDIR)/main_mp.o $(MP_FLAGS)
+mp : $(OUTDIR) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o $(MP_FLAGS)
 
 clean :
+	@rm -f $(DEF_OBJS)
+	@rm -f $(MP_OBJS)
 	@rm -f $(OUTDIR)/main.o
 	@rm -f $(OUTDIR)/main_mp.o
 	@rm -f $(PRODUCT)
@@ -32,6 +36,8 @@ info :
 	@echo "COMPILER:" $(CC)
 	@echo "COMPILER FLAGS:" $(CPP_FLAGS)
 	@echo "PRODUCT:" $(PRODUCT)
+	@echo "DEFAULT OBJS:" $(DEF_OBJS)
+	@echo "MP_OBJS:" $(MP_OBJS)
 
 
 ### Prerequisites
@@ -42,4 +48,7 @@ $(OUTDIR)/main.o : main.cpp
 	$(CC) -c -o $@ $< $(CPP_FLAGS)
 
 $(OUTDIR)/main_mp.o : main_mp.cpp
+	$(CC) -c -o $@ $< $(CPP_FLAGS) $(MP_FLAGS)
+
+$(OUTDIR)/%.o : src/%.cpp
 	$(CC) -c -o $@ $< $(CPP_FLAGS) $(MP_FLAGS)

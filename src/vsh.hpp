@@ -262,7 +262,7 @@ namespace Smarties {
 
     f.colwise() *= sqrt((mp_pi<Real>()/2) / rho);
 
-    RowArrayXc<Real> n = RowArrayXc<Real>::LinSpaced(N_max, 1, N_max);
+    RowArrayXc<Real> n = RowArrayXr<Real>::LinSpaced(N_max, 1, N_max);
     auto output = make_unique<stZnAll<Real>>();
     output->Z0 = f;
     output->Z1 = (output->Z0).colwise() / rho.template cast<complex<Real>>();
@@ -384,7 +384,8 @@ namespace Smarties {
 
       output->Erm[m + N_max] = make_unique<ArrayXXc<Real>>(pow(-1, m) * Er_sum);
       output->Etm[m + N_max] = make_unique<ArrayXXc<Real>>(pow(-1, m) * Et_sum);
-      output->Efm[m + N_max] = make_unique<ArrayXXc<Real>>(mp_im_unit<Real>() * pow(-1, m) * Ef_sum);
+      output->Efm[m + N_max] = make_unique<ArrayXXc<Real>>(mp_im_unit<Real>() *
+          static_cast<complex<Real>>(pow(-1, m)) * Ef_sum);
     }
 
     return output;
@@ -443,18 +444,6 @@ namespace Smarties {
     }
     return psi_x;
   }
-
-  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int);
-  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
-  template unique_ptr<stPinmTaunm<double>> vshPinmTaunm(int, const ArrayXd&);
-  template unique_ptr<stIncEabnm<double>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<double>>&);
-  template unique_ptr<stZnAll<double>> vshGetZnAll(int, const ArrayXd&, sBessel);
-  template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
-      const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
-      const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, unique_ptr<stPinmTaunm<double>>);
-  template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
-  template ArrayXXc<double> vshRBchi(ArrayXd, const ArrayXd&);
-  template ArrayXXc<double> vshRBpsi(ArrayXd, const ArrayXd&);
 }
 
 #endif
