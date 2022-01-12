@@ -255,7 +255,7 @@ void RamanElasticScattering(int argc, char** argv) {
         cout.precision(5);
         cout << "max diameter = " << max(a, c)*2e-3;
         cout.precision(10);
-        cout << " um, theta = " << theta_p * 180/PI << " degrees" << endl;
+        cout << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
         cout.precision(11);
         cout << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
         cout << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
