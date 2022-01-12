@@ -1,8 +1,0 @@
-#include "core.h"
-#include "math.h"
-#include "smarties_aux.h"
-#include "vsh.h"
-#include "sph.h"
-#include "rvh.h"
-#include "slv.h"
-#include "pst.h"

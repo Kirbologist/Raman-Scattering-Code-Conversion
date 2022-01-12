@@ -1,7 +1,51 @@
-#include "vsh.h"
-#include "math.h"
+#ifndef VSH_HPP
+#define VSH_HPP
+
+#include "core.hpp"
+#include "math.hpp"
 
 namespace Smarties {
+
+  enum sBessel {J, H1};
+
+  template <class Real>
+  struct stPinmTaunm {
+    ArrayXXr<Real> pi_nm;
+    ArrayXXr<Real> tau_nm;
+    ArrayXXr<Real> p_n0;
+  };
+
+  template <class Real>
+  struct stIncEabnm {
+    ArrayXc<Real> a_nm;
+    ArrayXc<Real> b_nm;
+  };
+
+  template <class Real>
+  struct stZnAll {
+    ArrayXXc<Real> Z0;
+    ArrayXXc<Real> Z1;
+    ArrayXXc<Real> Z2;
+  };
+
+  template <class Real>
+  struct stEAllPhi {
+    RowArrayXr<Real> theta;
+    RowArrayXr<Real> r_of_theta;
+    vector<unique_ptr<ArrayXXc<Real>>> Erm;
+    vector<unique_ptr<ArrayXXc<Real>>> Etm;
+    vector<unique_ptr<ArrayXXc<Real>>> Efm;
+  };
+
+  template <class Real>
+  struct stEforPhi {
+    ArrayXXc<Real> Er;
+    ArrayXXc<Real> Et;
+    ArrayXXc<Real> Ef;
+    ArrayXr<Real> theta;
+    Real phi0;
+  };
+
   template <class Real>
   unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max) {
     auto output = make_unique<stIncPar<Real>>();
@@ -230,7 +274,7 @@ namespace Smarties {
   unique_ptr<stEAllPhi<Real>> vshEgenThetaAllPhi(
       const ArrayXr<Real>& lambda, const ArrayXr<Real>& epsilon, const ArrayXXc<Real>& p_nm,
       const ArrayXXc<Real>& q_nm, const RowArrayXr<Real>& rt, const RowArrayXr<Real>& theta,
-      sBessel type, unique_ptr<stPinmTaunm<Real>> stPT) {
+      sBessel type, unique_ptr<stPinmTaunm<Real>> stPT = unique_ptr<stPinmTaunm<Real>>()) {
     int P_max = p_nm.cols(), N_max = static_cast<int>(round(sqrt(P_max) - 1)),
         Nb_lambda = lambda.size();
     if (rt.size() != theta.size() && rt(0) != 0 && !isinf(rt(0)))
@@ -410,3 +454,5 @@ namespace Smarties {
   template ArrayXXc<double> vshRBchi(ArrayXd, const ArrayXd&);
   template ArrayXXc<double> vshRBpsi(ArrayXd, const ArrayXd&);
 }
+
+#endif

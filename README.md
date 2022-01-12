@@ -28,10 +28,10 @@ output/raman_elastic_scattering [CPU_N] [CPUS] [DIA_MIN] [DIA_MAX] [N_RAD] [N_TH
 Where:
 - `CPU_N` is the index of the current computer of a cluster of computers (note that index-by-0 is used, so the first computer of a cluster has `CPU_N` = 0, the second computer has `CPU_N` = 1, etc.). By default, `CPU_N` = 0.
 - `CPUS` is the number of computers in the cluster. By default, `CPUS` = 1.
-- `DIA_MIN` is the minimum equivalent spherical diameter (ESD) in nanometres of the spheroids you want to calculate the scattering of. By default, `DIA_MIN` = 1000.
-- `DIA_MAX` is the maximum equivalent spherical diameter (ESD) in nanometres of the spheroids you want to calculate the scattering of. By default, `DIA_MAX` = 2000.
-- `N_RAD` is the number of ESD's between `DIA_MIN` and `DIA_MAX` inclusive that you want to calculate with. These ESD's are equally spaced. By default, `N_RAD` = 100.
-- `N_THETA_P` is the number of spheroid orientations you want to calculate with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are equally spaced. By default, `N_THETA_P` = 19.
+- `DIA_MIN` is the minimum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, `DIA_MIN` = 1000.
+- `DIA_MAX` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, `DIA_MAX` = 2000.
+- `N_RAD` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, `N_RAD` = 100.
+- `N_THETA_P` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, `N_THETA_P` = 19.
 - `CALC_TYPE` is the type of precision used for floating-point calculations. Use `double` for double precision and `mp` for arbitrary precision. Note that this parameter only matters if the binary was built using `make mp`. By default, `CALC_TYPE` = `double`.
 
 ## Progress
@@ -75,6 +75,7 @@ Where:
 
 ## Dependencies
 
+- A compiler with C++17 support (tested with gcc 9.3.0-17 and clang 10.0.0-4 targeting x86_64-pc-linux-gnu)
 - Eigen 3.4.0, a free, open-source, efficient and comprehensive linear algebra library made for C++. Website: https://eigen.tuxfamily.org/index.php
 - Boost (C++ Libraries) 1.77.0, a free, open-source set of libraries with applications in a wide variety of areas. Used for some template maths functions and its MPFR class wrapper. Website: https://www.boost.org
 - The GNU Multi Precision Arithmetic Library (GMP), a C library that provides support for arbitrary precision arithmetic. While it has arbitrary-precision floating-point types, MPFR is preferred. This library is a prerequisite for MPFR. Website: https://gmplib.org/
@@ -84,7 +85,7 @@ Where:
 
 - Although most of the code is based on the SMARTIES v1.01 MATLAB package, only the functions necessary for calculating Raman scattering will be converted.
 - The coding style is loosely based on Google's C++ style guide, with variable, struct and function names matching closely with the ones given in the original SMARTIES code.
-- The code was written to be compiled with G++ and on hardware that correctly implements the IEEE 754 standard. If IEEE 754 is not supported, compiling or executing the code may cause a divide-by-zero hardware exception.
+- The code was written to be compiled with GCC and on hardware that correctly implements the IEEE 754 standard. If IEEE 754 is not supported, compiling or executing the code may cause a divide-by-zero hardware exception.
 
 ## Copyright Disclaimer
 
@@ -93,6 +94,6 @@ The following libraries are open-source and were written by their respective dev
 SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015). The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
 https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
 
-The code in tensor_matrix_cast.h was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
+The code in `tensor_matrix_cast.hpp` was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
 
 Parts of the Eigen 3.4.0 library have been included under the MPL2 license and parts of the Boost 1.77.0 library have been included under the Boost license. Eigen and Boost were made by their respective developers listed on their websites.

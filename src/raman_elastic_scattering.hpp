@@ -1,5 +1,8 @@
-#include "raman_elastic_scattering.h"
-#include "smarties.h"
+#ifndef RAMAN_ELASTIC_SCATTERING_HPP
+#define RAMAN_ELASTIC_SCATTERING_HPP
+
+#include "core.hpp"
+#include "smarties.hpp"
 #include <chrono>
 
 using namespace std;
@@ -7,7 +10,7 @@ using namespace Eigen;
 using namespace Smarties;
 
 template <class Real>
-unique_ptr<stParams<Real>> loadParam(string type) {
+unique_ptr<stParams<Real>> loadParam(string type = "") {
   unique_ptr<stParams<Real>> params = make_unique<stParams<Real>>();
   params->epsilon1 = 1;
   params->s = ArrayXr<Real>(1);
@@ -269,3 +272,5 @@ void RamanElasticScattering(int argc, char** argv) {
 
 template unique_ptr<stParams<double>> loadParam(string);
 template void RamanElasticScattering<double>(int, char**);
+
+#endif

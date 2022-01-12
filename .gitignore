@@ -3,8 +3,6 @@
 *.exe
 *.o
 raman_elastic_scattering
-high_level.*
-low_level.*
 
 # Packages #
 ############

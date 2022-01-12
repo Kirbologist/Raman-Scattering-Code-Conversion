@@ -1,12 +1,26 @@
-#include "slv.h"
+#ifndef SLV_HPP
+#define SLV_HPP
+
+#include "core.hpp"
+#include "rvh.hpp"
+#include "vsh.hpp"
+#include "sph.hpp"
 
 using namespace Eigen;
 using namespace std;
 
 namespace Smarties {
+
+  template <class Real>
+  struct stTmatrix {
+    unique_ptr<stCrossSection<Real>> st_coa;
+    vector<unique_ptr<stTR<Real>>> st_TR_list;
+  };
+
   template <class Real>
   unique_ptr<stTmatrix<Real>> slvForT(const unique_ptr<stParams<Real>>& params,
-      const unique_ptr<stOptions<Real>>& options, unique_ptr<stRtfunc<Real>> stGeometry) {
+      const unique_ptr<stOptions<Real>>& options,
+      unique_ptr<stRtfunc<Real>> stGeometry = unique_ptr<stRtfunc<Real>>()) {
     Real c = params->c;
     Real a = params->a;
 
@@ -53,3 +67,5 @@ namespace Smarties {
   template unique_ptr<stTmatrix<double>> slvForT(const unique_ptr<stParams<double>>&,
       const unique_ptr<stOptions<double>>&, unique_ptr<stRtfunc<double>>);
 }
+
+#endif

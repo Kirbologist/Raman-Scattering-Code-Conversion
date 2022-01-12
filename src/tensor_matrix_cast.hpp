@@ -3,8 +3,8 @@
 * Source: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix
 */
 
-#ifndef TENSOR_MATRIX_CAST_H
-#define TENSOR_MATRIX_CAST_H
+#ifndef TENSOR_MATRIX_CAST_HPP
+#define TENSOR_MATRIX_CAST_HPP
 
 #include <Eigen/CXX11/Tensor>
 #include <iostream>

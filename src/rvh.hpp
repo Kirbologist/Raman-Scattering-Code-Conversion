@@ -1,12 +1,44 @@
-#include "rvh.h"
-#include "math.h"
+#ifndef RVH_HPP
+#define RVH_HPP
+
+#include "core.hpp"
+#include "sph.hpp"
+#include "vsh.hpp"
+#include "math.hpp"
 
 using namespace Eigen;
 using namespace std;
 
 namespace Smarties {
+
   template <class Real>
-  vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R) {
+  struct stTR : stMat<Real> {
+    using stMat<Real>::stMat;
+    inline st4M<Real>& st_4M_T_eo() { return this->st_4M_list[0]; }
+    inline st4M<Real>& st_4M_T_oe() { return this->st_4M_list[1]; }
+    inline st4M<Real>& st_4M_R_eo() { return this->st_4M_list[2]; }
+    inline st4M<Real>& st_4M_R_oe() { return this->st_4M_list[3]; }
+  };
+
+  template <class Real>
+  struct stAbcdnm {
+    ArrayXc<Real> p_nm;
+    ArrayXc<Real> q_nm;
+    ArrayXc<Real> a_nm;
+    ArrayXc<Real> b_nm;
+    ArrayXc<Real> c_nm;
+    ArrayXc<Real> d_nm;
+  };
+
+  template <class Real>
+  struct stCrossSection {
+    ArrayXr<Real> ext;
+    ArrayXr<Real> sca;
+    ArrayXr<Real> abs;
+  };
+
+  template <class Real>
+  vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R = false) {
     size_t num_entries = st_PQ_list.size();
     vector<unique_ptr<stTR<Real>>> output(num_entries);
     for (size_t i = 0; i < num_entries; i++) {
@@ -167,14 +199,16 @@ namespace Smarties {
     return output;
   }
 
+  // Untested
   template <class Real>
-  vector<unique_ptr<stTR<Real>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<Real>>>& st_mat_list, vector<string> mat_list) {
+  vector<unique_ptr<stTR<Real>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<Real>>>& st_mat_list,
+      vector<string> mat_list = {"st_4M_T"}) {
     enum parity {EO, OE, END};
     size_t num_entries = st_mat_list.size();
     vector<unique_ptr<stTR<Real>>> output(num_entries);
 
     for (size_t i = 0; i < num_entries; i++) {
-      output[i] = make_unique<stTR<Real>>(*(st_mat_list[i])); //Makes a deep copy of st_mat_list[i]
+      output[i] = make_unique<stTR<Real>>(*(st_mat_list[i]));
       for (size_t j = 0; j < 2*mat_list.size(); j++) {
         for (int k = EO; k != END; k++) {
           st4M<Real>* st_4M;
@@ -226,13 +260,15 @@ namespace Smarties {
   }
 
   template <class Real>
-  unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max, const vector<unique_ptr<stTR<Real>>>& st_TR_list,
-      const unique_ptr<stIncPar<Real>>& st_inc_par, unique_ptr<stIncEabnm<Real>> st_inc_E_abnm) {
+  unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max,
+      const vector<unique_ptr<stTR<Real>>>& st_TR_list, const unique_ptr<stIncPar<Real>>& st_inc_par,
+      unique_ptr<stIncEabnm<Real>> st_inc_E_abnm = unique_ptr<stIncEabnm<Real>>()) {
     if (!st_inc_E_abnm)
       st_inc_E_abnm = vshGetIncidentCoeffs(N_max, st_inc_par);
 
     bool get_R = false;
-    if (find(st_TR_list[0]->mat_list.begin(), st_TR_list[0]->mat_list.end(), "st_4M_R") != st_TR_list[0]->mat_list.end())
+    if (find(st_TR_list[0]->mat_list.begin(), st_TR_list[0]->mat_list.end(), "st_4M_R")
+        != st_TR_list[0]->mat_list.end())
       get_R = true;
 
     ArrayXb abs_m_vec_valid = st_inc_par->abs_m_vec <= N_max;
@@ -431,3 +467,5 @@ namespace Smarties {
   template unique_ptr<stCrossSection<double>> rvhGetAverageCrossSections(
       const ArrayXd&, const vector<vector<unique_ptr<stTR<double>>>>&);
 }
+
+#endif

@@ -1,12 +1,38 @@
-#include "smarties_aux.h"
-#include "math.h"
+#ifndef SMARTIES_AUX_HPP
+#define SMARTIES_AUX_HPP
+
+#include "core.hpp"
+#include "math.hpp"
 
 using namespace Eigen;
 using namespace std;
 
 namespace Smarties {
+
+  enum sInt {GAUSS, RECTANGLE, PTS};
+
   template <class Real>
-  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(size_t N1, Real a, Real b) {
+  struct stGLQuad {
+    ArrayXr<Real> x;
+    ArrayXr<Real> w;
+  };
+
+  template <class Real>
+  struct stRtfunc {
+    size_t Nb_theta;
+    ArrayXr<Real> theta;
+    ArrayXr<Real> w_theta;
+    ArrayXr<Real> r;
+    ArrayXr<Real> dr_dt;
+    Real a;
+    Real c;
+    Real h;
+    Real r0;
+    sInt type;
+  };
+
+  template <class Real>
+  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(size_t N1, Real a = -1.0, Real b = 1.0) {
     int N = N1 - 1, N2 = N1 + 1;
     ArrayXr<Real> xu, y, y0(N1), Lp;
     ArrayXXr<Real> L(N1, N2);
@@ -40,7 +66,6 @@ namespace Smarties {
     return output;
   }
 
-  // Missing functionality
   template <class Real>
   unique_ptr<stRtfunc<Real>> auxPrepareIntegrals(size_t N_int, sInt type) {
     unique_ptr<stRtfunc<Real>> output = make_unique<stRtfunc<Real>>();
@@ -71,3 +96,5 @@ namespace Smarties {
   template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(size_t, double, double);
   template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(size_t, sInt);
 }
+
+#endif

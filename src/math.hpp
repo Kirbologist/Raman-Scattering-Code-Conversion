@@ -1,4 +1,7 @@
-#include "math.h"
+#ifndef SMARTIES_MATH_HPP
+#define SMARTIES_MATH_HPP
+
+#include "core.hpp"
 #include <Eigen/LU>
 #include <boost/math/special_functions/bessel.hpp>
 #include <boost/math/constants/constants.hpp>
@@ -11,9 +14,7 @@ namespace Smarties {
   inline Real mp_pi(void) { return boost::math::constants::pi<Real>(); }
 
   template <class Real>
-  Real mp_eps(void) {
-    return numeric_limits<Real>::epsilon();
-  }
+  inline Real mp_eps(void) { return numeric_limits<Real>::epsilon(); }
 
   template <class Real>
   inline complex<Real> mp_im_unit(void) { return complex<Real>(0.0, 1.0); }
@@ -122,7 +123,7 @@ namespace Smarties {
   ArrayXr<Real> arr_bessel_j(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
     for (int i = 0; i < nu.size(); i++)
-      output(i) = cyl_bessel_j(nu(i), x);
+      output(i) = boost::math::cyl_bessel_j<Real>(nu(i), x);
     return output;
   }
 
@@ -130,7 +131,7 @@ namespace Smarties {
   ArrayXr<Real> arr_bessel_y(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
     for (int i = 0; i < nu.size(); i++)
-      output(i) = cyl_neumann(nu(i), x);
+      output(i) = boost::math::cyl_neumann<Real>(nu(i), x);
     return output;
   }
 
@@ -151,3 +152,5 @@ namespace Smarties {
   template ArrayXd arr_bessel_j(ArrayXd&, double);
   template ArrayXd arr_bessel_y(ArrayXd&, double);
 }
+
+#endif
