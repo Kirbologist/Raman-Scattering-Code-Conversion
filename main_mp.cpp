@@ -25,14 +25,14 @@ template Tensor4c<mpfr_float> tensor_conj(Tensor4c<mpfr_float>&);
 template ArrayXr<mpfr_float> arr_bessel_j(ArrayXr<mpfr_float>&, mpfr_float);
 template ArrayXr<mpfr_float> arr_bessel_y(ArrayXr<mpfr_float>&, mpfr_float);
 
-template unique_ptr<stGLQuad<mpfr_float>> auxInitLegendreQuad(size_t, mpfr_float, mpfr_float);
-template unique_ptr<stRtfunc<mpfr_float>> auxPrepareIntegrals(size_t, sInt);
+template unique_ptr<stGLQuad<mpfr_float>> auxInitLegendreQuad(int, mpfr_float, mpfr_float);
+template unique_ptr<stRtfunc<mpfr_float>> auxPrepareIntegrals(int, sInt);
 
-template unique_ptr<stIncPar<mpfr_float>> vshMakeIncidentParams(sIncType, size_t);
-template unique_ptr<stIncPar<mpfr_float>> vshMakeIncidentParams(sIncType, size_t, mpfr_float, mpfr_float, mpfr_float);
-template unique_ptr<stPinmTaunm<mpfr_float>> vshPinmTaunm(size_t, const ArrayXr<mpfr_float>&);
+template unique_ptr<stIncPar<mpfr_float>> vshMakeIncidentParams(sIncType, int);
+template unique_ptr<stIncPar<mpfr_float>> vshMakeIncidentParams(sIncType, int, mpfr_float, mpfr_float, mpfr_float);
+template unique_ptr<stPinmTaunm<mpfr_float>> vshPinmTaunm(int, const ArrayXr<mpfr_float>&);
 template unique_ptr<stIncEabnm<mpfr_float>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<mpfr_float>>&);
-template unique_ptr<stZnAll<mpfr_float>> vshGetZnAll(size_t, const ArrayXr<mpfr_float>&, sBessel);
+template unique_ptr<stZnAll<mpfr_float>> vshGetZnAll(int, const ArrayXr<mpfr_float>&, sBessel);
 template unique_ptr<stEAllPhi<mpfr_float>> vshEgenThetaAllPhi(const ArrayXr<mpfr_float>&,
     const ArrayXr<mpfr_float>&, const ArrayXXc<mpfr_float>&, const ArrayXXc<mpfr_float>&,
     const RowArrayXr<mpfr_float>&, const RowArrayXr<mpfr_float>&, sBessel, unique_ptr<stPinmTaunm<mpfr_float>>);
@@ -46,9 +46,9 @@ template unique_ptr<stFpovx<mpfr_float>> sphGetFpovx(int, mpfr_float, const Arra
 template unique_ptr<stBessel<mpfr_float>> sphGetXiPsi(int, mpfr_float, const ArrayXr<mpfr_float>&, int);
 template unique_ptr<stBesselPrimes<mpfr_float>> sphGetBesselProductsPrimes(const Tensor3c<mpfr_float>&);
 template unique_ptr<stBesselProducts<mpfr_float>> sphGetModifiedBesselProducts(int, mpfr_float, const ArrayXr<mpfr_float>&, int);
-template unique_ptr<stRtfunc<mpfr_float>> sphMakeGeometry(size_t, mpfr_float, mpfr_float, const unique_ptr<ArrayXr<mpfr_float>>);
-template size_t sphCheckBesselConvergence(size_t, mpfr_float, const ArrayXr<mpfr_float>&, mpfr_float, size_t);
-template size_t sphEstimateNB(size_t, const unique_ptr<stRtfunc<mpfr_float>>&,
+template unique_ptr<stRtfunc<mpfr_float>> sphMakeGeometry(int, mpfr_float, mpfr_float, const unique_ptr<ArrayXr<mpfr_float>>);
+template int sphCheckBesselConvergence(int, mpfr_float, const ArrayXr<mpfr_float>&, mpfr_float, int);
+template int sphEstimateNB(int, const unique_ptr<stRtfunc<mpfr_float>>&,
     const unique_ptr<stParams<mpfr_float>>&, mpfr_float);
 template vector<unique_ptr<stPQ<mpfr_float>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<mpfr_float>>&, const unique_ptr<stParams<mpfr_float>>&, int);

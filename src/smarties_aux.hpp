@@ -19,7 +19,7 @@ namespace Smarties {
 
   template <class Real>
   struct stRtfunc {
-    size_t Nb_theta;
+    int Nb_theta;
     ArrayXr<Real> theta;
     ArrayXr<Real> w_theta;
     ArrayXr<Real> r;
@@ -32,7 +32,7 @@ namespace Smarties {
   };
 
   template <class Real>
-  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(size_t N1, Real a = -1.0, Real b = 1.0) {
+  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(int N1, Real a = -1.0, Real b = 1.0) {
     int N = N1 - 1, N2 = N1 + 1;
     ArrayXr<Real> xu, y, y0(N1), Lp;
     ArrayXXr<Real> L(N1, N2);
@@ -49,7 +49,7 @@ namespace Smarties {
       n_iter++;
       L.col(1) = y;
 
-      for (size_t i = 1; i < N1; i++)
+      for (int i = 1; i < N1; i++)
         L.col(i + 1) = ((2*i + 1)*y * L.col(i) - i*L.col(i - 1))/(i + 1);
 
       Lp = N2*(L.col(N) - y*L.col(N1))/(1 - y.pow(2));
@@ -67,7 +67,7 @@ namespace Smarties {
   }
 
   template <class Real>
-  unique_ptr<stRtfunc<Real>> auxPrepareIntegrals(size_t N_int, sInt type) {
+  unique_ptr<stRtfunc<Real>> auxPrepareIntegrals(int N_int, sInt type) {
     unique_ptr<stRtfunc<Real>> output = make_unique<stRtfunc<Real>>();
     output->Nb_theta = N_int;
 
@@ -93,8 +93,8 @@ namespace Smarties {
     return output;
   }
 
-  template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(size_t, double, double);
-  template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(size_t, sInt);
+  template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(int, double, double);
+  template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(int, sInt);
 }
 
 #endif

@@ -37,9 +37,9 @@ namespace Smarties {
 
   ArrayXi seq2Array(long int first, long int last, long int stride) {
     ArithmeticSequence<long int, long int, long int> sequence = seq(first, last, stride);
-    size_t rows = sequence.size();
+    int rows = sequence.size();
     ArrayXi output(rows);
-    for (size_t i = 0; i < rows; i++)
+    for (int i = 0; i < rows; i++)
       output(i) = sequence[i];
     return output;
   }
@@ -68,10 +68,10 @@ namespace Smarties {
   // Expects base_array.dimensions() = bool_array.dimensions()
   template <class Real>
   ArrayXr<Real> logicalSlice(ArrayXr<Real>& base_array, ArrayXb& bool_array) {
-    size_t output_size = bool_array.count();
+    int output_size = bool_array.count();
     ArrayXr<Real> output(output_size);
     int base_index = 0;
-    for (size_t i = 0; i < output_size && base_index < bool_array.size(); i++, base_index++) {
+    for (int i = 0; i < output_size && base_index < bool_array.size(); i++, base_index++) {
       while (!bool_array(base_index))
         base_index++;
       output(i) = base_array(base_index);
@@ -82,10 +82,10 @@ namespace Smarties {
   // Expects base_array.dimensions() = bool_array.dimensions()
   template <class Real>
   RowArrayXr<Real> logicalSlice(RowArrayXr<Real>& base_array, RowArrayXb& bool_array) {
-    size_t output_size = bool_array.count();
+    int output_size = bool_array.count();
     RowArrayXr<Real> output(output_size);
     int base_index = 0;
-    for (size_t i = 0; i < output_size && base_index < bool_array.size(); i++, base_index++) {
+    for (int i = 0; i < output_size && base_index < bool_array.size(); i++, base_index++) {
       while (!bool_array(base_index))
         base_index++;
       output(i) = base_array(base_index);
@@ -94,10 +94,10 @@ namespace Smarties {
   }
 
   ArrayXi logicalIndices(ArrayXb& bool_array) {
-    size_t output_size = bool_array.count();
+    int output_size = bool_array.count();
     ArrayXi output(output_size);
     int index = 0;
-    for (size_t i = 0; i < output_size && index < bool_array.size(); i++, index++) {
+    for (int i = 0; i < output_size && index < bool_array.size(); i++, index++) {
       while (!bool_array(index))
         index++;
       output(i) = index;

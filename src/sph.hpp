@@ -384,7 +384,7 @@ namespace Smarties {
   }
 
   template <class Real>
-  unique_ptr<stRtfunc<Real>> sphMakeGeometry(size_t Nb_theta, Real a, Real c,
+  unique_ptr<stRtfunc<Real>> sphMakeGeometry(int Nb_theta, Real a, Real c,
       const unique_ptr<ArrayXr<Real>> theta = unique_ptr<ArrayXr<Real>>()) {
     sInt type;
     auto output = make_unique<stRtfunc<Real>>();
@@ -417,12 +417,12 @@ namespace Smarties {
   }
 
   template <class Real>
-  size_t sphCheckBesselConvergence(size_t N_req, Real s, const ArrayXr<Real>& x, Real acc, size_t N_min) {
-    size_t NB_start = max(N_req, N_min);
-    size_t NB = NB_start;
+  int sphCheckBesselConvergence(int N_req, Real s, const ArrayXr<Real>& x, Real acc, int N_min) {
+    int NB_start = max(N_req, N_min);
+    int NB = NB_start;
     unique_ptr<stFpovx<Real>> prod = sphGetFpovx<Real>(NB, s, x);
     bool to_continue = true;
-    size_t max_N = 500, NB_step = 16;
+    int max_N = 500, NB_step = 16;
 
     int NB_next;
     unique_ptr<stFpovx<Real>> prod_new;
@@ -475,7 +475,7 @@ namespace Smarties {
   }
 
   template <class Real>
-  size_t sphEstimateNB(size_t NQ, const unique_ptr<stRtfunc<Real>>& stGeometry,
+  int sphEstimateNB(int NQ, const unique_ptr<stRtfunc<Real>>& stGeometry,
       const unique_ptr<stParams<Real>>& params, Real acc = 1e-13) {
     ArrayXr<Real> s = params->s;
     ArrayXr<Real> k1 = params->k1;
@@ -487,8 +487,8 @@ namespace Smarties {
     abs(s).maxCoeff(&ind);
     Real s_max = s(ind);
 
-    size_t N1 = sphCheckBesselConvergence(NQ, s_max, x_max, acc, NQ);
-    size_t NB = sphCheckBesselConvergence(NQ, s_min, x_max, acc, N1);
+    int N1 = sphCheckBesselConvergence(NQ, s_max, x_max, acc, NQ);
+    int NB = sphCheckBesselConvergence(NQ, s_min, x_max, acc, N1);
     return NB;
   }
 
@@ -707,9 +707,9 @@ namespace Smarties {
   template unique_ptr<stBessel<double>> sphGetXiPsi(int, double, const ArrayXd&, int);
   template unique_ptr<stBesselPrimes<double>> sphGetBesselProductsPrimes(const Tensor3c<double>&);
   template unique_ptr<stBesselProducts<double>> sphGetModifiedBesselProducts(int, double, const ArrayXd&, int);
-  template unique_ptr<stRtfunc<double>> sphMakeGeometry(size_t, double, double, const unique_ptr<ArrayXd>);
-  template size_t sphCheckBesselConvergence(size_t, double, const ArrayXd&, double, size_t);
-  template size_t sphEstimateNB(size_t, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
+  template unique_ptr<stRtfunc<double>> sphMakeGeometry(int, double, double, const unique_ptr<ArrayXd>);
+  template int sphCheckBesselConvergence(int, double, const ArrayXd&, double, int);
+  template int sphEstimateNB(int, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
   template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
 }
 

@@ -39,9 +39,9 @@ namespace Smarties {
 
   template <class Real>
   vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R = false) {
-    size_t num_entries = st_PQ_list.size();
+    int num_entries = st_PQ_list.size();
     vector<unique_ptr<stTR<Real>>> output(num_entries);
-    for (size_t i = 0; i < num_entries; i++) {
+    for (int i = 0; i < num_entries; i++) {
       output[i] = make_unique<stTR<Real>>();
       unique_ptr<stPQ<Real>>& st_PQ = st_PQ_list[i];
       unique_ptr<stTR<Real>>& st_TR = output[i];
@@ -63,8 +63,8 @@ namespace Smarties {
       MatrixXc<Real> Q21_eo = st_PQ->st_4M_Q_oe().M21;
       MatrixXc<Real> Q22_ee = st_PQ->st_4M_Q_oe().M22;
 
-      size_t num_even = Q11_ee.rows();
-      size_t num_odd = Q11_oo.rows();
+      int num_even = Q11_ee.rows();
+      int num_odd = Q11_oo.rows();
       ArrayXi ind1_eo = st_PQ->st_4M_Q_eo().ind1;
       ArrayXi ind2_eo = st_PQ->st_4M_Q_eo().ind2;
       ArrayXi ind1_oe = st_PQ->st_4M_Q_oe().ind1;
@@ -165,14 +165,14 @@ namespace Smarties {
   template <class Real>
   vector<unique_ptr<stTR<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<Real>>>& st_mat_list, int N_max) {
     vector<unique_ptr<stTR<Real>>> output;
-
-    for (size_t i = 0 ; i < st_mat_list.size(); i++) {
-      size_t num_st_4M = st_mat_list[i]->mat_list.size() * 2;
+    int num_entries = st_mat_list.size();
+    for (int i = 0 ; i < num_entries; i++) {
+      int num_st_4M = st_mat_list[i]->mat_list.size() * 2;
       int m;
       if (num_st_4M > 0 && (m = st_mat_list[i]->st_4M_list[0].m) <= N_max) {
         unique_ptr<stTR<Real>> output_st_TR = make_unique<stTR<Real>>();
         output_st_TR->mat_list = st_mat_list[i]->mat_list;
-        for (size_t j = 0; j < num_st_4M; j++) {
+        for (int j = 0; j < num_st_4M; j++) {
           int new_size = N_max - max(1, m) + 1;
           ArrayXb ind1_valid = st_mat_list[i]->st_4M_list[j].ind1 <= new_size;
           ArrayXb ind2_valid = st_mat_list[i]->st_4M_list[j].ind2 <= new_size;
@@ -204,12 +204,13 @@ namespace Smarties {
   vector<unique_ptr<stTR<Real>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<Real>>>& st_mat_list,
       vector<string> mat_list = {"st_4M_T"}) {
     enum parity {EO, OE, END};
-    size_t num_entries = st_mat_list.size();
+    int num_entries = st_mat_list.size();
     vector<unique_ptr<stTR<Real>>> output(num_entries);
 
-    for (size_t i = 0; i < num_entries; i++) {
+    for (int i = 0; i < num_entries; i++) {
       output[i] = make_unique<stTR<Real>>(*(st_mat_list[i]));
-      for (size_t j = 0; j < 2*mat_list.size(); j++) {
+      int num_st_4M = mat_list.size() * 2;
+      for (int j = 0; j < num_st_4M; j++) {
         for (int k = EO; k != END; k++) {
           st4M<Real>* st_4M;
           if (mat_list[j] == "st_4M_T") {
@@ -274,8 +275,8 @@ namespace Smarties {
     ArrayXb abs_m_vec_valid = st_inc_par->abs_m_vec <= N_max;
     ArrayXi abs_m_vec = logicalSlice(st_inc_par->abs_m_vec, abs_m_vec_valid);
 
-    size_t num_M = st_TR_list.size();
-    size_t M = abs_m_vec.size();
+    int num_M = st_TR_list.size();
+    int M = abs_m_vec.size();
     int P_max = (N_max + 1)*(N_max + 1);
 
     ArrayXc<Real> a_nm = st_inc_E_abnm->a_nm;
@@ -286,8 +287,8 @@ namespace Smarties {
     ArrayXc<Real> d_nm = ArrayXc<Real>::Zero(get_R ? P_max : 1);
     ArrayXi m_for_T(M);
 
-    for (size_t m_ind11 = 0; m_ind11 < M; m_ind11++) {
-      for (size_t m_ind = 0; m_ind < num_M; m_ind++) {
+    for (int m_ind11 = 0; m_ind11 < M; m_ind11++) {
+      for (int m_ind = 0; m_ind < num_M; m_ind++) {
         if (st_TR_list[m_ind]->st_4M_T_eo().m == abs_m_vec(m_ind11)) {
           m_for_T(m_ind11) = m_ind;
           break;
@@ -295,7 +296,7 @@ namespace Smarties {
       }
     }
 
-    for (size_t m_ind11 = 0; m_ind11 < M; m_ind11++) {
+    for (int m_ind11 = 0; m_ind11 < M; m_ind11++) {
       int m_ind = m_for_T(m_ind11);
       int m = abs_m_vec(m_ind11);
       int N_min = max(m, 1);

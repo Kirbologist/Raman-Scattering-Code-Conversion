@@ -47,7 +47,7 @@ namespace Smarties {
   };
 
   template <class Real>
-  unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, size_t N_max) {
+  unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, int N_max) {
     auto output = make_unique<stIncPar<Real>>();
     switch (type) {
       case KxEz: {
@@ -116,7 +116,7 @@ namespace Smarties {
 
   template <class Real>
   unique_ptr<stIncPar<Real>> vshMakeIncidentParams(
-      sIncType type, size_t N_max, Real theta_p, Real phi_p, Real alpha_p) {
+      sIncType type, int N_max, Real theta_p, Real phi_p, Real alpha_p) {
     unique_ptr<stIncPar<Real>> output;
     if (type == GENERAL) {
       output = make_unique<stIncPar<Real>>();
@@ -133,10 +133,10 @@ namespace Smarties {
 
   // Many versions in orignial code
   template <class Real>
-  unique_ptr<stPinmTaunm<Real>> vshPinmTaunm(size_t N_max, const ArrayXr<Real>& theta) {
+  unique_ptr<stPinmTaunm<Real>> vshPinmTaunm(int N_max, const ArrayXr<Real>& theta) {
     if ((theta < 0.0).any())
       cout << "Warning: theta must be >= 0 in vshPinmTaunm..." << endl;
-    size_t n_rows = size(theta), n_cols, P_max = (N_max + 1)*(N_max + 1);
+    int n_rows = size(theta), n_cols, P_max = (N_max + 1)*(N_max + 1);
     auto output = make_unique<stPinmTaunm<Real>>();
     output->pi_nm = ArrayXXr<Real>::Zero(n_rows, P_max);
     output->tau_nm = ArrayXXr<Real>::Zero(n_rows, P_max);
@@ -144,7 +144,7 @@ namespace Smarties {
     ArrayXr<Real> mu_c = cos(theta), mu_s = sin(theta), n_vec_real;
     ArrayXi n_vec, p_vec, p_vec_n;
 
-    for (size_t m = 1; m <= N_max; m++) {
+    for (int m = 1; m <= N_max; m++) {
       A_m_sin_mm1 *= sqrt(static_cast<Real>(2*m - 1)/(2*m))*
           (m > 1 ? mu_s : ArrayXr<Real>::Ones(n_rows));
       n_cols = N_max - m + 2;
@@ -152,7 +152,7 @@ namespace Smarties {
       pi_aux.col(0).setZero();
       pi_aux.col(1) = m*A_m_sin_mm1;
 
-      for (size_t j = 2, n = m + 1; j < n_cols; j++, n++)
+      for (int j = 2, n = m + 1; j < n_cols; j++, n++)
         pi_aux.col(j) = (1/sqrt((n - m) * (n + m))) * ((2*n - 1)*mu_c*
             pi_aux.col(j - 1) - sqrt((n - 1 - m)*(n - 1 + m)) * pi_aux.col(j - 2));
 
@@ -161,7 +161,7 @@ namespace Smarties {
       p_vec = n_vec*(n_vec + 1) + m;
       p_vec_n = p_vec - 2*m;
 
-      for (size_t n = 0; n < n_cols - 1; n++) {
+      for (int n = 0; n < n_cols - 1; n++) {
         (output->pi_nm).col(p_vec(n)) = pi_aux.col(n + 1);
         (output->pi_nm).col(p_vec_n(n)) = pow(-1, (m + 1) % 2) * pi_aux.col(n + 1);
 
@@ -178,7 +178,7 @@ namespace Smarties {
     t_nm1.col(0).setZero();
     t_nm1.col(1) = -mu_s;
 
-    for (size_t n = 1; n < N_max; n++) {
+    for (int n = 1; n < N_max; n++) {
       p_nm1.col(n + 1) = static_cast<Real>(2*n + 1)/(n + 1)*mu_c * p_nm1.col(n) -
           static_cast<Real>(n)/(n + 1)*p_nm1.col(n - 1);
       t_nm1.col(n + 1) = mu_c*t_nm1.col(n) - (n+1)*mu_s*p_nm1.col(n);
@@ -188,7 +188,7 @@ namespace Smarties {
     n_vec = ArrayXi::LinSpaced(N_max + 1, 0, N_max);
     p_vec = n_vec*(n_vec + 1);
 
-    for (size_t n = 0; n <= N_max; n++) {
+    for (int n = 0; n <= N_max; n++) {
       output->pi_nm.col(p_vec(n)).setZero();
       output->tau_nm.col(p_vec(n)) = t_nm1.col(n);
     }
@@ -220,8 +220,10 @@ namespace Smarties {
     }
 
     auto stPTp = vshPinmTaunm<Real>(N_max, theta_p);
-    ArrayXc<Real> minus_EC_nm_star = cos(alpha_p)*I*stPTp->pi_nm.row(0) + sin(alpha_p)*stPTp->tau_nm.row(0);
-    ArrayXc<Real> i_EB_nm_star = I*cos(alpha_p)*stPTp->tau_nm.row(0) + sin(alpha_p)*stPTp->pi_nm.row(0);
+    ArrayXc<Real> minus_EC_nm_star = static_cast<complex<Real>>(cos(alpha_p))*I*stPTp->pi_nm.row(0)
+        + sin(alpha_p)*stPTp->tau_nm.row(0);
+    ArrayXc<Real> i_EB_nm_star = static_cast<complex<Real>>(cos(alpha_p))*I*stPTp->tau_nm.row(0)
+        + sin(alpha_p)*stPTp->pi_nm.row(0);
 
     auto output = make_unique<stIncEabnm<Real>>();
     output->a_nm = d_bar_nm * minus_EC_nm_star;
@@ -231,7 +233,7 @@ namespace Smarties {
 
   // Many versions in original code
   template <class Real>
-  unique_ptr<stZnAll<Real>> vshGetZnAll(size_t N_max, const ArrayXr<Real>& rho, sBessel type) {
+  unique_ptr<stZnAll<Real>> vshGetZnAll(int N_max, const ArrayXr<Real>& rho, sBessel type) {
     if ((rho == 0).any())
       cout << "Warning: rho = 0 arguments not allowed in vshZnAll..." << endl;
 
@@ -240,7 +242,7 @@ namespace Smarties {
 
     for (int i = 0; i < rho.size(); i++) {
       f.row(i) = arr_bessel_j(nu, rho(i));
-      if ((f.row(i) == 0).any()) {
+      if ((f.row(i) == static_cast<complex<Real>>(0)).any()) {
         cout << "Warning: Bessel (j) calculation went beyond precision in vshGetZnAll()" << endl;
         cout << "x = " << rho(i) << "N_max = " << N_max << endl;
       }
@@ -442,11 +444,11 @@ namespace Smarties {
     return psi_x;
   }
 
-  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, size_t);
-  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, size_t, double, double, double);
-  template unique_ptr<stPinmTaunm<double>> vshPinmTaunm(size_t, const ArrayXd&);
+  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int);
+  template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
+  template unique_ptr<stPinmTaunm<double>> vshPinmTaunm(int, const ArrayXd&);
   template unique_ptr<stIncEabnm<double>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<double>>&);
-  template unique_ptr<stZnAll<double>> vshGetZnAll(size_t, const ArrayXd&, sBessel);
+  template unique_ptr<stZnAll<double>> vshGetZnAll(int, const ArrayXd&, sBessel);
   template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
       const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
       const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, unique_ptr<stPinmTaunm<double>>);
