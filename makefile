@@ -11,7 +11,7 @@ LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)
 DEF_OBJS=$(OUTDIR)/math.o $(OUTDIR)/defs_default.o $(OUTDIR)/defs_quad.o
-MP_OBJS=$(OUTDIR)/mp_part1.o $(OUTDIR)/mp_part2.o $(OUTDIR)/mp_part3.o $(OUTDIR)/mp_part4.o
+MP_OBJS=$(OUTDIR)/defs_mp1.o $(OUTDIR)/defs_mp2.o $(OUTDIR)/defs_mp3.o $(OUTDIR)/defs_mp4.o
 
 
 ### Recipes

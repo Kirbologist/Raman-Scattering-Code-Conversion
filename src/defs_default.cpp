@@ -15,7 +15,7 @@ template Tensor3c<double> subtensor(Tensor3c<double>&,
 template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
 template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
-template RowArrayXr<double> logicalSlice(RowArrayXr<double>&, RowArrayXb&);
+template RowArrayXd logicalSlice(RowArrayXd&, RowArrayXb&);
 template ArrayXd logicalSlice(ArrayXd&, ArrayXb&);
 template Tensor4c<double> tensor_conj(Tensor4c<double>&);
 template ArrayXd arr_bessel_j(ArrayXd&, double);
@@ -44,7 +44,7 @@ template unique_ptr<stIncEabnm<double>> vshGetIncidentCoeffs(int, const unique_p
 template unique_ptr<stZnAll<double>> vshGetZnAll(int, const ArrayXd&, sBessel);
 template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
     const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
-    const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, unique_ptr<stPinmTaunm<double>>);
+    const RowArrayXd&, const RowArrayXd&, sBessel, unique_ptr<stPinmTaunm<double>>);
 template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
 template ArrayXXc<double> vshRBchi(ArrayXd, const ArrayXd&);
 template ArrayXXc<double> vshRBpsi(ArrayXd, const ArrayXd&);
@@ -58,7 +58,7 @@ extern template Tensor3c<double> subtensor(Tensor3c<double>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
 extern template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
-extern template RowArrayXr<double> logicalSlice(RowArrayXr<double>&, RowArrayXb&);
+extern template RowArrayXd logicalSlice(RowArrayXd&, RowArrayXb&);
 
 extern template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(int, sInt);
 
@@ -111,7 +111,7 @@ extern template unique_ptr<stCrossSection<double>> rvhGetAverageCrossSections(
 */
 
 template unique_ptr<stTmatrix<double>> slvForT(const unique_ptr<stParams<double>>&,
-    const unique_ptr<stOptions<double>>&, unique_ptr<stRtfunc<double>>);
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<double>>);
 
 /*
 extern double mp_pi<double>();
@@ -136,14 +136,14 @@ extern template Tensor4c<double> tensor_conj(Tensor4c<double>&);
 extern template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
 extern template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
     const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
-    const RowArrayXr<double>&, const RowArrayXr<double>&, sBessel, unique_ptr<stPinmTaunm<double>>);
+    const RowArrayXd&, const RowArrayXd&, sBessel, unique_ptr<stPinmTaunm<double>>);
 extern template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
 
 extern template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
     const unique_ptr<stIncPar<double>>&, unique_ptr<stIncEabnm<double>>);
 
 extern template unique_ptr<stTmatrix<double>> slvForT(const unique_ptr<stParams<double>>&,
-    const unique_ptr<stOptions<double>>&, unique_ptr<stRtfunc<double>>);
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<double>>);
 
 extern template unique_ptr<stRes<double>> pstMakeStructForField(
     const unique_ptr<stAbcdnm<double>>&, const unique_ptr<stParams<double>>&);

@@ -19,7 +19,7 @@ namespace Smarties {
 
   template <class Real>
   unique_ptr<stTmatrix<Real>> slvForT(const unique_ptr<stParams<Real>>& params,
-      const unique_ptr<stOptions<Real>>& options,
+      const unique_ptr<stOptions>& options,
       unique_ptr<stRtfunc<Real>> stGeometry = unique_ptr<stRtfunc<Real>>()) {
     Real c = params->c;
     Real a = params->a;

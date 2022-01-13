@@ -30,7 +30,7 @@ extern template unique_ptr<stCrossSection<raman_float>> rvhGetAverageCrossSectio
     const ArrayXr<raman_float>&, const vector<vector<unique_ptr<stTR<raman_float>>>>&);
 
 template unique_ptr<stTmatrix<raman_float>> slvForT(const unique_ptr<stParams<raman_float>>&,
-    const unique_ptr<stOptions<raman_float>>&, unique_ptr<stRtfunc<raman_float>>);
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<raman_float>>);
 
 template unique_ptr<stRes<raman_float>> pstMakeStructForField(const unique_ptr<stAbcdnm<raman_float>>&,
     int, ArrayXr<raman_float>, ArrayXr<raman_float>, raman_float, unique_ptr<stIncPar<raman_float>>, raman_float, raman_float);

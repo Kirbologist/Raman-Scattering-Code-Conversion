@@ -20,6 +20,8 @@ namespace Smarties {
 
   using RowArrayXb = Array<bool, 1, Dynamic>;
 
+  using RowArrayXd = Array<double, 1, Dynamic>;
+
   template <class Real>
   using ArrayXXr = Array<Real, Dynamic, Dynamic>;
 
@@ -39,6 +41,9 @@ namespace Smarties {
   using RowArrayXc = Array<complex<Real>, 1, Dynamic>;
 
   template <class Real>
+  using MatrixXr = Matrix<Real, Dynamic, Dynamic>;
+
+  template <class Real>
   using MatrixXc = Matrix<complex<Real>, Dynamic, Dynamic>;
 
   template <class Real>
@@ -46,6 +51,8 @@ namespace Smarties {
 
   template <class Real>
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
+
+  using Tensor3d = Tensor<double, 3>;
 
   template <class Real>
   using Tensor3r = Tensor<Real, 3>;
@@ -96,7 +103,6 @@ namespace Smarties {
     ArrayXr<Real> epsilon2;
   };
 
-  template <class Real>
   struct stOptions {
     bool get_R = false;
     int delta = 0;

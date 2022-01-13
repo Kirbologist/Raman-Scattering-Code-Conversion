@@ -111,7 +111,7 @@ extern template unique_ptr<stCrossSection<long double>> rvhGetAverageCrossSectio
 */
 
 template unique_ptr<stTmatrix<long double>> slvForT(const unique_ptr<stParams<long double>>&,
-    const unique_ptr<stOptions<long double>>&, unique_ptr<stRtfunc<long double>>);
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<long double>>);
 
 /*
 extern long double mp_pi<long double>();
@@ -143,13 +143,35 @@ extern template unique_ptr<stAbcdnm<long double>> rvhGetFieldCoefficients(int, c
     const unique_ptr<stIncPar<long double>>&, unique_ptr<stIncEabnm<long double>>);
 
 extern template unique_ptr<stTmatrix<long double>> slvForT(const unique_ptr<stParams<long double>>&,
-    const unique_ptr<stOptions<long double>>&, unique_ptr<stRtfunc<long double>>);
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<long double>>);
 
 extern template unique_ptr<stRes<long double>> pstMakeStructForField(
     const unique_ptr<stAbcdnm<long double>>&, const unique_ptr<stParams<long double>>&);
 extern template unique_ptr<stSM<long double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<long double>>>&, long double, long double, int);
 */
+extern template double mp_pi<double>();
+
+extern template Tensor4c<double> tensor_conj(Tensor4c<double>&);
+
+extern template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
+extern template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
+    const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
+    const RowArrayXd&, const RowArrayXd&, sBessel, unique_ptr<stPinmTaunm<double>>);
+extern template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
+
+extern template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
+    const unique_ptr<stIncPar<double>>&, unique_ptr<stIncEabnm<double>>);
+
+extern template unique_ptr<stTmatrix<double>> slvForT(const unique_ptr<stParams<double>>&,
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<double>>);
+
+extern template unique_ptr<stRes<double>> pstMakeStructForField(
+    const unique_ptr<stAbcdnm<double>>&, const unique_ptr<stParams<double>>&);
+extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
+    const vector<unique_ptr<stTR<double>>>&, double, double, int);
 
 template unique_ptr<stParams<long double>> loadParam(string);
 template void RamanElasticScattering<long double>(int, char**);
+template vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<long double>>>&);
+template void RamanElasticScatteringMpDouble<long double>(int, char**);
