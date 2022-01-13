@@ -1,9 +1,9 @@
-#include "sph.hpp"
-#include "rvh.hpp"
-#include "math.hpp"
-#include "smarties_aux.hpp"
-#include "vsh.hpp"
-#include "core.hpp"
+#include "../src/sph.hpp"
+#include "../src/rvh.hpp"
+#include "../src/math.hpp"
+#include "../src/smarties_aux.hpp"
+#include "../src/vsh.hpp"
+#include "../src/core.hpp"
 #include "core_mp.hpp"
 
 using namespace Eigen;

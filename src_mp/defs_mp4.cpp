@@ -1,10 +1,10 @@
-#include "raman_elastic_scattering.hpp"
-#include "math.hpp"
-#include "vsh.hpp"
-#include "rvh.hpp"
-#include "slv.hpp"
-#include "pst.hpp"
-#include "core.hpp"
+#include "../src/raman_elastic_scattering.hpp"
+#include "../src/math.hpp"
+#include "../src/vsh.hpp"
+#include "../src/rvh.hpp"
+#include "../src/slv.hpp"
+#include "../src/pst.hpp"
+#include "../src/core.hpp"
 #include "core_mp.hpp"
 
 using namespace Eigen;

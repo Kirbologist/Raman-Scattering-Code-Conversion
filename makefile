@@ -2,11 +2,12 @@
 UNSUPPORTED_FLAG=-Ilib/eigen-3.4.0/unsupported
 EIGEN_FLAG=-Ilib/eigen-3.4.0
 BOOST_FLAG=-Ilib/boost_1_77_0
-MP_FLAGS=-lmpfr -lgmp
+MP_LIBS=-lmpfr -lgmp
 
 OUTDIR=output
 CC=g++
-CPP_FLAGS=-std=c++17 -Wall -g -msse2 -O3 $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+OBJ_FLAGS=-std=c++17 -Wall -msse2 -O2 -ftree-parallelize-loops=4 $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)
 DEF_OBJS=$(OUTDIR)/math.o $(OUTDIR)/defs_default.o $(OUTDIR)/defs_quad.o
@@ -17,10 +18,10 @@ MP_OBJS=$(OUTDIR)/mp_part1.o $(OUTDIR)/mp_part2.o $(OUTDIR)/mp_part3.o $(OUTDIR)
 .PHONY=build clean info
 
 build : $(OUTDIR) $(DEF_OBJS) $(OUTDIR)/main.o
-	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(OUTDIR)/main.o
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(OUTDIR)/main.o $(LINK_FLAGS)
 
 mp : $(OUTDIR) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o
-	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o $(MP_FLAGS)
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o $(LINK_FLAGS) $(MP_LIBS)
 
 clean :
 	@rm -f $(DEF_OBJS)
@@ -38,7 +39,8 @@ info :
 	@echo "EIGEN FLAG:" $(EIGEN_FLAG)
 	@echo "BOOST FLAG:" $(BOOST_FLAG)
 	@echo "COMPILER:" $(CC)
-	@echo "COMPILER FLAGS:" $(CPP_FLAGS)
+	@echo "COMPILER FLAGS:" $(OBJ_FLAGS)
+	@echo "LIBRARIES:" $(MP_LIBS)
 	@echo "PRODUCT:" $(PRODUCT)
 	@echo "DEFAULT OBJS:" $(DEF_OBJS)
 	@echo "MP_OBJS:" $(MP_OBJS)
@@ -49,10 +51,13 @@ $(OUTDIR) :
 	@mkdir $@
 
 $(OUTDIR)/main.o : main.cpp
-	$(CC) -c -o $@ $< $(CPP_FLAGS)
+	$(CC) -c -o $@ $< $(OBJ_FLAGS)
 
 $(OUTDIR)/main_mp.o : main_mp.cpp
-	$(CC) -c -o $@ $< $(CPP_FLAGS) $(MP_FLAGS)
+	$(CC) -c -o $@ $< $(OBJ_FLAGS) $(MP_LIBS)
 
 $(OUTDIR)/%.o : src/%.cpp
-	$(CC) -c -o $@ $< $(CPP_FLAGS) $(MP_FLAGS)
+	$(CC) -c -o $@ $< $(OBJ_FLAGS)
+
+$(OUTDIR)/%.o : src_mp/%.cpp
+	$(CC) -c -o $@ $< $(OBJ_FLAGS) $(MP_LIBS)
