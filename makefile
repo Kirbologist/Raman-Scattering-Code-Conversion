@@ -29,6 +29,10 @@ clean :
 	@rm -f $(OUTDIR)/main_mp.o
 	@rm -f $(PRODUCT)
 
+clean-mp :
+	@rm -f $(MP_OBJS)
+	@rm -f $(OUTDIR)/main_mp.o
+
 info :
 	@echo "UNSUPPORTED EIGEN FLAG:" $(UNSUPPORTED_FLAG)
 	@echo "EIGEN FLAG:" $(EIGEN_FLAG)

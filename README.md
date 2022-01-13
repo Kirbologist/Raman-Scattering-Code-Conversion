@@ -11,17 +11,17 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
 ## Instructions
 
-Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using double-precision floating points, simply type the following command:
+Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command:
 ```
 make
 ```
 
-For calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, type the following command:
+For calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, run the following command:
 ```
 make mp
 ```
 
-In either case, once the binaries have been built, type the following to run the program:
+In either case, once the binaries have been built (this may take a few minutes), run the following command to run the program:
 ```
 output/raman_elastic_scattering [CPU_N] [CPUS] [DIA_MIN] [DIA_MAX] [N_RAD] [N_THETA_P] [CALC_TYPE]
 ```
@@ -32,7 +32,13 @@ Where:
 - `DIA_MAX` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, `DIA_MAX` = 2000.
 - `N_RAD` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, `N_RAD` = 100.
 - `N_THETA_P` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, `N_THETA_P` = 19.
-- `CALC_TYPE` is the type of precision used for floating-point calculations. Use `double` for double precision and `mp` for arbitrary precision. Note that this parameter only matters if the binary was built using `make mp`. By default, `CALC_TYPE` = `double`.
+- `CALC_TYPE` is the type of precision used for floating-point calculations. Use `double` for double precision, `quad` for quadruple precision (using C++'s `long double` type) and `mp` for arbitrary precision. Note that `mp` only works as intended if the binary was compiled using `make mp`. By default, `CALC_TYPE` = `double`.
+
+By default, `make mp` calculates with a precision of 34 bits. To change the precision, open the `core_mp.hpp` header file, change the `const int precision` variable to the desired number of bits of precision. Then the code must be recompiled for the changes to take effect. The fastest way to compile these changes is to run
+```
+make clean-mp
+make mp
+```
 
 ## Progress
 
