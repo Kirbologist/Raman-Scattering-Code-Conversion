@@ -11,39 +11,42 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
 ## Instructions
 
-Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command:
+Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command to compile the program:
 ```
 make
 ```
 
-For calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, run the following command:
+For also calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, run the following command:
 ```
 make mp
 ```
 
-In either case, once the binaries have been built (this may take a few minutes), run the following command to run the program:
+In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
 ```
-output/raman_elastic_scattering [CPU_N] [CPUS] [DIA_MIN] [DIA_MAX] [N_RAD] [N_THETA_P] [CALC_TYPE]
+output/raman_elastic_scattering
 ```
-Where:
-- `CPU_N` is the index of the current computer of a cluster of computers (note that index-by-0 is used, so the first computer of a cluster has `CPU_N` = 0, the second computer has `CPU_N` = 1, etc.). By default, `CPU_N` = 0.
-- `CPUS` is the number of computers in the cluster. By default, `CPUS` = 1.
-- `DIA_MIN` is the minimum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, `DIA_MIN` = 1000.
-- `DIA_MAX` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, `DIA_MAX` = 2000.
-- `N_RAD` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, `N_RAD` = 100.
-- `N_THETA_P` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, `N_THETA_P` = 19.
-- `CALC_TYPE` is the type of precision used for floating-point calculations. By default, `CALC_TYPE` = `double`.
+By default, the program also writes the output to `output/results.txt`.
+
+You can change the calculation parameters by editing the `config.txt` file. Parameters must be entered in the format `Parameter:value`, where `value` is all lower case, no spaces. If no value is given, the program uses the default value.
+
+Here's what each 'run' parameter under does:
+- `CPU no.` is the index of the current computer of a cluster of computers (note that index-by-0 is used, so the first computer of a cluster has `CPU no.` = 0, the second computer has `CPU no.` = 1, etc.). By default, this parameter is 0.
+- `No. of CPUs` is the number of computers in the cluster. By default, this parameter is 1.
+- `Minimum diameter` is the minimum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 1000.
+- `Maximum diameter` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 2000.
+- `No. of radii` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, this parameter is 100.
+- `No. of thetas` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, this parameter is 19.
+- `Calculation type` is the type of precision used for floating-point calculations. By default, this parameter is `double`.
   - Use `double` for performing all calculations with double precision.
   - Use `quad` for performing all calculations with quad precision (using C++'s `long double` type).
   - Use `mp` for performing all calculations with arbitrary precision. (Only works if code was compiled using `make mp`)
   - Use `quad-double` for calculating T-matrices with quad precision (using C++'s `long double` type) and calculating the electric fields with double precision.
   - Use `mp-double` for calculating T-matrices with arbitrary precision and calculating the electric fields with double precision.
+- `Print output to file` is a `yes`/`no` parameter. If `yes`, the program writes the output to `output/results.txt`. Otherwise, it doesn't write to any file.
 
-By default, `make mp` calculates with a precision of 113 bits (the number of significand bits in the IEEE 754 quadruple-precision format). To change the precision, open the `core_mp.hpp` header file, change the `const int precision` variable to the desired number of bits of precision. Then the code must be recompiled for the changes to take effect. The fastest way to compile these changes is to run
-```
-make clean-mp
-make mp
-```
+The 'build' parameters requires the program to be recompiled to apply any changes (run `make clean` to clear all the compiled code and then run `make`). Here's what each 'build' parameter does:
+- `No. of threads` is the number of computer threads used to perform the calculations. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, this parameter is 1.
+- `No. of bits of precision` is the number of bits used for the significand/mantissa used by the arbitrary-precision type (i.e. its precision). The precision allowed is only limited by the amount of memory available on your computer. By default, this parameter is 113 (the number of significand bits in quadruple precision).
 
 ## Progress
 

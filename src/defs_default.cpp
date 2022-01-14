@@ -11,7 +11,7 @@ string GetCalcType(string in_file_name) {
   if (!in_file.is_open())
     throw runtime_error("Error: cannot open config.txt");
 
-  string option = "Calculation type: ";
+  string option = "Calculation type:";
   string line;
   do {
     if (in_file.peek() == EOF)

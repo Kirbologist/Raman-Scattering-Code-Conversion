@@ -59,8 +59,8 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
 
   string line;
   vector<string> options {
-    "CPU no.: ", "No. of CPUs: ", "Minimum diameter: ", "Maximum diameter: ",
-    "No. of radii: ", "No. of thetas: ", "Print output to file: "
+    "CPU no.:", "No. of CPUs:", "Minimum diameter:", "Maximum diameter:",
+    "No. of radii:", "No. of thetas:", "Print output to file:"
   };
   for (size_t i = 0; i < options.size(); i++) {
     string option = options[i];

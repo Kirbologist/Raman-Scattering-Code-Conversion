@@ -1,5 +1,7 @@
 #include "src/raman_elastic_scattering.hpp"
 
+using namespace std;
+
 extern template void RamanElasticScattering<double>(string, string);
 extern template void RamanElasticScattering<long double>(string, string);
 extern template void RamanElasticScatteringMpDouble<long double>(string, string);
@@ -13,7 +15,13 @@ int main(int argc, char** argv) {
     RamanElasticScattering<long double>(in_file_name, out_file_name);
   else if (calc_type == "quad-double")
     RamanElasticScatteringMpDouble<long double>(in_file_name, out_file_name);
-  else
+  else {
+    if (calc_type == "mp" || calc_type == "mp-double")
+      cerr << "Warning: attempted to run with multiprecision. Please recompile with command 'make mp'. " <<
+          "Running with double precision." << endl;
+    else if (calc_type != "double")
+      cerr << "Warning: unrecognised calculation type. Running with double precision." << endl;
     RamanElasticScattering<double>(in_file_name, out_file_name);
+  }
   return 0;
 }

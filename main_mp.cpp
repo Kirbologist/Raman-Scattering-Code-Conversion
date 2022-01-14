@@ -24,7 +24,10 @@ int main(int argc, char** argv) {
     RamanElasticScattering<long double>(in_file_name, out_file_name);
   else if (calc_type == "quad-double")
     RamanElasticScatteringMpDouble<long double>(in_file_name, out_file_name);
-  else
+  else {
+    if (calc_type != "double")
+      cerr << "Warning: unrecognised calculation type. Running with double precision." << endl;
     RamanElasticScattering<double>(in_file_name, out_file_name);
+  }
   return 0;
 }
