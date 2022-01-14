@@ -32,9 +32,14 @@ Where:
 - `DIA_MAX` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, `DIA_MAX` = 2000.
 - `N_RAD` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, `N_RAD` = 100.
 - `N_THETA_P` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, `N_THETA_P` = 19.
-- `CALC_TYPE` is the type of precision used for floating-point calculations. Use `double` for double precision, `quad` for quadruple precision (using C++'s `long double` type) and `mp` for arbitrary precision. Note that `mp` only works as intended if the binary was compiled using `make mp`. By default, `CALC_TYPE` = `double`.
+- `CALC_TYPE` is the type of precision used for floating-point calculations. By default, `CALC_TYPE` = `double`.
+  - Use `double` for performing all calculations with double precision.
+  - Use `quad` for performing all calculations with quad precision (using C++'s `long double` type).
+  - Use `mp` for performing all calculations with arbitrary precision. (Only works if code was compiled using `make mp`)
+  - Use `quad-double` for calculating T-matrices with quad precision (using C++'s `long double` type) and calculating the electric fields with double precision.
+  - Use `mp-double` for calculating T-matrices with arbitrary precision and calculating the electric fields with double precision.
 
-By default, `make mp` calculates with a precision of 34 bits. To change the precision, open the `core_mp.hpp` header file, change the `const int precision` variable to the desired number of bits of precision. Then the code must be recompiled for the changes to take effect. The fastest way to compile these changes is to run
+By default, `make mp` calculates with a precision of 113 bits (the number of significand bits in the IEEE 754 quadruple-precision format). To change the precision, open the `core_mp.hpp` header file, change the `const int precision` variable to the desired number of bits of precision. Then the code must be recompiled for the changes to take effect. The fastest way to compile these changes is to run
 ```
 make clean-mp
 make mp
@@ -48,9 +53,10 @@ make mp
   - [x] rvh* functions (5/3)
   - [x] slv* functions (2/2)
   - [x] pst* functions (2/2)
-  - [x] Non-SMARTIES functions (2/2)
+  - [x] Non-SMARTIES functions (3/3)
   - [x] Minimum viable product
-  - [x] arbitrary-precision support
+  - [x] Arbitrary-precision support
+  - [ ] Automated parallel computing
 
 ## Notable differences from SMARTIES
 

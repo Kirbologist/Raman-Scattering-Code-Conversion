@@ -135,7 +135,7 @@ namespace Smarties {
   template <class Real>
   unique_ptr<stPinmTaunm<Real>> vshPinmTaunm(int N_max, const ArrayXr<Real>& theta) {
     if ((theta < 0.0).any())
-      cout << "Warning: theta must be >= 0 in vshPinmTaunm..." << endl;
+      cerr << "Warning: theta must be >= 0 in vshPinmTaunm..." << endl;
     int n_rows = size(theta), n_cols, P_max = (N_max + 1)*(N_max + 1);
     auto output = make_unique<stPinmTaunm<Real>>();
     output->pi_nm = ArrayXXr<Real>::Zero(n_rows, P_max);
@@ -235,7 +235,7 @@ namespace Smarties {
   template <class Real>
   unique_ptr<stZnAll<Real>> vshGetZnAll(int N_max, const ArrayXr<Real>& rho, sBessel type) {
     if ((rho == 0).any())
-      cout << "Warning: rho = 0 arguments not allowed in vshZnAll..." << endl;
+      cerr << "Warning: rho = 0 arguments not allowed in vshZnAll..." << endl;
 
     ArrayXr<Real> nu = ArrayXr<Real>::LinSpaced(N_max + 1, 0.5, N_max + 0.5);
     ArrayXXc<Real> f(rho.size(), N_max + 1);
@@ -243,8 +243,8 @@ namespace Smarties {
     for (int i = 0; i < rho.size(); i++) {
       f.row(i) = arr_bessel_j(nu, rho(i));
       if ((f.row(i) == static_cast<complex<Real>>(0)).any()) {
-        cout << "Warning: Bessel (j) calculation went beyond precision in vshGetZnAll()" << endl;
-        cout << "x = " << rho(i) << "N_max = " << N_max << endl;
+        cerr << "Warning: Bessel (j) calculation went beyond precision in vshGetZnAll()" << endl;
+        cerr << "x = " << rho(i) << "N_max = " << N_max << endl;
       }
     }
 
@@ -253,8 +253,8 @@ namespace Smarties {
       for (int i = 0; i < rho.size(); i++) {
         y = arr_bessel_y(nu, rho(i));
         if ((f.row(i).isInf()).any()) {
-          cout << "Warning: Bessel (y) calculation went beyond precision in vshGetZnAll()" << endl;
-          cout << "x = " << rho(i) << "N_max = " << N_max << endl;
+          cerr << "Warning: Bessel (y) calculation went beyond precision in vshGetZnAll()" << endl;
+          cerr << "x = " << rho(i) << "N_max = " << N_max << endl;
         }
         f.row(i) += mp_im_unit<Real>()*y;
       }

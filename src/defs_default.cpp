@@ -1,8 +1,44 @@
 #include "smarties.hpp"
 #include "raman_elastic_scattering.hpp"
+#include <fstream>
 
 using namespace Eigen;
 using namespace Smarties;
+
+string GetCalcType(string in_file_name) {
+  ifstream in_file;
+  in_file.open(in_file_name, ios::in);
+  if (!in_file.is_open())
+    throw runtime_error("Error: cannot open config.txt");
+
+  string option = "Calculation type: ";
+  string line;
+  do {
+    if (in_file.peek() == EOF)
+      throw runtime_error("Error: cannot find option " + option);
+    getline(in_file, line);
+  } while (line.find(option) == string::npos);
+  string calc_type = line.substr(line.find(option) + option.size());
+  in_file.close();
+  return calc_type;
+}
+
+void MultiPrint(string out_string, string out_file_name, bool write_output) {
+  cout << out_string;
+  cout.flush();
+  if (write_output) {
+    ofstream out_file;
+    out_file.open(out_file_name, ios::out | ios::app);
+    if (!out_file.is_open()) {
+      cerr << "Warning: cannot open output file. Some output won't be written." << endl;
+      out_file.close();
+      write_output = false;
+    }
+    out_file << out_string;
+    out_file.flush();
+    out_file.close();
+  }
+}
 
 template double mp_pi<double>();
 template double mp_eps<double>();
@@ -152,4 +188,5 @@ extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
 */
 
 template unique_ptr<stParams<double>> loadParam(string);
-template void RamanElasticScattering<double>(int, char**);
+template unique_ptr<RamanParams<double>> GetRamanParams(string in_file_name);
+template void RamanElasticScattering<double>(string, string);

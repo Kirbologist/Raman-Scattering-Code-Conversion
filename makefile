@@ -4,9 +4,10 @@ EIGEN_FLAG=-Ilib/eigen-3.4.0
 BOOST_FLAG=-Ilib/boost_1_77_0
 MP_LIBS=-lmpfr -lgmp
 
+THREADS=4
 OUTDIR=output
 CC=g++
-OBJ_FLAGS=-std=c++17 -Wall -msse2 -O2 -ftree-parallelize-loops=4 $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+OBJ_FLAGS=-std=c++17 -Wall -msse2 -O2 -ftree-parallelize-loops=$(THREADS) $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)

@@ -11,7 +11,7 @@ using namespace Eigen;
 using namespace Smarties;
 using namespace boost::multiprecision;
 
-extern template complex<raman_float> mp_pi();
+extern template raman_float mp_pi();
 
 extern template Tensor4c<raman_float> tensor_conj(Tensor4c<raman_float>&);
 
@@ -56,6 +56,9 @@ extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
 
 
 template unique_ptr<stParams<raman_float>> loadParam(string);
-template void RamanElasticScattering<raman_float>(int, char**);
+template unique_ptr<RamanParams<raman_float>> GetRamanParams(string in_file_name);
+template void RamanElasticScattering<raman_float>(string, string);
+
+extern template double mp_im_unit()
 template vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<raman_float>>>&);
-template void RamanElasticScatteringMpDouble<raman_float>(int, char**);
+template void RamanElasticScatteringMpDouble<raman_float>(string, string);
