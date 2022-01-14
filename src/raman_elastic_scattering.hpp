@@ -113,6 +113,37 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
   return output;
 }
 
+// Can make this into a non-template function using c++20 'concepts' keyword
+template <class Real>
+void CreateTimeStamp(string out_file_name, const unique_ptr<RamanParams<Real>>& raman_params, bool is_mixed) {
+  string main_calc_type = typeid(raman_params->dia_min).name();
+  string converted_calc_type;
+  if (main_calc_type.find("N5boost14multiprecision6numberINS0_8backends18mpfr_float_backend") != string::npos) {
+    size_t prec_begin = main_calc_type.find("ILj") + 3;
+    size_t prec_end = main_calc_type.find("ELNS");
+    string precision = main_calc_type.substr(prec_begin, prec_end - prec_begin);
+    converted_calc_type = "Boost MPFR with precision of " + precision + " bits";
+  } else if (main_calc_type == "d")
+    converted_calc_type = "double";
+  else if (main_calc_type == "e")
+    converted_calc_type = "long double";
+
+  ofstream out_file;
+  out_file.open(out_file_name, ios::out | ios::app);
+  auto sys_time = chrono::system_clock::now();
+  time_t sys_time_date = chrono::system_clock::to_time_t(sys_time);
+  out_file << "Session began at system time: " << ctime(&sys_time_date);
+  out_file << "Running RamanElasticScattering with type " << converted_calc_type;
+  if (is_mixed)
+    out_file << " and type double";
+  out_file << endl;
+  out_file << "Parameters are CPU_N: " << raman_params->cpu_n << ", CPUS: " << raman_params->cpus <<
+      ", DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
+      ", N_RAD: " << raman_params->N_rad << ", N_THETA_P: " << raman_params->N_theta_p << endl;
+  out_file.flush();
+  out_file.close();
+}
+
 template <class Real>
 void RamanElasticScattering(string in_file_name, string out_file_name) {
   Real PI = mp_pi<Real>();
@@ -132,17 +163,8 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
       write_output = false;
     }
   }
-  if (write_output) {
-    auto sys_time = chrono::system_clock::now();
-    time_t sys_time_date = chrono::system_clock::to_time_t(sys_time);
-    out_file << "Session began at system time: " << ctime(&sys_time_date);
-    out_file << "Running RamanElasticScattering with " << typeid(PI).name() << " precision." << endl;
-    out_file << "Parameters are CPU_N: " << raman_params->cpu_n << ", CPUS: " << raman_params->cpus <<
-        ", DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
-        ", N_RAD: " << raman_params->N_rad << ", N_THETA_P: " << raman_params->N_theta_p << endl;
-    out_file.flush();
-    out_file.close();
-  }
+  if (write_output)
+    CreateTimeStamp(out_file_name, raman_params, false);
 
   Tensor3r<Real> sigma_yz(rad_var.size(), h_var.size(), theta_p_var.size());
   Tensor3r<Real> sigma_zy(rad_var.size(), h_var.size(), theta_p_var.size());
@@ -384,6 +406,7 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
   }
 }
 
+// Can make this into a non-template function using c++20 'concepts' keyword
 template <class Real>
 vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<Real>>>& st_TR_list) {
   vector<unique_ptr<stTR<double>>> output(st_TR_list.size());
@@ -449,11 +472,11 @@ vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<
 template <class Real>
 void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
   double PI = mp_pi<double>();
-  unique_ptr<RamanParams<double>> raman_params = GetRamanParams<double>(in_file_name);
-  ArrayXd rad_var = raman_params->rad_var;
-  ArrayXd theta_p_var = raman_params->theta_p_var;
+  unique_ptr<RamanParams<Real>> raman_params = GetRamanParams<Real>(in_file_name);
+  ArrayXr<Real> rad_var = raman_params->rad_var;
+  ArrayXd theta_p_var = raman_params->theta_p_var.template cast<double>();
   bool write_output = raman_params->write_output;
-  ArrayXd h_var = {{static_cast<Real>(1.0)/3}};
+  ArrayXr<Real> h_var = {{static_cast<Real>(1.0)/3}};
 
   ofstream out_file;
   if (write_output) {
@@ -465,18 +488,8 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
       write_output = false;
     }
   }
-  if (write_output) {
-    auto sys_time = chrono::system_clock::now();
-    time_t sys_time_date = chrono::system_clock::to_time_t(sys_time);
-    out_file << "Session began at system time: " << ctime(&sys_time_date) << endl;
-    out_file << "Running RamanElasticScatteringMpDouble with " <<
-        typeid(static_cast<Real>(0)).name() << " and double precision." << endl;
-    out_file << "Parameters are CPU_N: " << raman_params->cpu_n << ", CPUS: " << raman_params->cpus <<
-        ", DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
-        ", N_RAD: " << raman_params->N_rad << ", N_THETA_P: " << raman_params->N_theta_p << endl;
-    out_file.flush();
-    out_file.close();
-  }
+  if (write_output)
+    CreateTimeStamp(out_file_name, raman_params, true);
 
   Tensor3d sigma_yz(rad_var.size(), h_var.size(), theta_p_var.size());
   Tensor3d sigma_zy(rad_var.size(), h_var.size(), theta_p_var.size());
@@ -521,7 +534,7 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
 
   for (int h_ind = 0; h_ind < h_var.size(); h_ind++) {
     stringstream out_stream;
-    double h = h_var(h_ind);
+    Real h = h_var(h_ind);
 
     out_stream.precision(4);
     out_stream << "aspect ratio " << h_var << endl;
@@ -529,21 +542,24 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
     out_stream.str(string());
 
     for (int k = 0; k < rad_var.size(); k++) {
-      double a, c;
+      Real a_mp, c_mp;
       if (h > 1) {
-        a = rad_var(k);
-        c = rad_var(k) / h;
+        a_mp = rad_var(k);
+        c_mp = rad_var(k) / h;
       } else {
-        a = rad_var(k) * h;
-        c = rad_var(k);
+        a_mp = rad_var(k) * h;
+        c_mp = rad_var(k);
       }
-      int N = 6 + 2*static_cast<int>(ceil(max(a, c)/40));
+      int N = 6 + 2*static_cast<int>(ceil(max(a_mp, c_mp)/40));
       params_mp->N = N;
-      params_mp->a = a;
-      params_mp->c = c;
+      params_mp->a = a_mp;
+      params_mp->c = c_mp;
       params_mp_rm->N = N;
-      params_mp_rm->a = a;
-      params_mp_rm->c = c;
+      params_mp_rm->a = a_mp;
+      params_mp_rm->c = c_mp;
+
+      double a = static_cast<double>(a_mp);
+      double c = static_cast<double>(c_mp);
       params->N = N;
       params->a = a;
       params->c = c;

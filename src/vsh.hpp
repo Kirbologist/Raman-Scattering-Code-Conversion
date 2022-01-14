@@ -424,7 +424,7 @@ namespace Smarties {
     for (int i = 0; i < x.size(); i++) {
       yx = arr_bessel_y(n, x(i));
       if ((yx.isInf()).any())
-        cout << "Warning: Bessel (y) calculation went beyond precision in vshRBchi()" << endl;
+        cerr << "Warning: Bessel (y) calculation went beyond precision in vshRBchi()" << endl;
       chi_x.row(i) = sqrt(static_cast<complex<Real>>(x(i)*mp_pi<Real>()/2))*yx;
     }
     return chi_x;
@@ -439,7 +439,7 @@ namespace Smarties {
     for (int i = 0; i < x.size(); i++) {
       jx = arr_bessel_j(n, x(i));
       if ((jx == 0.0).any())
-        cout << "Warning: Bessel (j) calculation went beyond precision in vshRBpsi()" << endl;
+        cerr << "Warning: Bessel (j) calculation went beyond precision in vshRBpsi()" << endl;
       psi_x.row(i) = sqrt(static_cast<complex<Real>>(x(i)*mp_pi<Real>()/2))*jx;
     }
     return psi_x;

@@ -56,9 +56,10 @@ extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
 
 
 template unique_ptr<stParams<raman_float>> loadParam(string);
-template unique_ptr<RamanParams<raman_float>> GetRamanParams(string in_file_name);
+template unique_ptr<RamanParams<raman_float>> GetRamanParams(string);
+template void CreateTimeStamp(string, const unique_ptr<RamanParams<raman_float>>&, bool);
 template void RamanElasticScattering<raman_float>(string, string);
 
-extern template double mp_im_unit()
+extern template complex<double> mp_im_unit();
 template vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<raman_float>>>&);
 template void RamanElasticScatteringMpDouble<raman_float>(string, string);

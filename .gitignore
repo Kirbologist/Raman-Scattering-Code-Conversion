@@ -3,6 +3,7 @@
 *.exe
 *.o
 raman_elastic_scattering
+results.txt
 
 # Packages #
 ############

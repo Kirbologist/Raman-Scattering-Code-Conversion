@@ -172,7 +172,8 @@ extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<double>>>&, double, double, int);
 
 template unique_ptr<stParams<long double>> loadParam(string);
-template unique_ptr<RamanParams<long double>> GetRamanParams(string in_file_name);
+template unique_ptr<RamanParams<long double>> GetRamanParams(string);
+template void CreateTimeStamp(string, const unique_ptr<RamanParams<long double>>&, bool);
 template void RamanElasticScattering<long double>(string, string);
 
 extern template complex<double> mp_im_unit();
