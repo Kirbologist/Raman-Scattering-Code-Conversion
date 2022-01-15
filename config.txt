@@ -5,10 +5,5 @@ Minimum diameter:1000
 Maximum diameter:2000
 No. of radii:100
 No. of thetas:19
-Calculation type:mp
+Calculation type:double
 Print output to file:yes
-
-### BUILD PARAMETERS ###
--- The code must be recompiled to apply any changes to these parameters!! --
-No. of threads:1
-No. of bits of precision:113

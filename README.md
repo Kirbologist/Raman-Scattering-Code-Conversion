@@ -13,13 +13,17 @@ The original MATLAB code was written to calculate Raman scattering by spheroids 
 
 Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command to compile the program:
 ```
-make
+make [OPTIONS]
 ```
 
 For also calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, run the following command:
 ```
-make mp
+make mp [OPTIONS]
 ```
+
+`[OPTIONS]` can contain any of the following parameters:
+- `THREADS=*VALUE*`: the program will use `*VALUE*` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
+- `PRECISION=*VALUE*`: if used with `mp`, the program will use `*VALUE*` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer. By default, if this option is not specified, the number of bits used is 113 (the number of significand bits in quadruple precision).
 
 In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
 ```
@@ -43,10 +47,6 @@ Here's what each 'run' parameter under does:
   - Use `quad-double` for calculating T-matrices with quad precision (using C++'s `long double` type) and calculating the electric fields with double precision.
   - Use `mp-double` for calculating T-matrices with arbitrary precision and calculating the electric fields with double precision.
 - `Print output to file` is a `yes`/`no` parameter. If `yes`, the program writes the output to `output/results.txt`. Otherwise, it doesn't write to any file.
-
-The 'build' parameters requires the program to be recompiled to apply any changes (run `make clean` to clear all the compiled code and then run `make`). Here's what each 'build' parameter does:
-- `No. of threads` is the number of computer threads used to perform the calculations. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, this parameter is 1.
-- `No. of bits of precision` is the number of bits used for the significand/mantissa used by the arbitrary-precision type (i.e. its precision). The precision allowed is only limited by the amount of memory available on your computer. By default, this parameter is 113 (the number of significand bits in quadruple precision).
 
 ## Progress
 

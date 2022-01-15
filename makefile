@@ -4,10 +4,13 @@ EIGEN_FLAG=-Ilib/eigen-3.4.0
 BOOST_FLAG=-Ilib/boost_1_77_0
 MP_LIBS=-lmpfr -lgmp
 
-THREADS=4
+THREADS=1
+PRECISION=113 # default value of 113 is number of significand bits in quadruple-precision
+
 OUTDIR=output
 CC=g++
-OBJ_FLAGS=-std=c++17 -Wall -msse2 -O2 -ftree-parallelize-loops=$(THREADS) $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -ftree-parallelize-loops=$(THREADS) $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+MP_FLAGS=-DPRECISION=$(PRECISION)
 LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)
@@ -40,11 +43,12 @@ info :
 	@echo "EIGEN FLAG:" $(EIGEN_FLAG)
 	@echo "BOOST FLAG:" $(BOOST_FLAG)
 	@echo "COMPILER:" $(CC)
-	@echo "COMPILER FLAGS:" $(OBJ_FLAGS)
+	@echo "COMPILER FLAGS:" $(CPPFLAGS)
+	@echo "COMPILER MP FLAGS:" $(MP_FLAGS)
 	@echo "LIBRARIES:" $(MP_LIBS)
 	@echo "PRODUCT:" $(PRODUCT)
 	@echo "DEFAULT OBJS:" $(DEF_OBJS)
-	@echo "MP_OBJS:" $(MP_OBJS)
+	@echo "MP OBJS:" $(MP_OBJS)
 
 
 ### Prerequisites
@@ -52,13 +56,13 @@ $(OUTDIR) :
 	@mkdir $@
 
 $(OUTDIR)/main.o : main.cpp
-	$(CC) -c -o $@ $< $(OBJ_FLAGS)
+	$(CC) -c -o $@ $< $(CPPFLAGS)
 
 $(OUTDIR)/main_mp.o : main_mp.cpp
-	$(CC) -c -o $@ $< $(OBJ_FLAGS) $(MP_LIBS)
+	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
 
 $(OUTDIR)/%.o : src/%.cpp
-	$(CC) -c -o $@ $< $(OBJ_FLAGS)
+	$(CC) -c -o $@ $< $(CPPFLAGS)
 
 $(OUTDIR)/%.o : src_mp/%.cpp
-	$(CC) -c -o $@ $< $(OBJ_FLAGS) $(MP_LIBS)
+	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
