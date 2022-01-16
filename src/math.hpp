@@ -24,7 +24,9 @@ namespace Smarties {
       ArithmeticSequence<long int, long int, long int> slice_dim1,
       ArithmeticSequence<long int, long int, long int> slice_dim2,
       ArithmeticSequence<long int, long int, long int> slice_dim3) {
-    long int new_dim1 = slice_dim1.size(), new_dim2 = slice_dim2.size(), new_dim3 = slice_dim3.size();
+    long int new_dim1 = slice_dim1.size();
+    long int new_dim2 = slice_dim2.size();
+    long int new_dim3 = slice_dim3.size();
     Tensor3c<Real> output(new_dim1, new_dim2, new_dim3);
     for (long int i = 0; i < new_dim1; i++) {
       for (long int j = 0; j < new_dim2; j++) {

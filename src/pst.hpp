@@ -68,7 +68,7 @@ namespace Smarties {
       Real a = numeric_limits<Real>::quiet_NaN(), Real c = numeric_limits<Real>::quiet_NaN()) {
     if (!st_abcdnm->c_nm.size())
       cout << "Pb in  pstMakeStructForField: the structure stAbcdnm should contain c_nm and d_nm for internal fields" << endl;
-    unique_ptr<stRes<Real>> output = make_unique<stRes<Real>>(*st_abcdnm);
+    auto output = make_unique<stRes<Real>>(*st_abcdnm);
     output->N_max = N_max;
     output->lambda = lambda;
     output->epsilon1 = epsilon1;
@@ -86,7 +86,7 @@ namespace Smarties {
       const unique_ptr< stAbcdnm<Real>>& st_abcdnm, const unique_ptr<stParams<Real>>& params) {
     if (!st_abcdnm->c_nm.size())
       cout << "Pb in  pstMakeStructForField: the structure stAbcdnm should contain c_nm and d_nm for internal fields" << endl;
-    unique_ptr<stRes<Real>> output = make_unique<stRes<Real>>(*st_abcdnm);
+    auto output = make_unique<stRes<Real>>(*st_abcdnm);
     output->N_max = params->N;
     output->lambda = params->lambda;
     output->epsilon1 = params->epsilon1;
@@ -426,7 +426,7 @@ namespace Smarties {
       }
     }
 
-    unique_ptr<stSM<Real>> output = make_unique<stSM<Real>>();
+    auto output = make_unique<stSM<Real>>();
     output->ALF1n = ArrayXr<Real>::Zero(2*N + 1);
     output->ALF2n = ArrayXr<Real>::Zero(2*N + 1);
     output->ALF3n = ArrayXr<Real>::Zero(2*N + 1);

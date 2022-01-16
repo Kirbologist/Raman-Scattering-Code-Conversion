@@ -32,16 +32,20 @@ namespace Smarties {
   };
 
   template <class Real>
-  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(int N1, Real a = -1.0, Real b = 1.0) {
-    int N = N1 - 1, N2 = N1 + 1;
-    ArrayXr<Real> xu, y, y0(N1), Lp;
-    ArrayXXr<Real> L(N1, N2);
+  unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(int N, Real a = -1.0, Real b = 1.0) {
+    assert(N >= 1);
+    N--;
+    int N1 = N + 1;
+    int N2 = N + 2;
 
-    xu = ArrayXr<Real>::LinSpaced(N1, -1, 1);
-    y = cos((2*ArrayXr<Real>::LinSpaced(N1, 0, N) + 1)*mp_pi<Real>()/(2*N + 2)) +
+    ArrayXr<Real> xu = ArrayXr<Real>::LinSpaced(N1, -1, 1);
+    ArrayXr<Real> y = cos((2*ArrayXr<Real>::LinSpaced(N1, 0, N) + 1)*mp_pi<Real>()/(2*N + 2)) +
         (0.27/N1)*sin(mp_pi<Real>()*xu*N/N2);
+    ArrayXr<Real> y0(N1);
     y0.fill(2);
+    ArrayXXr<Real> L(N1, N2);
     L.col(0).setOnes();
+    ArrayXr<Real> Lp(N1);
 
     int n_iter = 0;
     while ((n_iter < 15) && mp_eps<Real>() <
@@ -58,7 +62,7 @@ namespace Smarties {
       y = y0 - L.col(N1)/Lp;
     }
 
-    unique_ptr<stGLQuad<Real>> output = make_unique<stGLQuad<Real>>();
+    auto output = make_unique<stGLQuad<Real>>();
 
     output->x = (a*(1 - y) + b*(1 + y))/2;
     output->w = ArrayXr<Real>::Constant(N1, b - a) /
@@ -68,7 +72,7 @@ namespace Smarties {
 
   template <class Real>
   unique_ptr<stRtfunc<Real>> auxPrepareIntegrals(int N_int, sInt type) {
-    unique_ptr<stRtfunc<Real>> output = make_unique<stRtfunc<Real>>();
+    auto output = make_unique<stRtfunc<Real>>();
     output->Nb_theta = N_int;
 
     switch (type) {

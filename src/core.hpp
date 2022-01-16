@@ -1,6 +1,7 @@
 #ifndef SMARTIES_CORE_H
 #define SMARTIES_CORE_H
 
+#include <cassert>
 #include <cmath>
 #include <complex>
 #include <iostream>

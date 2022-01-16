@@ -127,16 +127,12 @@ namespace Smarties {
     beta(1, 1) = beta(0, 1) * (s - 1) * (s + 1) * 2;
     beta(2, 1) = beta(1, 1) * (s - 1) * (s + 1) / 2;
 
-    RowArrayXr<Real> alpha_q(num_x), current_term(num_x);
-    RowArrayXi counter(num_x);
-    RowArrayXb x_not_converged(num_x), test(num_x);
-    int b, num_to_test = 3;
-    Real gamma_qnk;
+    int num_to_test = 3;
 
     for (int k = n - 4; k >= 0; k -= 2) {
       q_min = (n - k)/2 - 1; // expression is mathematically always an integer
       q_int = n - k;
-      alpha_bar_k = -alpha_bar_k/(n - k - 2);
+      alpha_bar_k /= -(n - k - 2);
       beta(0, q_int - 2) = 1;
       for (int j = 1; j < q_int; j++)
         beta(j, q_int - 2) = beta(j - 1, q_int - 2)*(s - 1)*(s + 1)*(q_int - j)/j;
@@ -144,15 +140,16 @@ namespace Smarties {
       for (int j = 1; j <= q_int; j++)
         beta(j, q_int - 1) = beta(j - 1, q_int - 1)*(s - 1)*(s + 1)*(q_int - j + 1)/j;
 
+      RowArrayXr<Real> alpha_q(num_x);
       alpha_q.fill(alpha_bar_k);
-      x_not_converged.fill(true);
-      current_term.setZero();
-      counter.setZero();
-      test.fill(false);
+      RowArrayXb x_not_converged = RowArrayXb::Ones(num_x);
+      RowArrayXr<Real> current_term = RowArrayXr<Real>::Zero(num_x);
+      RowArrayXi counter = RowArrayXi::Zero(num_x);
+      RowArrayXb test = RowArrayXb::Zero(num_x);
 
       for (int q = q_min; q < q_int; q++) {
-        b = n - k - q - 1;
-        gamma_qnk = 0;
+        int b = n - k - q - 1;
+        Real gamma_qnk = 0;
         for (int j = max(0, 2 * q + k - n + 1); j <= q; j++)
           gamma_qnk += beta(j, q - 1) * (*u)(q - j, b);
 
@@ -185,10 +182,11 @@ namespace Smarties {
       x_not_converged.fill(true);
       counter.setZero();
 
-      Real c_qqnk = static_cast<Real>(1)/(2*k + 1), c_iqnk;
+      Real c_qqnk = static_cast<Real>(1.0)/(2*k + 1);
       int q = q_int;
       while (true) {
-        gamma_qnk = c_iqnk = c_qqnk;
+        Real c_iqnk = c_qqnk;
+        Real gamma_qnk = c_iqnk;
         for (int i = q - 1; i >= 0; i--) {
           c_iqnk *= pow(s, 2)*(i + 1)*(2*i + 1 - 2*n)/(q - i)/(2*k + 2*q - 2*i + 1);
           gamma_qnk += c_iqnk;
@@ -285,7 +283,8 @@ namespace Smarties {
             TensorCast(chi_psi_prod->rb_psi.col(k) * output->psi_n.col(n), num_x);
     }
 
-    std::array<int, 3> offsets = {0, 0, 0}, extents = {N_max + 2, N_max + 2, num_x};
+    std::array<int, 3> offsets = {0, 0, 0};
+    std::array<int, 3> extents = {N_max + 2, N_max + 2, num_x};
     output->xi_psi = output->psi_psi + output->psi_psi.constant(mp_im_unit<Real>()) *
         chi_psi_prod->Fpovx.slice(offsets, extents);
     output->chi_n = chi_psi_prod->rb_chi.leftCols(N_max + 2);
@@ -301,7 +300,8 @@ namespace Smarties {
     int X = prods.dimension(2);
 
     auto output = make_unique<stBesselPrimes<Real>>();
-    std::array<long int, 3> offsets = {0, 0, 0}, extents = {N + 1, N + 1, X};
+    std::array<long int, 3> offsets = {0, 0, 0};
+    std::array<long int, 3> extents = {N + 1, N + 1, X};
     output->xi_psi = prods.slice(offsets, extents);
     output->xi_prime_psi = Tensor3c<Real>(N + 1, N + 1, X);
     output->xi_psi_prime = Tensor3c<Real>(N + 1, N + 1, X);
@@ -317,12 +317,11 @@ namespace Smarties {
     output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.setZero();
     output->xi_psi_over_sxx.setZero();
 
-    int kkp1, nnp1;
     Tensor1c<Real> col_shape(X);
     for (int n = 1; n <= N; n++) {
       for (int k = 2 - n % 2; k <= N; k += 2) {
-        kkp1 = k*(k + 1);
-        nnp1 = n*(n + 1);
+        int kkp1 = k*(k + 1);
+        int nnp1 = n*(n + 1);
 
         output->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(n, 0).chip(k, 0) = (
             col_shape.constant(static_cast<complex<Real>>((k + n + 1)*(k + 1))) * prods.chip(n - 1, 0).chip(k - 1, 0) +
@@ -407,13 +406,14 @@ namespace Smarties {
     output->c = c;
     output->type = type;
 
-    ArrayXr<Real> sin_t = sin(output->theta), cos_t = cos(output->theta);
+    ArrayXr<Real> sin_t = sin(output->theta);
+    ArrayXr<Real> cos_t = cos(output->theta);
 
     output->r = a*c/sqrt(pow(c*sin_t, 2) + pow(a*cos_t, 2));
     output->dr_dt = (pow(a, 2) - pow(c, 2))/pow(a*c, 2)*sin_t * cos_t * output->r.pow(3);
 
     output->h = max(a, c)/min(a, c);
-    output->r0 = pow(pow(a, 2)*c, static_cast<Real>(1)/3);
+    output->r0 = pow(pow(a, 2)*c, static_cast<Real>(1.0)/3);
 
     return output;
   }
@@ -424,15 +424,18 @@ namespace Smarties {
     int NB = NB_start;
     unique_ptr<stFpovx<Real>> prod = sphGetFpovx<Real>(NB, s, x);
     bool to_continue = true;
-    int max_N = 500, NB_step = 16;
+    int max_N = 500;
+    int NB_step = 16;
 
     int NB_next;
     unique_ptr<stFpovx<Real>> prod_new;
     Tensor<Real, 0> rel_acc_ee, rel_acc_oo;
     Real rel_acc;
-    ArithmeticSequence<long int, long int, long int>
-        seq1(0, N_req, 2), seq2(1, N_req, 2), seq3(0, x.size() - 1); // prod->Fpovx has no. of columns = x.size()
-    long int dim1 = seq1.size(), dim3 = seq3.size();
+    ArithmeticSequence<long int, long int, long int> seq1(0, N_req, 2);
+    ArithmeticSequence<long int, long int, long int> seq2(1, N_req, 2);
+    ArithmeticSequence<long int, long int, long int> seq3(0, x.size() - 1); // prod->Fpovx has no. of columns = x.size()
+    long int dim1 = seq1.size();
+    long int dim3 = seq3.size();
     Tensor3c<Real> tmp(dim1, dim1, dim3);
     while (to_continue && NB < max_N) {
       NB_next = NB + NB_step;
@@ -511,7 +514,8 @@ namespace Smarties {
       output[i] = make_unique<stPQ<Real>>();
     Real s = params->s(0);
     Real k1 = params->k1(0);
-    int N_int = Rt_func->Nb_theta, T = N_int; // Number of theta's
+    int N_int = Rt_func->Nb_theta;
+    int T = N_int; // Number of theta's
     ArrayXr<Real> x = Rt_func->r * k1; // [T x 1] x(theta)
     ArrayXr<Real> x_theta = Rt_func->dr_dt * k1; // [T x 1] x'(theta)
 

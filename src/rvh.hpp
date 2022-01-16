@@ -170,7 +170,7 @@ namespace Smarties {
       int num_st_4M = st_mat_list[i]->mat_list.size() * 2;
       int m;
       if (num_st_4M > 0 && (m = st_mat_list[i]->st_4M_list[0].m) <= N_max) {
-        unique_ptr<stTR<Real>> output_st_TR = make_unique<stTR<Real>>();
+        auto output_st_TR = make_unique<stTR<Real>>();
         output_st_TR->mat_list = st_mat_list[i]->mat_list;
         for (int j = 0; j < num_st_4M; j++) {
           int new_size = N_max - max(1, m) + 1;
@@ -407,7 +407,7 @@ namespace Smarties {
       }
     }
 
-    unique_ptr<stAbcdnm<Real>> output = make_unique<stAbcdnm<Real>>();
+    auto output = make_unique<stAbcdnm<Real>>();
     output->p_nm = p_nm;
     output->q_nm = q_nm;
     output->a_nm = a_nm;
@@ -452,7 +452,7 @@ namespace Smarties {
       }
     }
 
-    unique_ptr<stCrossSection<Real>> output = make_unique<stCrossSection<Real>>();
+    auto output = make_unique<stCrossSection<Real>>();
     output->ext = -4*mp_pi<Real>()/k1.pow(2) * ext_sum.real();
     output->sca = 4*mp_pi<Real>()/k1.pow(2) * sca_sum.real();
     output->abs = -4*mp_pi<Real>()/k1.pow(2) * (ext_sum.real() + sca_sum.real());

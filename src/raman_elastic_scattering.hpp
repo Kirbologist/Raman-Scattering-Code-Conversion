@@ -31,7 +31,7 @@ void MultiPrint(string out_string, string out_file_name, bool write_output = fal
 
 template <class Real>
 unique_ptr<stParams<Real>> loadParam(string type = string()) {
-  unique_ptr<stParams<Real>> params = make_unique<stParams<Real>>();
+  auto params = make_unique<stParams<Real>>();
   params->epsilon1 = 1;
   params->s = ArrayXr<Real>(1);
   if (type == "rm") {
@@ -55,7 +55,7 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
   if (!in_file.is_open())
     throw runtime_error("Error: cannot open config.txt");
 
-  unique_ptr<RamanParams<Real>> output = make_unique<RamanParams<Real>>();
+  auto output = make_unique<RamanParams<Real>>();
 
   string line;
   vector<string> options {
@@ -175,7 +175,7 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
   ArrayXr<Real> abs = ArrayXr<Real>::Zero(rad_var.size());
   vector<unique_ptr<stSM<Real>>> stSM_list(rad_var.size());
 
-  unique_ptr<stOptions> options = make_unique<stOptions>();
+  auto options = make_unique<stOptions>();
   options->get_R = true;
   options->delta = 0;
   options->NB = 0;
@@ -354,7 +354,7 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
 
         std::array<int, 1> dim3 = {3}, dim2 = {2};
         Tensor<Real, 2> inter_step = 2*PI/N_phi*(E_field_rm_z * tensor_conj(E_field_z))
-            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+            .sum(dim3).abs().pow(static_cast<Real>(2.0)).sum(dim2);
         ArrayXXr<Real> M_mat = MatrixCast(inter_step, N_r, N_theta).array();
         ArrayXXr<Real> F = M_mat * r_mat.pow(2) * sin(theta_mat);
         ArrayXXr<Real> tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
@@ -362,7 +362,7 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
         sigma_zz(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real>(4.0)/3*PI*a*a*c);
 
         inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
-            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+            .sum(dim3).abs().pow(static_cast<Real>(2.0)).sum(dim2);
         M_mat = MatrixCast(inter_step, N_r, N_theta).array();
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
@@ -370,7 +370,7 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
         sigma_yz(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real>(4.0)/3*PI*a*a*c);
 
         inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_y))
-            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+            .sum(dim3).abs().pow(static_cast<Real>(2.0)).sum(dim2);
         M_mat = MatrixCast(inter_step, N_r, N_theta).array();
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
@@ -378,7 +378,7 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
         sigma_yy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real>(4.0)/3*PI*a*a*c);
 
         inter_step = 2*PI/N_phi*(E_field_rm_z * tensor_conj(E_field_y))
-            .sum(dim3).abs().pow(static_cast<Real>(2)).sum(dim2);
+            .sum(dim3).abs().pow(static_cast<Real>(2.0)).sum(dim2);
         M_mat = MatrixCast(inter_step, N_r, N_theta).array();
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
@@ -500,7 +500,7 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
   ArrayXd abs = ArrayXd::Zero(rad_var.size());
   vector<unique_ptr<stSM<double>>> stSM_list(rad_var.size());
 
-  unique_ptr<stOptions> options = make_unique<stOptions>();
+  auto options = make_unique<stOptions>();
   options->get_R = true;
   options->delta = 0;
   options->NB = 0;

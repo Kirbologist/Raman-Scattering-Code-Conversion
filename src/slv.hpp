@@ -57,7 +57,7 @@ namespace Smarties {
     unique_ptr<stCrossSection<Real>> st_coa = rvhGetAverageCrossSections(params->k1, st_TR_array);
     st_TR_list = move(st_TR_array[0]);
 
-    unique_ptr<stTmatrix<Real>> output = make_unique<stTmatrix<Real>>();
+    auto output = make_unique<stTmatrix<Real>>();
     output->st_coa = move(st_coa);
     output->st_TR_list = move(st_TR_list);
 

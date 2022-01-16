@@ -18,8 +18,8 @@ make [OPTIONS]
 
 `[OPTIONS]` can contain any of the following parameters:
 - `mp`: the program will have the option to do calculations using arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
-- `THREADS=<value>`: the program will use `value` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
-- `PRECISION=<value>`: if used with `mp`, the program will use `value` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer.
+- `THREADS=<value>`: the program will use `<value>` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
+- `PRECISION=<value>`: if used with `mp`, the program will use `<value>` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer.
 
 Note that to change the number of threads or bits of precision used, the program must be recompiled. In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
 ```
@@ -27,7 +27,7 @@ output/raman_elastic_scattering
 ```
 By default, the program also writes the output to `output/results.txt`.
 
-You can change the calculation parameters by editing the `config.txt` file. Parameters must be entered in the format `Parameter:value`, where `value` is all lower case, no spaces. If no value is given, the program uses the default value.
+You can change the calculation parameters by editing the `config.txt` file. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, the program uses the default value.
 
 Here's what each 'run' parameter under does:
 - `CPU no.` is the index of the current computer of a cluster of computers (note that index-by-0 is used, so the first computer of a cluster has `CPU no.` = 0, the second computer has `CPU no.` = 1, etc.). By default, this parameter is 0.
