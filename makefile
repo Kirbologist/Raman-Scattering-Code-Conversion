@@ -5,11 +5,13 @@ BOOST_FLAG=-Ilib/boost_1_77_0
 MP_LIBS=-lmpfr -lgmp
 
 THREADS=1
+SUBTHREADS=1
 PRECISION=113 # default value of 113 is number of significand bits in quadruple-precision
 
 OUTDIR=output
 CC=g++
-CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -ftree-parallelize-loops=$(THREADS) $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp -ftree-parallelize-loops=$(SUBTHREADS) -DTHREADS=$(THREADS)
+CPPFLAGS+=$(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 MP_FLAGS=-DPRECISION=$(PRECISION)
 LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering

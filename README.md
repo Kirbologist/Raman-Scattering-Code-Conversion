@@ -18,7 +18,8 @@ make [OPTIONS]
 
 `[OPTIONS]` can contain any of the following parameters:
 - `mp`: the program will have the option to do calculations using arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
-- `THREADS=<value>`: the program will use `<value>` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
+- `THREADS=<value>`: the program will allocate the different droplet radii calculations to `<value>` many computer thread (use `lscpu` to check how many threads are available on your computer). By default, if this option is not specified, the number of threads used is 1.
+- `SUBTHREADS=<value>`: within each top-level thread, the program will perform the inner calculations using `<value>` many sub-threads. By default, if this option is not specified, the number of sub-threads used is 1.
 - `PRECISION=<value>`: if used with `mp`, the program will use `<value>` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer.
 
 Note that to change the number of threads or bits of precision used, the program must be recompiled. In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
@@ -55,7 +56,7 @@ Here's what each 'run' parameter under does:
   - [x] Non-SMARTIES functions (3/3)
   - [x] Minimum viable product
   - [x] Arbitrary-precision support
-  - [ ] Automated parallel computing
+  - [x] Automated parallel computing
 
 ## Notable differences from SMARTIES
 

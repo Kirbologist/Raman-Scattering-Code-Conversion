@@ -6,7 +6,7 @@
 #include <chrono>
 #include <fstream>
 #include <exception>
-#include <cassert>
+#include <omp.h>
 
 using namespace std;
 using namespace Eigen;
@@ -23,6 +23,7 @@ struct RamanParams {
   ArrayXr<Real> rad_var;
   ArrayXr<Real> theta_p_var;
   bool write_output = false;
+  bool write_log = true;
 };
 
 // defined in defs_default.cpp
@@ -59,8 +60,8 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
 
   string line;
   vector<string> options {
-    "CPU no.:", "No. of CPUs:", "Minimum diameter:", "Maximum diameter:",
-    "No. of radii:", "No. of thetas:", "Print output to file:"
+    "Minimum diameter:", "Maximum diameter:", "No. of radii:", "No. of thetas:",
+    "Print output to file:", "Print log to file:"
   };
   for (size_t i = 0; i < options.size(); i++) {
     string option = options[i];
@@ -75,31 +76,27 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
     string param = line.substr(line.find(option) + option.size());
     switch (i) {
       case 0 : {
-        output->cpu_n = (param.size() > 0 && isdigit(param[0])) ? stoi(param, nullptr) : output->cpu_n;
-        break;
-      }
-      case 1 : {
-        output->cpus = (param.size() > 0 && isdigit(param[0])) ? stoi(param, nullptr) : output->cpus;
-        break;
-      }
-      case 2 : {
         output->dia_min = (param.size() > 0 && isdigit(param[0])) ? stof(param, nullptr) : output->dia_min;
         break;
       }
-      case 3 : {
+      case 1 : {
         output->dia_max = (param.size() > 0 && isdigit(param[0])) ? stof(param, nullptr) : output->dia_max;
         break;
       }
-      case 4 : {
+      case 2 : {
         output->N_rad = (param.size() > 0 && isdigit(param[0])) ? stoi(param, nullptr) : output->N_rad;
         break;
       }
-      case 5 : {
+      case 3 : {
         output->N_theta_p = (param.size() > 0 && isdigit(param[0])) ? stoi(param, nullptr) : output->N_theta_p;
         break;
       }
-      case 6 : {
+      case 4 : {
         output->write_output = (param == "yes");
+        break;
+      }
+      case 5 : {
+        output->write_log = (param == "yes");
         break;
       }
     }
@@ -115,7 +112,7 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
 
 // Can make this into a non-template function using c++20 'concepts' keyword
 template <class Real>
-void CreateTimeStamp(string out_file_name, const unique_ptr<RamanParams<Real>>& raman_params, bool is_mixed) {
+void CreateTimeStamp(string log_file_name, const unique_ptr<RamanParams<Real>>& raman_params, bool is_mixed) {
   string main_calc_type = typeid(raman_params->dia_min).name();
   string converted_calc_type;
   if (main_calc_type.find("N5boost14multiprecision6numberINS0_8backends18mpfr_float_backend") != string::npos) {
@@ -128,43 +125,44 @@ void CreateTimeStamp(string out_file_name, const unique_ptr<RamanParams<Real>>& 
   else if (main_calc_type == "e")
     converted_calc_type = "long double";
 
-  ofstream out_file;
-  out_file.open(out_file_name, ios::out | ios::app);
+  ofstream log_file;
+  log_file.open(log_file_name, ios::out | ios::app);
   auto sys_time = chrono::system_clock::now();
   time_t sys_time_date = chrono::system_clock::to_time_t(sys_time);
-  out_file << "Session began at system time: " << ctime(&sys_time_date);
-  out_file << "Running RamanElasticScattering with type " << converted_calc_type;
+  log_file << "Session began at system time: " << ctime(&sys_time_date);
+  log_file << "Running RamanElasticScattering with type " << converted_calc_type;
   if (is_mixed)
-    out_file << " and type double";
-  out_file << endl;
-  out_file << "Parameters are CPU_N: " << raman_params->cpu_n << ", CPUS: " << raman_params->cpus <<
+    log_file << " and type double";
+  log_file << endl;
+  log_file << "Parameters are CPU_N: " << raman_params->cpu_n << ", CPUS: " << raman_params->cpus <<
       ", DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
       ", N_RAD: " << raman_params->N_rad << ", N_THETA_P: " << raman_params->N_theta_p << endl;
-  out_file.flush();
-  out_file.close();
+  log_file.flush();
+  log_file.close();
 }
 
 template <class Real>
-void RamanElasticScattering(string in_file_name, string out_file_name) {
+void RamanElasticScattering(string in_file_name, string log_file_name) {
   Real PI = mp_pi<Real>();
   unique_ptr<RamanParams<Real>> raman_params = GetRamanParams<Real>(in_file_name);
   ArrayXr<Real> rad_var = raman_params->rad_var;
   ArrayXr<Real> theta_p_var = raman_params->theta_p_var;
   bool write_output = raman_params->write_output;
+  bool write_log = raman_params->write_log;
   ArrayXr<Real> h_var = {{static_cast<Real>(1.0)/3}};
 
-  ofstream out_file;
-  if (write_output) {
-    out_file.open(out_file_name, ios::out | ios::app);
-    out_file << endl;
-    if (!out_file.is_open()) {
-      cerr << "Warning: cannot create or open output file. Some output won't be written." << endl;
-      out_file.close();
-      write_output = false;
+  ofstream log_file;
+  if (write_log) {
+    log_file.open(log_file_name, ios::out | ios::app);
+    log_file << endl;
+    if (!log_file.is_open()) {
+      cerr << "Warning: cannot create or open log file. Some output won't be written." << endl;
+      log_file.close();
+      write_log = false;
     }
   }
-  if (write_output)
-    CreateTimeStamp(out_file_name, raman_params, false);
+  if (write_log)
+    CreateTimeStamp(log_file_name, raman_params, false);
 
   Tensor3r<Real> sigma_yz(rad_var.size(), h_var.size(), theta_p_var.size());
   Tensor3r<Real> sigma_zy(rad_var.size(), h_var.size(), theta_p_var.size());
@@ -180,8 +178,6 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
   options->delta = 0;
   options->NB = 0;
   options->get_symmetric_T = false;
-  unique_ptr<stParams<Real>> params = loadParam<Real>();
-  unique_ptr<stParams<Real>> params_rm = loadParam<Real>("rm");
   Real phi_p = 0;
 
   int N_r = 100;
@@ -196,21 +192,26 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
 
   int Nb_theta = 1000;
   int Nb_theta_pst = 1;
-  params->Nb_theta = Nb_theta;
-  params->Nb_theta_pst = Nb_theta_pst;
-  params_rm->Nb_theta = Nb_theta;
-  params_rm->Nb_theta_pst = Nb_theta_pst;
 
   for (int h_ind = 0; h_ind < h_var.size(); h_ind++) {
-    stringstream out_stream;
+    stringstream aspect_ratio_string;
     Real h = h_var(h_ind);
 
-    out_stream.precision(4);
-    out_stream << "aspect ratio " << h_var << endl;
-    MultiPrint(out_stream.str(), out_file_name, write_output);
-    out_stream.str(string());
+    aspect_ratio_string.precision(4);
+    aspect_ratio_string << "aspect ratio " << h << endl;
+    MultiPrint(aspect_ratio_string.str(), log_file_name, write_log);
+    aspect_ratio_string.str(string());
 
+    #pragma omp parallel for schedule(dynamic)
     for (int k = 0; k < rad_var.size(); k++) {
+      unique_ptr<stParams<Real>> params = loadParam<Real>();
+      unique_ptr<stParams<Real>> params_rm = loadParam<Real>("rm");
+      params->Nb_theta = Nb_theta;
+      params->Nb_theta_pst = Nb_theta_pst;
+      params_rm->Nb_theta = Nb_theta;
+      params_rm->Nb_theta_pst = Nb_theta_pst;
+      stringstream log_stream;
+
       Real a, c;
       if (h > 1) {
         a = rad_var(k);
@@ -241,28 +242,28 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
       unique_ptr<stTmatrix<Real>> T_mat = slvForT(params, options);
       end = chrono::steady_clock::now();
       elapsed_seconds = end - begin;
-      out_stream << elapsed_seconds.count() << endl;
-      out_stream << "T-matrix calculatred for excitation" << endl;
-      MultiPrint(out_stream.str(), out_file_name, write_output);
-      out_stream.str(string());
+      log_stream << elapsed_seconds.count() << endl;
+      log_stream << "T-matrix calculatred for excitation" << endl;
+      MultiPrint(log_stream.str(), log_file_name, write_log);
+      log_stream.str(string());
 
       begin = chrono::steady_clock::now();
       unique_ptr<stTmatrix<Real>> T_mat_rm = slvForT(params_rm, options);
       end = chrono::steady_clock::now();
       elapsed_seconds = end - begin;
-      out_stream << elapsed_seconds.count() << endl;
-      out_stream << "T-matrix calculatred for Raman" << endl;
-      MultiPrint(out_stream.str(), out_file_name, write_output);
-      out_stream.str(string());
+      log_stream << elapsed_seconds.count() << endl;
+      log_stream << "T-matrix calculatred for Raman" << endl;
+      MultiPrint(log_stream.str(), log_file_name, write_log);
+      log_stream.str(string());
 
       sca(k) = T_mat->st_coa->sca(0); // st_coa->sca should only contain 1 element
       ext(k) = T_mat->st_coa->ext(0); // st_coa->ext should only contain 1 element
       abs(k) = T_mat->st_coa->abs(0); // st_coa->abs should only contain 1 element
-      out_stream << "Csca " << sca(k) << endl;
-      out_stream << "Cext " << ext(k) << endl;
-      out_stream << "Cabs " << abs(k) << endl;
-      MultiPrint(out_stream.str(), out_file_name, write_output);
-      out_stream.str(string());
+      log_stream << "Csca " << sca(k) << endl;
+      log_stream << "Cext " << ext(k) << endl;
+      log_stream << "Cabs " << abs(k) << endl;
+      MultiPrint(log_stream.str(), log_file_name, write_log);
+      log_stream.str(string());
 
       stSM_list[k] = pstScatteringMatrixOA(T_mat->st_TR_list, params->lambda(0), sca(k));
 
@@ -385,22 +386,22 @@ void RamanElasticScattering(string in_file_name, string out_file_name) {
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_zy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real>(4.0)/3*PI*a*a*c);
 
-        out_stream.precision(5);
-        out_stream << "max diameter = " << max(a, c)*2e-3;
-        out_stream.precision(10);
-        out_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
-        out_stream.precision(11);
-        out_stream << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
-        out_stream << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
-        out_stream << "--- relative raman zy = " << sigma_zy(k, h_ind, t) << endl;
-        out_stream << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
+        log_stream.precision(5);
+        log_stream << "max diameter = " << max(a, c)*2e-3;
+        log_stream.precision(10);
+        log_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
+        log_stream.precision(11);
+        log_stream << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
+        log_stream << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
+        log_stream << "--- relative raman zy = " << sigma_zy(k, h_ind, t) << endl;
+        log_stream << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
 
         end = chrono::steady_clock::now();
         elapsed_seconds = end - begin;
-        out_stream << elapsed_seconds.count() << endl;
+        log_stream << elapsed_seconds.count() << endl;
 
-        MultiPrint(out_stream.str(), out_file_name, write_output);
-        out_stream.str(string());
+        MultiPrint(log_stream.str(), log_file_name, write_log);
+        log_stream.str(string());
       }
     }
   }
@@ -470,26 +471,27 @@ vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<
 }
 
 template <class Real>
-void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
+void RamanElasticScatteringMpDouble(string in_file_name, string log_file_name) {
   double PI = mp_pi<double>();
   unique_ptr<RamanParams<Real>> raman_params = GetRamanParams<Real>(in_file_name);
   ArrayXr<Real> rad_var = raman_params->rad_var;
   ArrayXd theta_p_var = raman_params->theta_p_var.template cast<double>();
   bool write_output = raman_params->write_output;
+  bool write_log = raman_params->write_log;
   ArrayXr<Real> h_var = {{static_cast<Real>(1.0)/3}};
 
-  ofstream out_file;
-  if (write_output) {
-    out_file.open(out_file_name, ios::out | ios::app);
-    out_file << endl;
-    if (!out_file.is_open()) {
-      cerr << "Warning: cannot create or open output file. Some output won't be written.";
-      out_file.close();
-      write_output = false;
+  ofstream log_file;
+  if (write_log) {
+    log_file.open(log_file_name, ios::out | ios::app);
+    log_file << endl;
+    if (!log_file.is_open()) {
+      cerr << "Warning: cannot create or open output file. Some output won't be written." << endl;
+      log_file.close();
+      write_log = false;
     }
   }
-  if (write_output)
-    CreateTimeStamp(out_file_name, raman_params, true);
+  if (write_log)
+    CreateTimeStamp(log_file_name, raman_params, true);
 
   Tensor3d sigma_yz(rad_var.size(), h_var.size(), theta_p_var.size());
   Tensor3d sigma_zy(rad_var.size(), h_var.size(), theta_p_var.size());
@@ -505,10 +507,6 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
   options->delta = 0;
   options->NB = 0;
   options->get_symmetric_T = false;
-  unique_ptr<stParams<Real>> params_mp = loadParam<Real>();
-  unique_ptr<stParams<Real>> params_mp_rm = loadParam<Real>("rm");
-  unique_ptr<stParams<double>> params = loadParam<double>();
-  unique_ptr<stParams<double>> params_rm = loadParam<double>("rm");
   double phi_p = 0;
 
   int N_r = 100;
@@ -523,25 +521,32 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
 
   int Nb_theta = 1000;
   int Nb_theta_pst = 1;
-  params_mp->Nb_theta = Nb_theta;
-  params_mp->Nb_theta_pst = Nb_theta_pst;
-  params_mp_rm->Nb_theta = Nb_theta;
-  params_mp_rm->Nb_theta_pst = Nb_theta_pst;
-  params->Nb_theta = Nb_theta;
-  params->Nb_theta_pst = Nb_theta_pst;
-  params_rm->Nb_theta = Nb_theta;
-  params_rm->Nb_theta_pst = Nb_theta_pst;
 
   for (int h_ind = 0; h_ind < h_var.size(); h_ind++) {
-    stringstream out_stream;
+    stringstream aspect_ratio_string;
     Real h = h_var(h_ind);
 
-    out_stream.precision(4);
-    out_stream << "aspect ratio " << h_var << endl;
-    MultiPrint(out_stream.str(), out_file_name, write_output);
-    out_stream.str(string());
+    aspect_ratio_string.precision(4);
+    aspect_ratio_string << "aspect ratio " << h << endl;
+    MultiPrint(aspect_ratio_string.str(), log_file_name, write_log);
+    aspect_ratio_string.str(string());
 
+    #pragma omp parallel for schedule(dynamic)
     for (int k = 0; k < rad_var.size(); k++) {
+      unique_ptr<stParams<Real>> params_mp = loadParam<Real>();
+      unique_ptr<stParams<Real>> params_mp_rm = loadParam<Real>("rm");
+      unique_ptr<stParams<double>> params = loadParam<double>();
+      unique_ptr<stParams<double>> params_rm = loadParam<double>("rm");
+      params_mp->Nb_theta = Nb_theta;
+      params_mp->Nb_theta_pst = Nb_theta_pst;
+      params_mp_rm->Nb_theta = Nb_theta;
+      params_mp_rm->Nb_theta_pst = Nb_theta_pst;
+      params->Nb_theta = Nb_theta;
+      params->Nb_theta_pst = Nb_theta_pst;
+      params_rm->Nb_theta = Nb_theta;
+      params_rm->Nb_theta_pst = Nb_theta_pst;
+      stringstream log_stream;
+
       Real a_mp, c_mp;
       if (h > 1) {
         a_mp = rad_var(k);
@@ -581,19 +586,19 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
       unique_ptr<stTmatrix<Real>> T_mat = slvForT(params_mp, options);
       end = chrono::steady_clock::now();
       elapsed_seconds = end - begin;
-      out_stream << elapsed_seconds.count() << endl;
-      out_stream << "T-matrix calculatred for excitation" << endl;
-      MultiPrint(out_stream.str(), out_file_name, write_output);
-      out_stream.str(string());
+      log_stream << elapsed_seconds.count() << endl;
+      log_stream << "T-matrix calculatred for excitation" << endl;
+      MultiPrint(log_stream.str(), log_file_name, write_log);
+      log_stream.str(string());
 
       begin = chrono::steady_clock::now();
       unique_ptr<stTmatrix<Real>> T_mat_rm = slvForT(params_mp_rm, options);
       end = chrono::steady_clock::now();
       elapsed_seconds = end - begin;
-      out_stream << elapsed_seconds.count() << endl;
-      out_stream << "T-matrix calculatred for Raman" << endl;
-      MultiPrint(out_stream.str(), out_file_name, write_output);
-      out_stream.str(string());
+      log_stream << elapsed_seconds.count() << endl;
+      log_stream << "T-matrix calculatred for Raman" << endl;
+      MultiPrint(log_stream.str(), log_file_name, write_log);
+      log_stream.str(string());
 
       vector<unique_ptr<stTR<double>>> st_TR_list = stTRListMp2Double(T_mat->st_TR_list);
       vector<unique_ptr<stTR<double>>> st_TR_list_rm = stTRListMp2Double(T_mat_rm->st_TR_list);
@@ -601,11 +606,11 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
       sca(k) = static_cast<double>(T_mat->st_coa->sca(0)); // st_coa->sca should only contain 1 element
       ext(k) = static_cast<double>(T_mat->st_coa->ext(0)); // st_coa->ext should only contain 1 element
       abs(k) = static_cast<double>(T_mat->st_coa->abs(0)); // st_coa->abs should only contain 1 element
-      out_stream << "Csca " << sca(k) << endl;
-      out_stream << "Cext " << ext(k) << endl;
-      out_stream << "Cabs " << abs(k) << endl;
-      MultiPrint(out_stream.str(), out_file_name, write_output);
-      out_stream.str(string());
+      log_stream << "Csca " << sca(k) << endl;
+      log_stream << "Cext " << ext(k) << endl;
+      log_stream << "Cabs " << abs(k) << endl;
+      MultiPrint(log_stream.str(), log_file_name, write_log);
+      log_stream.str(string());
 
       stSM_list[k] = pstScatteringMatrixOA(st_TR_list, params->lambda(0), sca(k));
 
@@ -728,22 +733,22 @@ void RamanElasticScatteringMpDouble(string in_file_name, string out_file_name) {
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_zy(k, h_ind, t) = (tmp * dt_dr).sum()/(4.0/3*PI*a*a*c);
 
-        out_stream.precision(5);
-        out_stream << "max diameter = " << max(a, c)*2e-3;
-        out_stream.precision(10);
-        out_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
-        out_stream.precision(11);
-        out_stream << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
-        out_stream << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
-        out_stream << "--- relative raman zy = " << sigma_zy(k, h_ind, t) << endl;
-        out_stream << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
+        log_stream.precision(5);
+        log_stream << "max diameter = " << max(a, c)*2e-3;
+        log_stream.precision(10);
+        log_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
+        log_stream.precision(11);
+        log_stream << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
+        log_stream << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
+        log_stream << "--- relative raman zy = " << sigma_zy(k, h_ind, t) << endl;
+        log_stream << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
 
         end = chrono::steady_clock::now();
         elapsed_seconds = end - begin;
-        out_stream << elapsed_seconds.count() << endl;
+        log_stream << elapsed_seconds.count() << endl;
 
-        MultiPrint(out_stream.str(), out_file_name, write_output);
-        out_stream.str(string());
+        MultiPrint(log_stream.str(), log_file_name, write_log);
+        log_stream.str(string());
       }
     }
   }

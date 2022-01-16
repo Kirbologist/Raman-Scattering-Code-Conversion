@@ -4,6 +4,7 @@
 *.o
 raman_elastic_scattering
 results.txt
+log.txt
 
 # Packages #
 ############

@@ -1,9 +1,8 @@
 ### RUN PARAMETERS ###
-CPU no.:0
-No. of CPUs:1
 Minimum diameter:1000
 Maximum diameter:2000
 No. of radii:100
 No. of thetas:19
 Calculation type:double
-Print output to file:yes
+Print output to file:no
+Print log to file:yes

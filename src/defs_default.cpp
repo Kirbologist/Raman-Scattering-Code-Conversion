@@ -1,6 +1,7 @@
 #include "smarties.hpp"
 #include "raman_elastic_scattering.hpp"
 #include <fstream>
+#include <omp.h>
 
 using namespace Eigen;
 using namespace Smarties;
@@ -24,19 +25,22 @@ string GetCalcType(string in_file_name) {
 }
 
 void MultiPrint(string out_string, string out_file_name, bool write_output) {
-  cout << out_string;
-  cout.flush();
-  if (write_output) {
-    ofstream out_file;
-    out_file.open(out_file_name, ios::out | ios::app);
-    if (!out_file.is_open()) {
-      cerr << "Warning: cannot open output file. Some output won't be written." << endl;
+  #pragma omp critical (multi_print)
+  {
+    cout << out_string;
+    cout.flush();
+    if (write_output) {
+      ofstream out_file;
+      out_file.open(out_file_name, ios::out | ios::app);
+      if (!out_file.is_open()) {
+        cerr << "Warning: cannot open output file. Some output won't be written." << endl;
+        out_file.close();
+        write_output = false;
+      }
+      out_file << out_string;
+      out_file.flush();
       out_file.close();
-      write_output = false;
     }
-    out_file << out_string;
-    out_file.flush();
-    out_file.close();
   }
 }
 
