@@ -22,10 +22,10 @@ make mp [OPTIONS]
 ```
 
 `[OPTIONS]` can contain any of the following parameters:
-- `THREADS=*VALUE*`: the program will use `*VALUE*` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
-- `PRECISION=*VALUE*`: if used with `mp`, the program will use `*VALUE*` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer. By default, if this option is not specified, the number of bits used is 113 (the number of significand bits in quadruple precision).
+- `THREADS=value`: the program will use `value` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
+- `PRECISION=value`: if used with `mp`, the program will use `value` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer. By default, if this option is not specified, the number of bits used is 113 (the number of significand bits in quadruple precision).
 
-In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
+Note that to change the number of threads or bits of precision used, the program must be recompiled. In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
 ```
 output/raman_elastic_scattering
 ```
