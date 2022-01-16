@@ -16,14 +16,10 @@ Open the terminal to the Raman-Scattering-Code-Conversion directory. For calcula
 make [OPTIONS]
 ```
 
-For also calculating using arbitrary-precision floating points, GMP and MPFR must be manually installed (download both libraries in the links below, extract the files and follow the instructions given in their respective 'INSTALL' files). Once they are installed, run the following command:
-```
-make mp [OPTIONS]
-```
-
 `[OPTIONS]` can contain any of the following parameters:
-- `THREADS=value`: the program will use `value` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
-- `PRECISION=value`: if used with `mp`, the program will use `value` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer. By default, if this option is not specified, the number of bits used is 113 (the number of significand bits in quadruple precision).
+- `mp`: the program will have the option to do calculations using arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
+- `THREADS=<value>`: the program will use `value` many computer threads to perform the calculation. Please use `lscpu` to check how many threads are available on your computer; using more threads than there are available may lead to unexpected results. By default, if this option is not specified, the number of threads used is 1.
+- `PRECISION=<value>`: if used with `mp`, the program will use `value` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer.
 
 Note that to change the number of threads or bits of precision used, the program must be recompiled. In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
 ```
