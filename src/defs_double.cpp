@@ -1,48 +1,8 @@
 #include "smarties.hpp"
 #include "raman_elastic_scattering.hpp"
-#include <fstream>
-#include <omp.h>
 
 using namespace Eigen;
 using namespace Smarties;
-
-string GetCalcType(string in_file_name) {
-  ifstream in_file;
-  in_file.open(in_file_name, ios::in);
-  if (!in_file.is_open())
-    throw runtime_error("Error: cannot open config.txt");
-
-  string option = "Calculation type:";
-  string line;
-  do {
-    if (in_file.peek() == EOF)
-      throw runtime_error("Error: cannot find option " + option);
-    getline(in_file, line);
-  } while (line.find(option) == string::npos);
-  string calc_type = line.substr(line.find(option) + option.size());
-  in_file.close();
-  return calc_type;
-}
-
-void MultiPrint(string out_string, string out_file_name, bool write_output) {
-  #pragma omp critical (multi_print)
-  {
-    cout << out_string;
-    cout.flush();
-    if (write_output) {
-      ofstream out_file;
-      out_file.open(out_file_name, ios::out | ios::app);
-      if (!out_file.is_open()) {
-        cerr << "Warning: cannot open output file. Some output won't be written." << endl;
-        out_file.close();
-        write_output = false;
-      }
-      out_file << out_string;
-      out_file.flush();
-      out_file.close();
-    }
-  }
-}
 
 template double mp_pi<double>();
 template double mp_eps<double>();
@@ -191,7 +151,67 @@ extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<double>>>&, double, double, int);
 */
 
+extern template float mp_pi();
+extern template complex<float> mp_im_unit();
+
+extern template Tensor4c<float> tensor_conj(Tensor4c<float>&);
+
+extern template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int, float, float, float);
+extern template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXf&,
+    const ArrayXf&, const ArrayXXc<float>&, const ArrayXXc<float>&,
+    const RowArrayXf&, const RowArrayXf&, sBessel, unique_ptr<stPinmTaunm<float>>);
+extern template unique_ptr<stEforPhi<float>> vshEthetaForPhi(const unique_ptr<stEAllPhi<float>>&, float);
+
+extern template unique_ptr<stAbcdnm<float>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<float>>>&,
+    const unique_ptr<stIncPar<float>>&, unique_ptr<stIncEabnm<float>>);
+
+extern template unique_ptr<stTmatrix<float>> slvForT(const unique_ptr<stParams<float>>&,
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<float>>);
+
+extern template unique_ptr<stRes<float>> pstMakeStructForField(
+    const unique_ptr<stAbcdnm<float>>&, const unique_ptr<stParams<float>>&);
+extern template unique_ptr<stSM<float>> pstScatteringMatrixOA(
+    const vector<unique_ptr<stTR<float>>>&, float, float, int);
+
+extern template unique_ptr<stParams<float>> loadParam(string);
+extern template unique_ptr<RamanParams<float>> GetRamanParams(string);
+
+extern template long double mp_pi<long double>();
+extern template complex<long double> mp_im_unit();
+
+extern template Tensor4c<long double> tensor_conj(Tensor4c<long double>&);
+
+extern template unique_ptr<stIncPar<long double>> vshMakeIncidentParams(
+    sIncType, int, long double, long double, long double);
+extern template unique_ptr<stEAllPhi<long double>> vshEgenThetaAllPhi(const ArrayXr<long double>&,
+    const ArrayXr<long double>&, const ArrayXXc<long double>&, const ArrayXXc<long double>&,
+    const RowArrayXr<long double>&, const RowArrayXr<long double>&, sBessel, unique_ptr<stPinmTaunm<long double>>);
+extern template unique_ptr<stEforPhi<long double>> vshEthetaForPhi(
+    const unique_ptr<stEAllPhi<long double>>&, long double);
+
+extern template unique_ptr<stAbcdnm<long double>> rvhGetFieldCoefficients(
+    int, const vector<unique_ptr<stTR<long double>>>&,
+    const unique_ptr<stIncPar<long double>>&, unique_ptr<stIncEabnm<long double>>);
+
+extern template unique_ptr<stTmatrix<long double>> slvForT(const unique_ptr<stParams<long double>>&,
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<long double>>);
+
+extern template unique_ptr<stRes<long double>> pstMakeStructForField(
+    const unique_ptr<stAbcdnm<long double>>&, const unique_ptr<stParams<long double>>&);
+extern template unique_ptr<stSM<long double>> pstScatteringMatrixOA(
+    const vector<unique_ptr<stTR<long double>>>&, long double, long double, int);
+
+extern template unique_ptr<stParams<long double>> loadParam(string);
+extern template unique_ptr<RamanParams<long double>> GetRamanParams(string);
+
 template unique_ptr<stParams<double>> loadParam(string);
 template unique_ptr<RamanParams<double>> GetRamanParams(string);
-template void CreateTimeStamp(string, const unique_ptr<RamanParams<double>>&, bool);
-template void RamanElasticScattering<double>(string, string);
+template void CreateTimeStamp<double, float>(string, const unique_ptr<RamanParams<double>>&, bool);
+template void CreateTimeStamp<double, double>(string, const unique_ptr<RamanParams<double>>&, bool);
+template void CreateTimeStamp<double, long double>(string, const unique_ptr<RamanParams<double>>&, bool);
+template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
+template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
+template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
+template void RamanElasticScattering<double, float>(string, string);
+template void RamanElasticScattering<double, double>(string, string);
+template void RamanElasticScattering<double, long double>(string, string);

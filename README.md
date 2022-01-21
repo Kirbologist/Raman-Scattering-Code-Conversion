@@ -17,10 +17,10 @@ make [OPTIONS]
 ```
 
 `[OPTIONS]` can contain any of the following parameters:
-- `mp`: the program will have the option to do calculations using arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
+- `mp`: the program will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
 - `THREADS=<value>`: the program will allocate the different droplet radii calculations to `<value>` many computer thread (use `lscpu` to check how many threads are available on your computer). By default, if this option is not specified, the number of threads used is 1.
 - `SUBTHREADS=<value>`: within each top-level thread, the program will perform the inner calculations using `<value>` many sub-threads. By default, if this option is not specified, the number of sub-threads used is 1.
-- `PRECISION=<value>`: if used with `mp`, the program will use `<value>` many bits when calculating using the arbitrary-precision type. The precision allowed is only limited by the amount of memory available on your computer.
+- `PRECISION=<value>`: if used with `mp`, the program will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
 
 Note that to change the number of threads or bits of precision used, the program must be recompiled. In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
 ```
@@ -37,12 +37,11 @@ Here's what each 'run' parameter under does:
 - `Maximum diameter` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 2000.
 - `No. of radii` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, this parameter is 100.
 - `No. of thetas` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, this parameter is 19.
-- `Calculation type` is the type of precision used for floating-point calculations. By default, this parameter is `double`.
-  - Use `double` for performing all calculations with double precision.
-  - Use `quad` for performing all calculations with quad precision (using C++'s `long double` type).
-  - Use `mp` for performing all calculations with arbitrary precision. (Only works if code was compiled using `make mp`)
-  - Use `quad-double` for calculating T-matrices with quad precision (using C++'s `long double` type) and calculating the electric fields with double precision.
-  - Use `mp-double` for calculating T-matrices with arbitrary precision and calculating the electric fields with double precision.
+- `Calculation type` is the type of precision used for floating-point calculations. By default, this parameter is `double`. The value of this parameter must be of the form `XXXX` to run all calculations with type `XXXX` or `XXXX-YYYY` to calculate T-matrices with type `XXXX` and integrals with type `YYYY`, where `XXXX` and `YYYY` can be one of the following calculation types:
+  - `single` for single-precision floating points (using C++'s float types).
+  - `double` for double-precision floating points.
+  - `quad` for quadruple-precision floating points (using C++'s long double types).
+  - `custom` for performing all calculations with customised floating points of arbitrary precision. (Only works if code was compiled using `make mp`)
 - `Print output to file` is a `yes`/`no` parameter. If `yes`, the program writes the output to `output/results.txt`. Otherwise, it doesn't write to any file.
 
 ## Progress

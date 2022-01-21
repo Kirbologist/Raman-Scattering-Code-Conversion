@@ -246,7 +246,7 @@ namespace Smarties {
       f.row(i) = arr_bessel_j(nu, rho(i));
       if ((f.row(i) == static_cast<complex<Real>>(0)).any()) {
         cerr << "Warning: Bessel (j) calculation went beyond precision in vshGetZnAll()" << endl;
-        cerr << "x = " << rho(i) << "N_max = " << N_max << endl;
+        cerr << "x = " << rho(i) << " N_max = " << N_max << endl;
       }
     }
 
@@ -255,7 +255,7 @@ namespace Smarties {
         ArrayXr<Real> y = arr_bessel_y(nu, rho(i));
         if ((f.row(i).isInf()).any()) {
           cerr << "Warning: Bessel (y) calculation went beyond precision in vshGetZnAll()" << endl;
-          cerr << "x = " << rho(i) << "N_max = " << N_max << endl;
+          cerr << "x = " << rho(i) << ", N_max = " << N_max << endl;
         }
         f.row(i) += mp_im_unit<Real>()*y;
       }
@@ -282,7 +282,7 @@ namespace Smarties {
     int N_max = static_cast<int>(round(sqrt(P_max) - 1));
     int Nb_lambda = lambda.size();
     if (rt.size() != theta.size() && rt(0) != 0 && !isinf(rt(0)))
-      cout << "vshEgenThetaAllPhi error: theta and rt must be the same size row arrays." << endl;
+      cerr << "vshEgenThetaAllPhi error: theta and rt must be the same size row arrays." << endl;
     int Nb_theta = theta.size();
 
     ArrayXr<Real> n = ArrayXr<Real>::LinSpaced(N_max + 1, 0, N_max);

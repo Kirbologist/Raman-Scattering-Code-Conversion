@@ -21,6 +21,8 @@ namespace Smarties {
 
   using RowArrayXb = Array<bool, 1, Dynamic>;
 
+  using RowArrayXf = Array<float, 1, Dynamic>;
+
   using RowArrayXd = Array<double, 1, Dynamic>;
 
   template <class Real>

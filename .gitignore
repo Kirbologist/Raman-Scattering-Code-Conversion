@@ -5,6 +5,8 @@
 raman_elastic_scattering
 results.txt
 log.txt
+callgrind.out.*
+temp/*
 
 # Packages #
 ############

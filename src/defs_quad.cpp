@@ -150,7 +150,34 @@ extern template unique_ptr<stRes<long double>> pstMakeStructForField(
 extern template unique_ptr<stSM<long double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<long double>>>&, long double, long double, int);
 */
-extern template double mp_pi<double>();
+
+extern template float mp_pi();
+extern template complex<float> mp_im_unit();
+
+extern template Tensor4c<float> tensor_conj(Tensor4c<float>&);
+
+extern template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int, float, float, float);
+extern template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXf&,
+    const ArrayXf&, const ArrayXXc<float>&, const ArrayXXc<float>&,
+    const RowArrayXf&, const RowArrayXf&, sBessel, unique_ptr<stPinmTaunm<float>>);
+extern template unique_ptr<stEforPhi<float>> vshEthetaForPhi(const unique_ptr<stEAllPhi<float>>&, float);
+
+extern template unique_ptr<stAbcdnm<float>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<float>>>&,
+    const unique_ptr<stIncPar<float>>&, unique_ptr<stIncEabnm<float>>);
+
+extern template unique_ptr<stTmatrix<float>> slvForT(const unique_ptr<stParams<float>>&,
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<float>>);
+
+extern template unique_ptr<stRes<float>> pstMakeStructForField(
+    const unique_ptr<stAbcdnm<float>>&, const unique_ptr<stParams<float>>&);
+extern template unique_ptr<stSM<float>> pstScatteringMatrixOA(
+    const vector<unique_ptr<stTR<float>>>&, float, float, int);
+
+extern template unique_ptr<stParams<float>> loadParam(string);
+extern template unique_ptr<RamanParams<float>> GetRamanParams(string);
+
+extern template double mp_pi();
+extern template complex<double> mp_im_unit();
 
 extern template Tensor4c<double> tensor_conj(Tensor4c<double>&);
 
@@ -171,11 +198,17 @@ extern template unique_ptr<stRes<double>> pstMakeStructForField(
 extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<double>>>&, double, double, int);
 
+extern template unique_ptr<stParams<double>> loadParam(string);
+extern template unique_ptr<RamanParams<double>> GetRamanParams(string);
+
 template unique_ptr<stParams<long double>> loadParam(string);
 template unique_ptr<RamanParams<long double>> GetRamanParams(string);
-template void CreateTimeStamp(string, const unique_ptr<RamanParams<long double>>&, bool);
-template void RamanElasticScattering<long double>(string, string);
-
-extern template complex<double> mp_im_unit();
-template vector<unique_ptr<stTR<double>>> stTRListMp2Double(const vector<unique_ptr<stTR<long double>>>&);
-template void RamanElasticScatteringMpDouble<long double>(string, string);
+template void CreateTimeStamp<long double, float>(string, const unique_ptr<RamanParams<long double>>&, bool);
+template void CreateTimeStamp<long double, double>(string, const unique_ptr<RamanParams<long double>>&, bool);
+template void CreateTimeStamp<long double, long double>(string, const unique_ptr<RamanParams<long double>>&, bool);
+template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
+template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
+template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
+template void RamanElasticScattering<long double, float>(string, string);
+template void RamanElasticScattering<long double, double>(string, string);
+template void RamanElasticScattering<long double, long double>(string, string);

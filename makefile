@@ -5,7 +5,7 @@ BOOST_FLAG=-Ilib/boost_1_77_0
 MP_LIBS=-lmpfr -lgmp
 
 THREADS=1
-SUBTHREADS=1
+SUBTHREADS=4
 PRECISION=113 # default value of 113 is number of significand bits in quadruple-precision
 
 OUTDIR=output
@@ -16,18 +16,19 @@ MP_FLAGS=-DPRECISION=$(PRECISION)
 LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)
-DEF_OBJS=$(OUTDIR)/math.o $(OUTDIR)/defs_default.o $(OUTDIR)/defs_quad.o
-MP_OBJS=$(OUTDIR)/defs_mp1.o $(OUTDIR)/defs_mp2.o $(OUTDIR)/defs_mp3.o $(OUTDIR)/defs_mp4.o
+DEF_OBJS=$(OUTDIR)/math.o $(OUTDIR)/raman_elastic_scattering.o
+DEF_OBJS+=$(OUTDIR)/defs_single.o $(OUTDIR)/defs_double.o $(OUTDIR)/defs_quad.o
+MP_OBJS=$(OUTDIR)/defs_custom.o
 
 
 ### Recipes
 .PHONY=build clean info
 
 build : $(OUTDIR) $(DEF_OBJS) $(OUTDIR)/main.o
-	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(OUTDIR)/main.o $(LINK_FLAGS)
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(OUTDIR)/main.o $(CPPFLAGS)
 
 mp : $(OUTDIR) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o
-	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o $(LINK_FLAGS) $(MP_LIBS)
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o $(CPPFLAGS) $(MP_LIBS)
 
 clean :
 	@rm -f $(DEF_OBJS)
