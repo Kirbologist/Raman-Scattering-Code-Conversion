@@ -17,7 +17,9 @@ const string in_file_name = "config.txt";
 const string log_file_name = "output/log.txt";
 
 int main(int argc, char** argv) {
-  omp_set_num_threads(THREADS);
+  int num_CPUs = GetNumCPUs("config.txt");
+  if (num_CPUs > 0)
+    omp_set_num_threads(num_CPUs);
   std::array<CalcType, 2> calc_types = GetCalcType(in_file_name);
   switch (calc_types[0]) {
     case CalcType::SINGLE : {

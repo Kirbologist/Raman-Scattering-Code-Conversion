@@ -45,6 +45,23 @@ std::array<CalcType, 2> GetCalcType(string in_file_name) {
   return output;
 }
 
+int GetNumCPUs(string in_file_name) {
+  ifstream in_file;
+  in_file.open(in_file_name, ios::in);
+  if (!in_file.is_open())
+    throw runtime_error("Error: cannot open config.txt");
+
+  string option = "No. of CPUs:";
+  string line;
+  do {
+    if (in_file.peek() == EOF)
+      throw runtime_error("Error: cannot find option " + option);
+    getline(in_file, line);
+  } while (line.find(option) == string::npos);
+  string num_CPUs = line.substr(line.find(option) + option.size());
+  return (num_CPUs.size() > 0 && isdigit(num_CPUs[0])) ? stoi(num_CPUs, nullptr) : 1;
+}
+
 void MultiPrint(string out_string, string out_file_name, bool write_output) {
   #pragma omp critical (multi_print)
   {

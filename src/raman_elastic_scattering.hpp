@@ -6,7 +6,6 @@
 #include <chrono>
 #include <fstream>
 #include <exception>
-#include <omp.h>
 
 using namespace std;
 using namespace Eigen;
@@ -16,8 +15,6 @@ enum CalcType {SINGLE, DOUBLE, QUAD, CUSTOM, NONE};
 
 template <class Real>
 struct RamanParams {
-  int cpu_n = 0;
-  int cpus = 1;
   Real dia_min = 1000;
   Real dia_max = 2000;
   int N_rad = 100;
@@ -28,8 +25,9 @@ struct RamanParams {
   bool write_log = true;
 };
 
-// defined in defs_default.cpp
+// defined in raman_elastic_scattering.cpp
 std::array<CalcType, 2> GetCalcType(string in_file_name);
+int GetNumCPUs(string in_file_name);
 void MultiPrint(string out_string, string out_file_name, bool write_output = false);
 
 template <class Real>
@@ -104,9 +102,7 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
     }
   }
   in_file.close();
-  ArrayXr<Real> par = ArrayXr<Real>::LinSpaced(output->N_rad, output->dia_min, output->dia_max);
-  int par_per_cpu = output->N_rad / output->cpus;
-  ArrayXr<Real> dia_var = par(ArrayXi::LinSpaced(par_per_cpu, 0, par_per_cpu - 1) + output->cpu_n * par_per_cpu);
+  ArrayXr<Real> dia_var = ArrayXr<Real>::LinSpaced(output->N_rad, output->dia_min, output->dia_max);
   output->rad_var = dia_var/2;
   output->theta_p_var = ArrayXr<Real>::LinSpaced(output->N_theta_p, 0, mp_pi<Real>()/2);
   return output;
@@ -148,8 +144,7 @@ void CreateTimeStamp(string log_file_name, const unique_ptr<RamanParams<Real1>>&
   log_file << "Session began at system time: " << ctime(&sys_time_date);
   log_file << "Running RamanElasticScattering with type " << converted_main_calc_type;
   log_file << " and " << converted_second_calc_type << endl;
-  log_file << "Parameters are CPU_N: " << raman_params->cpu_n << ", CPUS: " << raman_params->cpus <<
-      ", DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
+  log_file << "Parameters are DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
       ", N_RAD: " << raman_params->N_rad << ", N_THETA_P: " << raman_params->N_theta_p << endl;
   log_file.flush();
   log_file.close();

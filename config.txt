@@ -1,4 +1,5 @@
 ### RUN PARAMETERS ###
+No. of CPUs:1
 Minimum diameter:1000
 Maximum diameter:2000
 No. of radii:100

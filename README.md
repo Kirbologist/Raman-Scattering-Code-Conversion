@@ -18,7 +18,6 @@ make [OPTIONS]
 
 `[OPTIONS]` can contain any of the following parameters:
 - `mp`: the program will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
-- `THREADS=<value>`: the program will allocate the different droplet radii calculations to `<value>` many computer thread (use `lscpu` to check how many threads are available on your computer). By default, if this option is not specified, the number of threads used is 1.
 - `SUBTHREADS=<value>`: within each top-level thread, the program will perform the inner calculations using `<value>` many sub-threads. By default, if this option is not specified, the number of sub-threads used is 1.
 - `PRECISION=<value>`: if used with `mp`, the program will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
 
@@ -31,8 +30,7 @@ By default, the program also writes the output to `output/results.txt`.
 You can change the calculation parameters by editing the `config.txt` file. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, the program uses the default value.
 
 Here's what each 'run' parameter under does:
-- `CPU no.` is the index of the current computer of a cluster of computers (note that index-by-0 is used, so the first computer of a cluster has `CPU no.` = 0, the second computer has `CPU no.` = 1, etc.). By default, this parameter is 0.
-- `No. of CPUs` is the number of computers in the cluster. By default, this parameter is 1.
+- `No. of CPUs` is the number of CPUs (threads) to be used to run the calculations. Specifically, it's the radii of the particles to calculate for is allocated among `<value>` many CPUs. Within each of these threads, more threads can be made to calculate the inner-most for loops of the code in parallel (this is controlled using the `SUBTHREADS=<value>` option above). If `<value>` is 0, the program is run with the maximum number of CPUs. By default, this parameter is 1.
 - `Minimum diameter` is the minimum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 1000.
 - `Maximum diameter` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 2000.
 - `No. of radii` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, this parameter is 100.
