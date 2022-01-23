@@ -7,38 +7,37 @@ MP_LIBS=-lmpfr -lgmp
 SUBTHREADS=4
 PRECISION=113 # default value of 113 is number of significand bits in quadruple-precision
 
-OUTDIR=output
+BUILDDIR=build
 CC=g++
 CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp -ftree-parallelize-loops=$(SUBTHREADS)
 CPPFLAGS+=$(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 MP_FLAGS=-DPRECISION=$(PRECISION)
 LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
-PRODUCT=$(OUTDIR)/$(PRODUCT_NAME)
-DEF_OBJS=$(OUTDIR)/math.o $(OUTDIR)/raman_elastic_scattering.o
-DEF_OBJS+=$(OUTDIR)/defs_single.o $(OUTDIR)/defs_double.o $(OUTDIR)/defs_quad.o
-MP_OBJS=$(OUTDIR)/defs_custom.o
-
+PRODUCT=$(PRODUCT_NAME)
+DEF_OBJS=$(BUILDDIR)/math.o $(BUILDDIR)/raman_elastic_scattering.o
+DEF_OBJS+=$(BUILDDIR)/defs_single.o $(BUILDDIR)/defs_double.o $(BUILDDIR)/defs_quad.o
+MP_OBJS=$(BUILDDIR)/defs_custom.o
 
 ### Recipes
-.PHONY=build clean info
+.PHONY=regular clean info
 
-build : $(OUTDIR) $(DEF_OBJS) $(OUTDIR)/main.o
-	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(OUTDIR)/main.o $(CPPFLAGS)
+regular : $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/main.o
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(BUILDDIR)/main.o $(CPPFLAGS)
 
-mp : $(OUTDIR) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o
-	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(OUTDIR)/main_mp.o $(CPPFLAGS) $(MP_LIBS)
+mp : $(BUILDDIR) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o
+	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o $(CPPFLAGS) $(MP_LIBS)
 
 clean :
 	@rm -f $(DEF_OBJS)
 	@rm -f $(MP_OBJS)
-	@rm -f $(OUTDIR)/main.o
-	@rm -f $(OUTDIR)/main_mp.o
+	@rm -f $(BUILDDIR)/main.o
+	@rm -f $(BUILDDIR)/main_mp.o
 	@rm -f $(PRODUCT)
 
 clean-mp :
 	@rm -f $(MP_OBJS)
-	@rm -f $(OUTDIR)/main_mp.o
+	@rm -f $(BUILDDIR)/main_mp.o
 
 info :
 	@echo "UNSUPPORTED EIGEN FLAG:" $(UNSUPPORTED_FLAG)
@@ -54,17 +53,17 @@ info :
 
 
 ### Prerequisites
-$(OUTDIR) :
+$(BUILDDIR) :
 	@mkdir $@
 
-$(OUTDIR)/main.o : main.cpp
+$(BUILDDIR)/main.o : main.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS)
 
-$(OUTDIR)/main_mp.o : main_mp.cpp
+$(BUILDDIR)/main_mp.o : main_mp.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
 
-$(OUTDIR)/%.o : src/%.cpp
+$(BUILDDIR)/%.o : src/%.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS)
 
-$(OUTDIR)/%.o : src_mp/%.cpp
+$(BUILDDIR)/%.o : src_mp/%.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)

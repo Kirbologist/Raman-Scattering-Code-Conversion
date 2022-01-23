@@ -21,9 +21,9 @@ No. of phi-coordinates:320
 
 epsilon1:1
 epsilon2:1.8225
-epsilon2_rm:1.806336
+Raman epsilon2:1.806336
 lambda:355
-lambda_rm:403.7
+Raman lambda:403.7
 
 Nb_theta:1000
 Nb_theta_pst:1

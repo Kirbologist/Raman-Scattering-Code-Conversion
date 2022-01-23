@@ -81,7 +81,7 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
   vector<string> options {
     "Print output to file:", "Print log to file:",
     "Minimum diameter:", "Maximum diameter:", "Particle phi:", "Minimum h:", "Maximum h:",
-    "epsilon1:", "epsilon2:", "epsilon2_rm:", "lambda:", "lambda_rm:",
+    "epsilon1:", "epsilon2:", "Raman epsilon2:", "lambda:", "Raman lambda:",
     "No. of particle radii:", "No. of particle thetas:", "No. of h ratios:",
     "No. of r-coordinates:", "No. of theta-coordinates:", "No. of phi-coordinates:",
     "Nb_theta:", "Nb_theta_pst:"

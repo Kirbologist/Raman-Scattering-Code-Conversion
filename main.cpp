@@ -13,10 +13,30 @@ extern template void RamanElasticScattering<long double, float>(string, string);
 extern template void RamanElasticScattering<long double, double>(string, string);
 extern template void RamanElasticScattering<long double, long double>(string, string);
 
-const string in_file_name = "config.txt";
-const string log_file_name = "output/log.txt";
+string in_file_name = "config.txt";
+string out_file_name = "output/results.txt";
+string log_file_name = "output/log.txt";
 
 int main(int argc, char** argv) {
+  vector<string> flags = {"--input=", "--log="};
+  for (int i = 0; i < argc; i++) {
+    string arg = argv[i];
+    for (size_t j = 0; j < flags.size(); j++) {
+      if (arg.find(flags[j]) == 0) {
+        switch (j) {
+          case 0 : {
+            in_file_name = arg.substr(flags[j].size());
+            break;
+          }
+          case 1 : {
+            log_file_name = arg.substr(flags[j].size());
+            break;
+          }
+        }
+      }
+    }
+  }
+
   int num_CPUs = GetNumCPUs("config.txt");
   if (num_CPUs > 0)
     omp_set_num_threads(num_CPUs);

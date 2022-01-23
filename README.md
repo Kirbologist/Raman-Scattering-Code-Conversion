@@ -7,40 +7,98 @@ Project supervisor is A/Prof Taras Plakhotnik.
 
 ## Introduction
 
-The original MATLAB code was written to calculate Raman scattering by spheroids with arbitrary precision. The original code (shared with me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support arbitrary precision using the Advanpix Multiprecision Toolbox. SMARTIES is an implementation of the T-matrix/Extended Boundary-Condition Method for light-scattering by spheroids. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
+The original MATLAB code was written to numerically calculate Raman scattering by spheroids with arbitrary precision. The original code (shared with me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support arbitrary precision using the Advanpix Multiprecision Toolbox. SMARTIES is a code suite used to calculate the optical properties of spheroidal particles. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
+
+Raman scattering is the inelastic scattering of light, i.e. a form of scattering where incident photons exchanges energy with the incident particle before propagating off in a different direction. Typically, this exchange of energy means that the particle gains or loses heat energy, and the incident photons change in frequency (usually heat energy is gained and frequency is lowered). Here, monochromatic light is scattering off an oblate spheroidal particle that behaves like a raindrop in the air. The program then calculates the amount of light scattered into some new frequency. Although the code is originally intended to model raindrop-like particles, minimal work should be needed to use the code for calculating the Raman scattering off of any spheroid (oblate or prolate) in any medium.
 
 ## Instructions
 
-Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command to compile the program:
-```
+### Setup
+
+Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command to compile the `raman_elastic_scattering` binaries:
+```bash
 make [OPTIONS]
 ```
 
 `[OPTIONS]` can contain any of the following parameters:
-- `mp`: the program will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
-- `SUBTHREADS=<value>`: within each top-level thread, the program will perform the inner calculations using `<value>` many sub-threads. By default, if this option is not specified, the number of sub-threads used is 1.
-- `PRECISION=<value>`: if used with `mp`, the program will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
+- `mp`: `raman_elastic_scattering` will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
+- `SUBTHREADS=<value>`: within each top-level thread, `raman_elastic_scattering` will perform the inner calculations using `<value>` many sub-threads. By default, if this option is not specified, the number of sub-threads used is 1.
+- `PRECISION=<value>`: if used with `mp`, `raman_elastic_scattering` will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
 
-Note that to change the number of threads or bits of precision used, the program must be recompiled. In either case, once the binaries have been built (this may take a few minutes), enter the following command to run the program:
+Note that to change the number of threads or bits of precision used, `raman_elastic_scattering` must be recompiled.
+
+### Running `raman_elastic_scattering`
+
+In either case, once the binaries have been built (this may take a few minutes), enter the following command to run `raman_elastic_scattering`:
+```bash
+./raman_elastic_scattering [OPTIONS]
 ```
-output/raman_elastic_scattering
-```
-By default, the program also writes the output to `output/results.txt`.
 
-You can change the calculation parameters by editing the `config.txt` file. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, the program uses the default value.
+`[OPTIONS]` can contain any of the following parameters:
+- `--input=</path/to/file>` means that `raman_elastic_scattering` reads the parameters from the file specified by `<path/to/file>`. More information about these parameters can be found in the 'Configuration' subsection. By default, the input file is `config.txt`.
+- `--log=</path/to/file` means that `raman_elastic_scattering` logs the ongoing program output to the file specified by `<path/to/file>`, in parallel with printing them to the terminal. By default, the logs are written to `output/log.txt`.
 
-Here's what each 'run' parameter under does:
-- `No. of CPUs` is the number of CPUs (threads) to be used to run the calculations. Specifically, it's the radii of the particles to calculate for is allocated among `<value>` many CPUs. Within each of these threads, more threads can be made to calculate the inner-most for loops of the code in parallel (this is controlled using the `SUBTHREADS=<value>` option above). If `<value>` is 0, the program is run with the maximum number of CPUs. By default, this parameter is 1.
-- `Minimum diameter` is the minimum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 1000.
-- `Maximum diameter` is the maximum diameter in nanometres of the largest axis of the spheroids to calculate the scattering of. By default, this parameter is 2000.
-- `No. of radii` is the number of radii between `DIA_MIN`/2 and `DIA_MAX`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, this parameter is 100.
-- `No. of thetas` is the number of spheroid orientations to calculate, with angles between 0 degrees and 90 degrees inclusive. The angles of these orientations are regularly spaced. By default, this parameter is 19.
-- `Calculation type` is the type of precision used for floating-point calculations. By default, this parameter is `double`. The value of this parameter must be of the form `XXXX` to run all calculations with type `XXXX` or `XXXX-YYYY` to calculate T-matrices with type `XXXX` and integrals with type `YYYY`, where `XXXX` and `YYYY` can be one of the following calculation types:
+### Configuration
+
+You can change the calculation parameters by editing the `config.txt` file, or the file specified under the flag `--input=</path/to/file>`. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, `raman_elastic_scattering` uses the default value. Otherwise if invalid values are given, it will fall back to the default values in the best case, or interpret the value in unexpected ways in the worst case. Examples of allowable formats for numerical values are given in its own subsection.
+
+Here's what each 'run' parameter does:
+- `No. of CPUs` is a non-negative integer representing the number of CPUs (threads) to be used to run the calculations. Specifically, it's the radii of the particles to calculate for is allocated among `<value>` many CPUs. Within each of these threads, more threads can be made to calculate the inner-most for loops of the code in parallel (this is controlled using the `SUBTHREADS=<value>` option above). If `<value>` is 0, `raman_elastic_scattering` will run with the maximum number of CPUs. By default, this parameter is 1.
+- `Calculation type` is the type used for floating-point calculations. By default, this parameter is `double`. The value of this parameter must be of the form `XXXX` to run all calculations with type `XXXX` or `XXXX-YYYY` to calculate T-matrices with type `XXXX` and integrals with type `YYYY`, where `XXXX` and `YYYY` can be one of the following calculation types:
   - `single` for single-precision floating points (using C++'s float types).
   - `double` for double-precision floating points.
   - `quad` for quadruple-precision floating points (using C++'s long double types).
-  - `custom` for performing all calculations with customised floating points of arbitrary precision. (Only works if code was compiled using `make mp`)
-- `Print output to file` is a `yes`/`no` parameter. If `yes`, the program writes the output to `output/results.txt`. Otherwise, it doesn't write to any file.
+  - `custom` for performing all calculations with customised floating points of arbitrary precision. (Only works if code was compiled using `make mp`).
+- `Print output to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes the output to `output/results.txt`. Otherwise, it doesn't write to any file. By default, this parameter is `no`.
+- `Print log to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes some of the text from the standard output to `output/log.txt`. By default, this parameter is `yes`.
+
+The following 'calculation' parameters are for determining what sizes, shapes and orientations of spheroidal particles to calculate the Raman scattering of. These particles have parameters `a`, `c`, `h`, `theta` and `phi`. `a` is the radius of the particle along the x and y semi-axes. `c` is the radius of the particle along the z semi-axis. `h` is the ratio `a/c`. `theta` is the angle of tilt of the z semi-axis with respect to the surrounding medium (zero tilt means that the z semi-axis of the particle is aligned with the z axis of the surrounding medium). `phi` is the angle of rotation along the z semi-axis, the particles are rotationally symmetric along the z semi-axis, changing this parameter should not change the results of the calculations, outside of small rounding errors.
+- `Minimum diameter` is a floating-point parameter representing the minimum diameter in nanometres of the largest semi-axis. By default, this parameter is 1000.
+- `Maximum diameter` is a floating-point parameter representing the maximum diameter in nanometres of the largest semi-axis. By default, this parameter is 2000.
+- `Minimum h` is a floating-point value representing the minimum value of `h`. By default, this value is 1/3.
+- `Maximum h` is a floating-point value representign the maximum value of `h`. By default, this value is 1/3.
+- `No. of particle radii` is a positive integer representing the number of particle radii between `Minimum diameter`/2 and `Maximum diameter`/2 inclusive to calculate with. The lengths of these radii are regularly spaced. By default, this parameter is 100.
+- `No. of particle thetas` is a positive integer representing the number of different `theta` to calculate with, with `theta` between 0 radians and 𝝅/2 radians inclusive. The values of `theta` are regularly spaced. By default, this parameter is 19.
+- `Particle phi` is a floating-point value representing the value of `phi` in radians. By default, this parameter is 0.
+- `No. of h ratios` is a positive integer representing the number of `h` values between `Minimum h` and `Maximum h` inclusive to calculate with. These values are linearly spaced. By default, this parameter is 1.
+
+The following 'calculation' parameters are for determining the spherical coordinates of the sample of points inside the particles to perform field calculations with. The physics definition of spherical coordinates are used, so `r` is the radial distance from the centre of the particle, `phi` is the azimuthal/longitudinal angle and `theta` is the polar/colatitudinal angle.
+- `No. of r-coordinates` is a positive integer representing the number of radial coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 100.
+- `No. of phi-coordinates` is a positive integer representing the number of azimuthal angle coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 320.
+- `No. of theta-coordinates` is a positive integer representing the number of polar angle/colatitude coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 320.
+
+The following 'calculation' parameters are for describing the incident light and the mediums that the light passes through.
+- `epsilon1` is a floating-point value representing the dielectric constant of the surrounding medium.
+- `epsilon2` is a floating-point value representing the dielectric constant of the scattering medium (the particle).
+- `Raman epsilon2` is a floating-point value representing the dielectric constant of the scattering medium (the particle) at the Raman wavelength (i.e. `Raman lambda`).
+- `lambda` is a floating-point value representing the wavelength of the incident light.
+- `Raman lambda` is a floating-point value representing the wavelength of the scattered light, i.e. the Raman wavelength.
+
+### Examples of valid numerical values
+
+Integers must be typed using the syntax of C++'s integer literals. While negative integers are readable by the program, any integer parameter must be non-negative, so there's no reason to use them. The following examples give the same value:
+```cpp
+42 // decimal value
+052 // leading 0 makes it an octal value
+0x2a // leading 0x makes it a hexadecimal value
+0X2A // 0X is also makes it hexadecimal, the case of hexadecimal digits are ignored
+0b101010 // leading 0b makes it a binary value
+```
+Any value given will be converted into a `signed int` type.
+
+Floating-point values must be typed using the syntax of C++'s floating-point literals or integer literals. Alternatively, fractions of two floating-point values can be used by typing two floating-point values with a `/` delimiter between them. Here are some examples:
+```cpp
+42
+42. // 42
+3.14
+4.e2 // 400
+1E-5 // 0.00001
+0x1ffp2 // 130816, leading 0x means to read it as a sequence of hexadecimal values. 'p' indicates a hex exponent part and is always necessary for hex floats.
+0X10.1P0 // 16.0625
+1/3 // 0.333333...
+2E10/2E12 //0.25
+```
+Any value given will be converted to the types given in the `Calculation type` parameter in the `config.txt` file, or some other specified input file.
 
 ## Progress
 
@@ -79,7 +137,7 @@ Here's what each 'run' parameter under does:
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 - The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept.
 - sphEstimateDelta doesn't get called in slvForT in the final program for this, so this function isn't implemented.
-- rvhGetSymmetricMat is not debugged since it's never used in the final raman_elastic_scattering program.
+- rvhGetSymmetricMat is not debugged since it's never used in the final `raman_elastic_scattering` program.
 - rvhTruncateMatrices, rvhGetSymmetricMat, rvhGetFieldCoefficients, rvhGetAverageCrossSections can only take stTR vectors as arguments and not stPR vectors. (Overloading these functions with versions that can take stPR vectors is relatively simple however.)
 
 ## Dependencies
