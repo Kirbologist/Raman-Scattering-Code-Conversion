@@ -3,6 +3,7 @@
 
 #include "core.hpp"
 #include "smarties.hpp"
+#include <boost/lexical_cast.hpp>
 #include <chrono>
 #include <fstream>
 #include <exception>
@@ -10,19 +11,43 @@
 using namespace std;
 using namespace Eigen;
 using namespace Smarties;
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
 
 enum CalcType {SINGLE, DOUBLE, QUAD, CUSTOM, NONE};
 
 template <class Real>
 struct RamanParams {
-  Real dia_min = 1000;
-  Real dia_max = 2000;
-  int N_rad = 100;
-  int N_theta_p = 19;
-  ArrayXr<Real> rad_var;
-  ArrayXr<Real> theta_p_var;
   bool write_output = false;
   bool write_log = true;
+
+  Real dia_min = 1000;
+  Real dia_max = 2000;
+
+  int N_rad = 100;
+  int N_theta_p = 19;
+  Real phi_p = 0;
+
+  int N_r = 100;
+  int N_theta = 320;
+  int N_phi = 320;
+
+  int N_h = 1;
+  Real h_min = static_cast<Real>(1.0)/3;
+  Real h_max = static_cast<Real>(1.0)/3;
+
+  Real epsilon1 = 1;
+  Real epsilon2 = pow(static_cast<Real>(1.35), 2);
+  Real epsilon2_rm = pow(static_cast<Real>(1.344), 2);
+  Real lambda = 355;
+  Real lambda_rm = 403.7;
+
+  int Nb_theta = 1000;
+  int Nb_theta_pst = 1;
+
+  ArrayXr<Real> rad_var;
+  ArrayXr<Real> theta_p_var;
+  ArrayXr<Real> h_var;
 };
 
 // defined in raman_elastic_scattering.cpp
@@ -31,26 +56,20 @@ int GetNumCPUs(string in_file_name);
 void MultiPrint(string out_string, string out_file_name, bool write_output = false);
 
 template <class Real>
-unique_ptr<stParams<Real>> loadParam(string type = string()) {
-  auto params = make_unique<stParams<Real>>();
-  params->epsilon1 = 1;
-  params->s = ArrayXr<Real>(1);
-  if (type == "rm") {
-    params->lambda = {{403.7}};
-    params->epsilon2 = {{pow(1.344, 2)}};
-    params->k1 = 2*mp_pi<Real>()/params->lambda;
-    params->s(0) = 1.344;
-  } else {
-    params->lambda = {{355}};
-    params->epsilon2 = {{pow(1.35, 2)}};
-    params->k1 = 2*mp_pi<Real>()/params->lambda;
-    params->s(0) = 1.35;
+Real Frac2Float(string frac) {
+  Real output;
+  size_t offset = frac.find("/");
+  if (offset == string::npos) {
+    output = static_cast<Real>(lexical_cast<Real>(frac));
+    return output;
   }
-  return params;
+  output = static_cast<Real>(lexical_cast<Real>(frac.substr(0, offset)));
+  output /= static_cast<Real>(lexical_cast<Real>(frac.substr(offset + 1)));
+  return output;
 }
 
 template <class Real>
-unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
+unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
   ifstream in_file;
   in_file.open(in_file_name, ios::in);
   if (!in_file.is_open())
@@ -60,8 +79,21 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
 
   string line;
   vector<string> options {
-    "Minimum diameter:", "Maximum diameter:", "No. of radii:", "No. of thetas:",
-    "Print output to file:", "Print log to file:"
+    "Print output to file:", "Print log to file:",
+    "Minimum diameter:", "Maximum diameter:", "Particle phi:", "Minimum h:", "Maximum h:",
+    "epsilon1:", "epsilon2:", "epsilon2_rm:", "lambda:", "lambda_rm:",
+    "No. of particle radii:", "No. of particle thetas:", "No. of h ratios:",
+    "No. of r-coordinates:", "No. of theta-coordinates:", "No. of phi-coordinates:",
+    "Nb_theta:", "Nb_theta_pst:"
+  };
+  std::array<bool, 2> boolParams = {output->write_output, output->write_log};
+  std::array<Real, 10> floatParams = {
+    output->dia_min, output->dia_max, output->phi_p, output->h_min, output->h_max,
+    output->epsilon1, output->epsilon2, output->epsilon2_rm, output->lambda, output->lambda_rm
+  };
+  std::array<int, 8> intParams = {
+    output->N_rad, output->N_theta_p, output->N_h, output->N_r, output->N_theta, output->N_phi,
+    output->Nb_theta, output->Nb_theta_pst
   };
   for (size_t i = 0; i < options.size(); i++) {
     string option = options[i];
@@ -73,44 +105,86 @@ unique_ptr<RamanParams<Real>> GetRamanParams(string in_file_name) {
     in_file.clear();
     in_file.seekg(0, in_file.beg);
 
-    string param = line.substr(line.find(option) + option.size());
-    switch (i) {
-      case 0 : {
-        output->dia_min = (param.size() > 0 && isdigit(param[0])) ? stof(param, nullptr) : output->dia_min;
-        break;
-      }
-      case 1 : {
-        output->dia_max = (param.size() > 0 && isdigit(param[0])) ? stof(param, nullptr) : output->dia_max;
-        break;
-      }
-      case 2 : {
-        output->N_rad = (param.size() > 0 && isdigit(param[0])) ? stoi(param, nullptr) : output->N_rad;
-        break;
-      }
-      case 3 : {
-        output->N_theta_p = (param.size() > 0 && isdigit(param[0])) ? stoi(param, nullptr) : output->N_theta_p;
-        break;
-      }
-      case 4 : {
-        output->write_output = (param == "yes");
-        break;
-      }
-      case 5 : {
-        output->write_log = (param == "yes");
-        break;
-      }
+    try {
+      string param = line.substr(line.find(option) + option.size());
+      if (i < boolParams.size())
+        boolParams[i] = (param == "yes");
+      else if (i < boolParams.size() + floatParams.size())
+        floatParams[i - boolParams.size()] = Frac2Float<Real>(param);
+      else if (i < boolParams.size() + floatParams.size() + intParams.size())
+        intParams[i - boolParams.size() - floatParams.size()] = lexical_cast<int>(param);
+    } catch(bad_lexical_cast &) {
+      cerr << "Cannot read value of option \"" << option << "\". Using default value.";
     }
+
+    output->write_output = boolParams[0];
+    output->write_log = boolParams[1];
+    output->dia_min = floatParams[0];
+    output->dia_max = floatParams[1];
+    output->phi_p = floatParams[2];
+    output->h_min = floatParams[3];
+    output->h_max = floatParams[4];
+    output->epsilon1 = floatParams[5];
+    output->epsilon2 = floatParams[6];
+    output->epsilon2_rm = floatParams[7];
+    output->lambda = floatParams[8];
+    output->lambda_rm = floatParams[9];
+    output->N_rad = intParams[0];
+    output->N_theta_p = intParams[1];
+    output->N_h = intParams[2];
+    output->N_r = intParams[3];
+    output->N_theta = intParams[4];
+    output->N_phi = intParams[5];
+    output->Nb_theta = intParams[6];
+    output->Nb_theta_pst = intParams[7];
   }
   in_file.close();
   ArrayXr<Real> dia_var = ArrayXr<Real>::LinSpaced(output->N_rad, output->dia_min, output->dia_max);
   output->rad_var = dia_var/2;
   output->theta_p_var = ArrayXr<Real>::LinSpaced(output->N_theta_p, 0, mp_pi<Real>()/2);
+  output->h_var = ArrayXr<Real>::LinSpaced(output->N_h, output->h_min, output->h_max);
   return output;
+}
+
+template <class Real>
+unique_ptr<stParams<Real>> Raman2SmartiesParams(
+    const unique_ptr<RamanParams<Real>>& raman_params, int rad_ind, int h_ind, string type = string()) {
+  auto params = make_unique<stParams<Real>>();
+  params->epsilon1 = raman_params->epsilon1;
+  params->lambda = ArrayXr<Real>(1);
+  params->epsilon2 = ArrayXr<Real>(1);
+  params->k1 = ArrayXr<Real>(1);
+  params->s = ArrayXr<Real>(1);
+  if (type == "rm") {
+    params->lambda(0) = raman_params->lambda_rm;
+    params->epsilon2(0) = raman_params->epsilon2_rm;
+    params->k1(0) = 2*mp_pi<Real>() / raman_params->lambda_rm * sqrt(raman_params->epsilon1);
+    params->s(0) = sqrt(raman_params->epsilon2_rm) / sqrt(raman_params->epsilon1);
+  } else {
+    params->lambda(0) = raman_params->lambda;
+    params->epsilon2(0) = raman_params->epsilon2;
+    params->k1(0) = 2*mp_pi<Real>() / raman_params->lambda * sqrt(raman_params->epsilon1);
+    params->s(0) = sqrt(raman_params->epsilon2) / sqrt(raman_params->epsilon1);
+  }
+  params->Nb_theta = raman_params->Nb_theta;
+  params->Nb_theta_pst = raman_params->Nb_theta_pst;
+
+  Real h = raman_params->h_var(h_ind);
+  Real radius = raman_params->rad_var(rad_ind);
+  if (h > 1) {
+    params->a = radius;
+    params->c = radius / h;
+  } else {
+    params->a = radius * h;
+    params->c = radius;
+  }
+  params->N = 6 + 2*static_cast<int>(ceil(max(params->a, params->c)/40));
+  return params;
 }
 
 // Can make this into a non-template function using c++20 'concepts' keyword
 template <class Real1, class Real2>
-void CreateTimeStamp(string log_file_name, const unique_ptr<RamanParams<Real1>>& raman_params, bool is_mixed) {
+void CreateTimeStamp(string log_file_name, const unique_ptr<RamanParams<Real1>>& raman_params) {
   string main_calc_type = typeid(raman_params->dia_min).name(), second_calc_type = typeid(mp_pi<Real2>()).name();
   string converted_main_calc_type, converted_second_calc_type;
   if (main_calc_type.find("N5boost14multiprecision6numberINS0_8backends18mpfr_float_backend") != string::npos) {
@@ -216,15 +290,11 @@ vector<unique_ptr<stTR<To>>> ConvertstTRList(const vector<unique_ptr<stTR<From>>
 template <class Real1, class Real2>
 void RamanElasticScattering(string in_file_name, string log_file_name) {
   Real2 PI = mp_pi<Real2>();
-  unique_ptr<RamanParams<Real1>> raman_params1 = GetRamanParams<Real1>(in_file_name);
-  unique_ptr<RamanParams<Real2>> raman_params2 = GetRamanParams<Real2>(in_file_name);
-  ArrayXr<Real1> rad_var1 = raman_params1->rad_var;
-  ArrayXr<Real2> rad_var2 = raman_params2->rad_var;
-  ArrayXr<Real2> theta_p_var = raman_params2->theta_p_var;
+
+  unique_ptr<RamanParams<Real1>> raman_params1 = LoadParams<Real1>(in_file_name);
+  unique_ptr<RamanParams<Real2>> raman_params2 = LoadParams<Real2>(in_file_name);
   bool write_output = raman_params1->write_output;
   bool write_log = raman_params1->write_log;
-  ArrayXr<Real1> h_var1 = {{static_cast<Real1>(1.0)/3}};
-  ArrayXr<Real2> h_var2 = {{static_cast<Real2>(1.0)/3}};
 
   ofstream log_file;
   if (write_log) {
@@ -237,27 +307,27 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
     }
   }
   if (write_log)
-    CreateTimeStamp<Real1, Real2>(log_file_name, raman_params1, false);
+    CreateTimeStamp<Real1, Real2>(log_file_name, raman_params1);
 
-  Tensor3r<Real2> sigma_yz(rad_var2.size(), h_var2.size(), theta_p_var.size());
-  Tensor3r<Real2> sigma_zy(rad_var2.size(), h_var2.size(), theta_p_var.size());
-  Tensor3r<Real2> sigma_zz(rad_var2.size(), h_var2.size(), theta_p_var.size());
-  Tensor3r<Real2> sigma_yy(rad_var2.size(), h_var2.size(), theta_p_var.size());
-  ArrayXr<Real1> sca = ArrayXr<Real1>::Zero(rad_var1.size());
-  ArrayXr<Real1> ext = ArrayXr<Real1>::Zero(rad_var1.size());
-  ArrayXr<Real1> abs = ArrayXr<Real1>::Zero(rad_var1.size());
-  vector<unique_ptr<stSM<Real2>>> stSM_list(rad_var2.size());
+  Tensor3r<Real2> sigma_yz(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
+  Tensor3r<Real2> sigma_zy(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
+  Tensor3r<Real2> sigma_zz(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
+  Tensor3r<Real2> sigma_yy(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
+  ArrayXr<Real1> sca = ArrayXr<Real1>::Zero(raman_params1->N_rad);
+  ArrayXr<Real1> ext = ArrayXr<Real1>::Zero(raman_params1->N_rad);
+  ArrayXr<Real1> abs = ArrayXr<Real1>::Zero(raman_params1->N_rad);
+  vector<unique_ptr<stSM<Real2>>> stSM_list(raman_params2->N_rad);
 
   auto options = make_unique<stOptions>();
   options->get_R = true;
   options->delta = 0;
   options->NB = 0;
   options->get_symmetric_T = false;
-  Real2 phi_p = 0;
+  Real2 phi_p = raman_params2->phi_p;
 
-  int N_r = 100;
-  int N_theta = 320;
-  int N_phi = 320;
+  int N_r = raman_params2->N_r;
+  int N_theta = raman_params2->N_theta;
+  int N_phi = raman_params2->N_phi;
 
   ArrayXr<Real2> theta_surf = ArrayXr<Real2>::LinSpaced(N_theta, 0, PI);
   RowArrayXr<Real2> r_surf_u = RowArrayXr<Real2>::LinSpaced(
@@ -265,67 +335,26 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
   ArrayXXr<Real2> r_mat_u = r_surf_u.replicate(N_theta, 1).transpose();
   ArrayXXr<Real2> theta_mat = theta_surf.replicate(1, N_r).transpose();
 
-  int Nb_theta = 1000;
-  int Nb_theta_pst = 1;
-
-  for (int h_ind = 0; h_ind < h_var1.size(); h_ind++) {
+  for (int h_ind = 0; h_ind < raman_params1->N_h; h_ind++) {
     stringstream aspect_ratio_string;
-    Real1 h1 = h_var1(h_ind);
-    Real2 h2 = h_var2(h_ind);
 
     aspect_ratio_string.precision(4);
-    aspect_ratio_string << "aspect ratio " << h1 << endl;
+    aspect_ratio_string << "aspect ratio " << raman_params1->h_var(h_ind) << endl;
     MultiPrint(aspect_ratio_string.str(), log_file_name, write_log);
     aspect_ratio_string.str(string());
 
     #pragma omp parallel for schedule(dynamic)
-    for (int k = 0; k < rad_var1.size(); k++) {
-      unique_ptr<stParams<Real1>> params1 = loadParam<Real1>();
-      unique_ptr<stParams<Real1>> params_rm1 = loadParam<Real1>("rm");
-      unique_ptr<stParams<Real2>> params2 = loadParam<Real2>();
-      unique_ptr<stParams<Real2>> params_rm2 = loadParam<Real2>("rm");
-      params1->Nb_theta = Nb_theta;
-      params1->Nb_theta_pst = Nb_theta_pst;
-      params_rm1->Nb_theta = Nb_theta;
-      params_rm1->Nb_theta_pst = Nb_theta_pst;
-      params2->Nb_theta = Nb_theta;
-      params2->Nb_theta_pst = Nb_theta_pst;
-      params_rm2->Nb_theta = Nb_theta;
-      params_rm2->Nb_theta_pst = Nb_theta_pst;
+    for (int k = 0; k < raman_params1->N_rad; k++) {
+      unique_ptr<stParams<Real1>> params1 = Raman2SmartiesParams(raman_params1, k, h_ind);
+      unique_ptr<stParams<Real1>> params_rm1 = Raman2SmartiesParams(raman_params1, k, h_ind, "rm");
+      unique_ptr<stParams<Real2>> params2 = Raman2SmartiesParams(raman_params2, k, h_ind);
+      unique_ptr<stParams<Real2>> params_rm2 = Raman2SmartiesParams(raman_params2, k, h_ind, "rm");
+      Real2 a = params2->a;
+      Real2 c = params2->c;
+      int N = params2->N;
       stringstream log_stream;
 
-      Real1 a1, c1;
-      if (h1 > 1) {
-        a1 = rad_var1(k);
-        c1 = rad_var1(k) / h1;
-      } else {
-        a1 = rad_var1(k) * h1;
-        c1 = rad_var1(k);
-      }
-      Real2 a2, c2;
-      if (h2 > 1) {
-        a2 = rad_var2(k);
-        c2 = rad_var2(k) / h2;
-      } else {
-        a2 = rad_var2(k) * h2;
-        c2 = rad_var2(k);
-      }
-
-      int N = 6 + 2*static_cast<int>(ceil(max(a1, c1)/40));
-      params1->N = N;
-      params1->a = a1;
-      params1->c = c1;
-      params_rm1->N = N;
-      params_rm1->a = a1;
-      params_rm1->c = c1;
-      params2->N = N;
-      params2->a = a2;
-      params2->c = c2;
-      params_rm2->N = N;
-      params_rm2->a = a2;
-      params_rm2->c = c2;
-
-      ArrayXXr<Real2> r_mat = a2*c2*r_mat_u/sqrt(pow(c2, 2)*sin(theta_mat).pow(2) + pow(a2, 2)*cos(theta_mat).pow(2));
+      ArrayXXr<Real2> r_mat = a*c*r_mat_u/sqrt(pow(c, 2)*sin(theta_mat).pow(2) + pow(a, 2)*cos(theta_mat).pow(2));
       ArrayXXr<Real2> d_theta = theta_mat(all, seq(1, last)) - theta_mat(all, seq(0, last - 1));
       ArrayXXr<Real2> dr = r_mat(seq(1, last), all) - r_mat(seq(0, last - 1), all);
       ArrayXXr<Real2> dt_dr = d_theta(seq(1, last), all) * dr(all, seq(1, last));
@@ -367,9 +396,9 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
 
       stSM_list[k] = pstScatteringMatrixOA(st_TR_list, params2->lambda(0), static_cast<Real2>(sca(k)));
 
-      for (int t = 0; t < theta_p_var.size(); t++) {
+      for (int t = 0; t < raman_params2->N_theta_p; t++) {
         begin = chrono::steady_clock::now();
-        Real2 theta_p = theta_p_var(t);
+        Real2 theta_p = raman_params2->theta_p_var(t);
         std::array<long int, 3> new_dims = {N_r, N_theta, 3};
         ArrayXr<Real2> phi_var = ArrayXr<Real2>::LinSpaced(N_phi + 1, 0, 2*PI);
 
@@ -460,7 +489,7 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
         ArrayXXr<Real2> F = M_mat * r_mat.pow(2) * sin(theta_mat);
         ArrayXXr<Real2> tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
-        sigma_zz(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a2*a2*c2);
+        sigma_zz(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a*a*c);
 
         inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
@@ -468,7 +497,7 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
-        sigma_yz(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a2*a2*c2);
+        sigma_yz(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a*a*c);
 
         inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_y))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
@@ -476,7 +505,7 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
-        sigma_yy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a2*a2*c2);
+        sigma_yy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a*a*c);
 
         inter_step = 2*PI/N_phi*(E_field_rm_z * tensor_conj(E_field_y))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
@@ -484,10 +513,10 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
-        sigma_zy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a2*a2*c2);
+        sigma_zy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a*a*c);
 
         log_stream.precision(5);
-        log_stream << "max diameter = " << max(a2, c2)*2e-3;
+        log_stream << "max diameter = " << max(a, c)*2e-3;
         log_stream.precision(10);
         log_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
         log_stream.precision(11);

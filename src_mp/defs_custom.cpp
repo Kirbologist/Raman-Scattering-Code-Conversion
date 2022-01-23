@@ -174,7 +174,9 @@ extern template unique_ptr<stRes<float>> pstMakeStructForField(
 extern template unique_ptr<stSM<float>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<float>>>&, float, float, int);
 
-extern template unique_ptr<stParams<float>> loadParam(string);
+extern template float Frac2Float(string);
+extern template unique_ptr<RamanParams<float>> LoadParams<float>(string);
+extern template unique_ptr<stParams<float>> Raman2SmartiesParams(const unique_ptr<RamanParams<float>>&, int, int, string);
 
 extern template double mp_pi();
 extern template complex<double> mp_im_unit();
@@ -198,7 +200,9 @@ extern template unique_ptr<stRes<double>> pstMakeStructForField(
 extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<double>>>&, double, double, int);
 
-extern template unique_ptr<stParams<double>> loadParam(string);
+extern template double Frac2Float(string);
+extern template unique_ptr<RamanParams<double>> LoadParams<double>(string);
+extern template unique_ptr<stParams<double>> Raman2SmartiesParams(const unique_ptr<RamanParams<double>>&, int, int, string);
 
 extern template long double mp_pi<long double>();
 extern template complex<long double> mp_im_unit();
@@ -225,14 +229,19 @@ extern template unique_ptr<stRes<long double>> pstMakeStructForField(
 extern template unique_ptr<stSM<long double>> pstScatteringMatrixOA(
     const vector<unique_ptr<stTR<long double>>>&, long double, long double, int);
 
-extern template unique_ptr<stParams<long double>> loadParam(string);
+extern template long double Frac2Float(string);
+extern template unique_ptr<RamanParams<long double>> LoadParams<long double>(string);
+extern template unique_ptr<stParams<long double>> Raman2SmartiesParams(
+    const unique_ptr<RamanParams<long double>>&, int, int, string);
 
-template unique_ptr<stParams<raman_float>> loadParam(string);
-template unique_ptr<RamanParams<raman_float>> GetRamanParams(string);
-template void CreateTimeStamp<raman_float, float>(string, const unique_ptr<RamanParams<raman_float>>&, bool);
-template void CreateTimeStamp<raman_float, double>(string, const unique_ptr<RamanParams<raman_float>>&, bool);
-template void CreateTimeStamp<raman_float, long double>(string, const unique_ptr<RamanParams<raman_float>>&, bool);
-template void CreateTimeStamp<raman_float, raman_float>(string, const unique_ptr<RamanParams<raman_float>>&, bool);
+template raman_float Frac2Float(string);
+template unique_ptr<RamanParams<raman_float>> LoadParams<raman_float>(string);
+template unique_ptr<stParams<raman_float>> Raman2SmartiesParams(
+    const unique_ptr<RamanParams<raman_float>>&, int, int, string);
+template void CreateTimeStamp<raman_float, float>(string, const unique_ptr<RamanParams<raman_float>>&);
+template void CreateTimeStamp<raman_float, double>(string, const unique_ptr<RamanParams<raman_float>>&);
+template void CreateTimeStamp<raman_float, long double>(string, const unique_ptr<RamanParams<raman_float>>&);
+template void CreateTimeStamp<raman_float, raman_float>(string, const unique_ptr<RamanParams<raman_float>>&);
 template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
 template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
 template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
@@ -242,9 +251,9 @@ template void RamanElasticScattering<raman_float, double>(string, string);
 template void RamanElasticScattering<raman_float, long double>(string, string);
 template void RamanElasticScattering<raman_float, raman_float>(string, string);
 
-template void CreateTimeStamp<float, raman_float>(string, const unique_ptr<RamanParams<float>>&, bool);
-template void CreateTimeStamp<double, raman_float>(string, const unique_ptr<RamanParams<double>>&, bool);
-template void CreateTimeStamp<long double, raman_float>(string, const unique_ptr<RamanParams<long double>>&, bool);
+template void CreateTimeStamp<float, raman_float>(string, const unique_ptr<RamanParams<float>>&);
+template void CreateTimeStamp<double, raman_float>(string, const unique_ptr<RamanParams<double>>&);
+template void CreateTimeStamp<long double, raman_float>(string, const unique_ptr<RamanParams<long double>>&);
 template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
 template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
