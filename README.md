@@ -9,7 +9,7 @@ Project supervisor is A/Prof Taras Plakhotnik.
 
 The original MATLAB code was written to numerically calculate Raman scattering by spheroids with arbitrary precision. The original code (shared with me by T. Plakhotnik) uses the SMARTIES v1.01 MATLAB package, with some modifications made to support arbitrary precision using the Advanpix Multiprecision Toolbox. SMARTIES is a code suite used to calculate the optical properties of spheroidal particles. The goal of the project is to rewrite the code that was used for the calculation of Raman scattering in a more efficient compiled programming language that can support numerical computation. Hopefully this will accelerate the computation speeds by orders of magnitude and allow calculations for larger spheroids using higher precision.
 
-Raman scattering is the inelastic scattering of light, i.e. a form of scattering where incident photons exchanges energy with the incident particle before propagating off in a different direction. Typically, this exchange of energy means that the particle gains or loses heat energy, and the incident photons change in frequency (usually heat energy is gained and frequency is lowered). Here, monochromatic light is scattering off an oblate spheroidal particle that behaves like a raindrop in the air. The program then calculates the amount of light scattered into some new frequency. Although the code is originally intended to model raindrop-like particles, minimal work should be needed to use the code for calculating the Raman scattering off of any spheroid (oblate or prolate) in any medium.
+Raman scattering is the inelastic scattering of light, i.e. a form of scattering where incident photons exchanges energy with the incident particle before propagating off in a different direction. Typically, this exchange of energy means that the particle gains or loses heat energy, and the incident photons change in frequency (usually heat energy is gained and frequency is lowered). Here, monochromatic light is scattering off an oblate spheroidal particle that behaves like a raindrop in the air. The program then calculates the amount of light scattered into some new frequency. Although the code is originally intended to model raindrop-like particles, minimal work should be needed to use the code for calculating the Raman scattering off of any spheroid (oblate or prolate) in any medium. Either change around the parameter settings shown below, or edit the `LoadParams` function in `raman_elastic_scattering.hpp`.
 
 ## Instructions
 
@@ -52,7 +52,7 @@ Here's what each 'run' parameter does:
 - `Print output to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes the output to `output/results.txt`. Otherwise, it doesn't write to any file. By default, this parameter is `no`.
 - `Print log to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes some of the text from the standard output to `output/log.txt`. By default, this parameter is `yes`.
 
-The following 'calculation' parameters are for determining what sizes, shapes and orientations of spheroidal particles to calculate the Raman scattering of. These particles have parameters `a`, `c`, `h`, `theta` and `phi`. `a` is the radius of the particle along the x and y semi-axes. `c` is the radius of the particle along the z semi-axis. `h` is the ratio `a/c`. `theta` is the angle of tilt of the z semi-axis with respect to the surrounding medium (zero tilt means that the z semi-axis of the particle is aligned with the z axis of the surrounding medium). `phi` is the angle of rotation along the z semi-axis, the particles are rotationally symmetric along the z semi-axis, changing this parameter should not change the results of the calculations, outside of small rounding errors.
+The following parameters are for determining what sizes, shapes and orientations of spheroidal particles to calculate the Raman scattering of. These particles have parameters `a`, `c`, `h`, `theta` and `phi`. `a` is the radius of the particle along the x and y semi-axes. `c` is the radius of the particle along the z semi-axis. `h` is the ratio `a/c`. `theta` is the angle of tilt of the z semi-axis with respect to the surrounding medium (zero tilt means that the z semi-axis of the particle is aligned with the z axis of the surrounding medium). `phi` is the angle of rotation along the z semi-axis, the particles are rotationally symmetric along the z semi-axis, changing this parameter should not change the results of the calculations, outside of small rounding errors.
 - `Minimum diameter` is a floating-point parameter representing the minimum diameter in nanometres of the largest semi-axis. By default, this parameter is 1000.
 - `Maximum diameter` is a floating-point parameter representing the maximum diameter in nanometres of the largest semi-axis. By default, this parameter is 2000.
 - `Minimum h` is a floating-point value representing the minimum value of `h`. By default, this value is 1/3.
@@ -62,10 +62,14 @@ The following 'calculation' parameters are for determining what sizes, shapes an
 - `Particle phi` is a floating-point value representing the value of `phi` in radians. By default, this parameter is 0.
 - `No. of h ratios` is a positive integer representing the number of `h` values between `Minimum h` and `Maximum h` inclusive to calculate with. These values are linearly spaced. By default, this parameter is 1.
 
-The following 'calculation' parameters are for determining the spherical coordinates of the sample of points inside the particles to perform field calculations with. The physics definition of spherical coordinates are used, so `r` is the radial distance from the centre of the particle, `phi` is the azimuthal/longitudinal angle and `theta` is the polar/colatitudinal angle.
+The following parameters are for determining the spherical coordinates of the sample of points inside the particles to perform field calculations with. The physics definition of spherical coordinates are used, so `r` is the radial distance from the centre of the particle, `phi` is the azimuthal/longitudinal angle and `theta` is the polar/colatitudinal angle.
 - `No. of r-coordinates` is a positive integer representing the number of radial coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 100.
 - `No. of phi-coordinates` is a positive integer representing the number of azimuthal angle coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 320.
 - `No. of theta-coordinates` is a positive integer representing the number of polar angle/colatitude coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 320.
+
+The following parameters are used for calculating the T-matrices.
+- `Nb_theta` is a positive integer used to calculate the P and Q matrices.
+- `Nb_theta_pst` is a positive integer used for postprocessing.
 
 The following 'calculation' parameters are for describing the incident light and the mediums that the light passes through.
 - `epsilon1` is a floating-point value representing the dielectric constant of the surrounding medium.
@@ -93,7 +97,8 @@ Floating-point values must be typed using the syntax of C++'s floating-point lit
 3.14
 4.e2 // 400
 1E-5 // 0.00001
-0x1ffp2 // 130816, leading 0x means to read it as a sequence of hexadecimal values. 'p' indicates a hex exponent part and is always necessary for hex floats.
+0x1ffp2 // 130816, leading 0x means to read it as a sequence of hexadecimal values
+// 'p' indicates a hex exponent part and is always necessary for hex floats.
 0X10.1P0 // 16.0625
 1/3 // 0.333333...
 2E10/2E12 //0.25
@@ -112,6 +117,12 @@ Any value given will be converted to the types given in the `Calculation type` p
   - [x] Minimum viable product
   - [x] Arbitrary-precision support
   - [x] Automated parallel computing
+
+  - [ ] Make the program more user-friendly
+  - [ ] Make the code more readable
+  - [ ] Run more rigorous tests
+  - [ ] Optimise code
+  - [ ] Create a release
 
 ## Notable differences from SMARTIES
 
@@ -142,7 +153,7 @@ Any value given will be converted to the types given in the `Calculation type` p
 
 ## Dependencies
 
-- A compiler with C++17 support (tested with gcc 9.3.0-17 and clang 10.0.0-4 targeting x86_64-pc-linux-gnu)
+- A compiler with C++17 support (tested with gcc 9.3.0-17 and clang 10.0.0-4 targeting a x86_64 Ubuntu-based linux PC)
 - Eigen 3.4.0, a free, open-source, efficient and comprehensive linear algebra library made for C++. Website: https://eigen.tuxfamily.org/index.php
 - Boost (C++ Libraries) 1.77.0, a free, open-source set of libraries with applications in a wide variety of areas. Used for some template maths functions and its MPFR class wrapper. Website: https://www.boost.org
 - The GNU Multi Precision Arithmetic Library (GMP), a C library that provides support for arbitrary precision arithmetic. While it has arbitrary-precision floating-point types, MPFR is preferred. This library is a prerequisite for MPFR. Website: https://gmplib.org/
@@ -152,7 +163,7 @@ Any value given will be converted to the types given in the `Calculation type` p
 
 - Although most of the code is based on the SMARTIES v1.01 MATLAB package, only the functions necessary for calculating Raman scattering will be converted.
 - The coding style is loosely based on Google's C++ style guide, with variable, struct and function names matching closely with the ones given in the original SMARTIES code.
-- The code was written to be compiled with GCC and on hardware that correctly implements the IEEE 754 standard. If IEEE 754 is not supported, compiling or executing the code may cause a divide-by-zero hardware exception.
+- The code was written to be compiled with GCC and on hardware that correctly implements the IEEE 754 standard.
 
 ## Copyright Disclaimer
 

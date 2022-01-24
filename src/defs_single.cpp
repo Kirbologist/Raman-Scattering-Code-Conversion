@@ -8,11 +8,12 @@ template float mp_pi<float>();
 template float mp_eps<float>();
 template complex<float> mp_im_unit<float>();
 
-template Tensor3c<float> subtensor(Tensor3c<float>&,
+template Tensor3c<float> tensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<float> reduceAndSlice(Tensor3c<float>&, int, int);
+template Map<ArrayXXc<float>> subtensor2ArrMap(const Tensor3c<float>&,
+    const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<float> invertLUcol(MatrixXc<float>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
 template RowArrayXr<float> logicalSlice(RowArrayXr<float>&, RowArrayXb&);

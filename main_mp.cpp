@@ -9,19 +9,19 @@ using namespace Smarties;
 extern template void RamanElasticScattering<float, float>(string, string);
 extern template void RamanElasticScattering<float, double>(string, string);
 extern template void RamanElasticScattering<float, long double>(string, string);
-extern template void RamanElasticScattering<float, raman_float>(string, string);
+extern template void RamanElasticScattering<float, RamanFloat>(string, string);
 extern template void RamanElasticScattering<double, float>(string, string);
 extern template void RamanElasticScattering<double, double>(string, string);
 extern template void RamanElasticScattering<double, long double>(string, string);
-extern template void RamanElasticScattering<double, raman_float>(string, string);
+extern template void RamanElasticScattering<double, RamanFloat>(string, string);
 extern template void RamanElasticScattering<long double, float>(string, string);
 extern template void RamanElasticScattering<long double, double>(string, string);
 extern template void RamanElasticScattering<long double, long double>(string, string);
-extern template void RamanElasticScattering<long double, raman_float>(string, string);
-extern template void RamanElasticScattering<raman_float, float>(string, string);
-extern template void RamanElasticScattering<raman_float, double>(string, string);
-extern template void RamanElasticScattering<raman_float, long double>(string, string);
-extern template void RamanElasticScattering<raman_float, raman_float>(string, string);
+extern template void RamanElasticScattering<long double, RamanFloat>(string, string);
+extern template void RamanElasticScattering<RamanFloat, float>(string, string);
+extern template void RamanElasticScattering<RamanFloat, double>(string, string);
+extern template void RamanElasticScattering<RamanFloat, long double>(string, string);
+extern template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string);
 
 string in_file_name = "config.txt";
 string out_file_name = "output/results.txt";
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<float, raman_float>(in_file_name, log_file_name);
+          RamanElasticScattering<float, RamanFloat>(in_file_name, log_file_name);
           break;
         }
         default : {
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<double, raman_float>(in_file_name, log_file_name);
+          RamanElasticScattering<double, RamanFloat>(in_file_name, log_file_name);
           break;
         }
         default : {
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<long double, raman_float>(in_file_name, log_file_name);
+          RamanElasticScattering<long double, RamanFloat>(in_file_name, log_file_name);
           break;
         }
         default : {
@@ -130,19 +130,19 @@ int main(int argc, char** argv) {
     case CalcType::CUSTOM : {
       switch (calc_types[1]) {
         case CalcType::SINGLE : {
-          RamanElasticScattering<raman_float, float>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, float>(in_file_name, log_file_name);
           break;
         }
         case CalcType::DOUBLE : {
-          RamanElasticScattering<raman_float, double>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, double>(in_file_name, log_file_name);
           break;
         }
         case CalcType::QUAD : {
-          RamanElasticScattering<raman_float, long double>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, long double>(in_file_name, log_file_name);
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<raman_float, raman_float>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, RamanFloat>(in_file_name, log_file_name);
           break;
         }
         default : {

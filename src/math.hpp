@@ -20,7 +20,7 @@ namespace Smarties {
   inline complex<Real> mp_im_unit(void) { return complex<Real>(0.0, 1.0); }
 
   template <class Real>
-  Tensor3c<Real> subtensor(Tensor3c<Real>& tensor,
+  Tensor3c<Real> tensorSlice(Tensor3c<Real>& tensor,
       ArithmeticSequence<long int, long int, long int> slice_dim1,
       ArithmeticSequence<long int, long int, long int> slice_dim2,
       ArithmeticSequence<long int, long int, long int> slice_dim3) {
@@ -39,15 +39,11 @@ namespace Smarties {
 
   ArrayXi seq2Array(long int first, long int last, long int stride);
 
-  template <class Real>
-  ArrayXXc<Real> reduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows) {
-    const auto dims = tensor.dimensions();
-    ArrayXXc<Real> output(num_rows, dims[1]);
-    for (int i = 0; i < num_rows; i++) {
-      for (int j = 0; j < dims[1]; j++)
-        output(i, j) = tensor(dims[0] - num_rows + i, j, offset);
-    }
-    return output;
+  template <class Scalar>
+  Map<ArrayXXr<Scalar>> subtensor2ArrMap(const Tensor3r<Scalar>& tensor,
+      const std::array<int, 3>& offsets, const std::array<int, 3>& extents, int rows, int cols) {
+    Tensor3r<Scalar> subtensor = tensor.slice(offsets, extents);
+    return Map<ArrayXXr<Scalar>>(subtensor.data(), rows, cols);
   }
 
   template <class Real>

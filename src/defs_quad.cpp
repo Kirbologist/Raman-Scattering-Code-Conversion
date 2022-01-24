@@ -8,11 +8,12 @@ template long double mp_pi<long double>();
 template long double mp_eps<long double>();
 template complex<long double> mp_im_unit<long double>();
 
-template Tensor3c<long double> subtensor(Tensor3c<long double>&,
+template Tensor3c<long double> tensorSlice(Tensor3c<long double>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<long double> reduceAndSlice(Tensor3c<long double>&, int, int);
+template Map<ArrayXXc<long double>> subtensor2ArrMap(const Tensor3c<long double>&,
+    const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<long double> invertLUcol(MatrixXc<long double>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
 template RowArrayXr<long double> logicalSlice(RowArrayXr<long double>&, RowArrayXb&);

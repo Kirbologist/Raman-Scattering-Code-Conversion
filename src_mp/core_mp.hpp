@@ -5,6 +5,6 @@
 
 using namespace boost::multiprecision;
 
-typedef number<mpfr_float_backend<PRECISION, mpfr_allocation_type::allocate_stack>> raman_float;
+typedef number<mpfr_float_backend<PRECISION, mpfr_allocation_type::allocate_stack>> RamanFloat;
 
 #endif
