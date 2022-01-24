@@ -5,6 +5,7 @@
 #include "smarties.hpp"
 #include <boost/lexical_cast.hpp>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <exception>
 
@@ -18,8 +19,7 @@ enum CalcType {SINGLE, DOUBLE, QUAD, CUSTOM, NONE};
 
 template <class Real>
 struct RamanParams {
-  bool write_output = false;
-  bool write_log = true;
+  bool write_output = true;
 
   Real dia_min = 1000;
   Real dia_max = 2000;
@@ -73,20 +73,20 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
   ifstream in_file;
   in_file.open(in_file_name, ios::in);
   if (!in_file.is_open())
-    throw runtime_error("Error: cannot open config.txt");
+    throw runtime_error("Error: cannot open " + in_file_name);
 
   auto output = make_unique<RamanParams<Real>>();
 
   string line;
   vector<string> options {
-    "Print output to file:", "Print log to file:",
+    "Print output to file:",
     "Minimum diameter:", "Maximum diameter:", "Particle phi:", "Minimum h:", "Maximum h:",
     "epsilon1:", "epsilon2:", "Raman epsilon2:", "lambda:", "Raman lambda:",
     "No. of particle radii:", "No. of particle thetas:", "No. of h ratios:",
     "No. of r-coordinates:", "No. of theta-coordinates:", "No. of phi-coordinates:",
     "Nb_theta:", "Nb_theta_pst:"
   };
-  std::array<bool, 2> boolParams = {output->write_output, output->write_log};
+  std::array<bool, 1> boolParams = {output->write_output};
   std::array<Real, 10> floatParams = {
     output->dia_min, output->dia_max, output->phi_p, output->h_min, output->h_max,
     output->epsilon1, output->epsilon2, output->epsilon2_rm, output->lambda, output->lambda_rm
@@ -118,7 +118,6 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
     }
 
     output->write_output = boolParams[0];
-    output->write_log = boolParams[1];
     output->dia_min = floatParams[0];
     output->dia_max = floatParams[1];
     output->phi_p = floatParams[2];
@@ -184,44 +183,19 @@ unique_ptr<stParams<Real>> Raman2SmartiesParams(
 
 // Can make this into a non-template function using c++20 'concepts' keyword
 template <class Real1, class Real2>
-void CreateTimeStamp(string log_file_name, const unique_ptr<RamanParams<Real1>>& raman_params) {
-  string main_calc_type = typeid(raman_params->dia_min).name(), second_calc_type = typeid(mp_pi<Real2>()).name();
-  string converted_main_calc_type, converted_second_calc_type;
-  if (main_calc_type.find("N5boost14multiprecision6numberINS0_8backends18mpfr_float_backend") != string::npos) {
-    size_t prec_begin = main_calc_type.find("ILj") + 3;
-    size_t prec_end = main_calc_type.find("ELNS");
-    string precision = main_calc_type.substr(prec_begin, prec_end - prec_begin);
-    converted_main_calc_type = "custom with precision of " + precision + " bits";
-  } else if (main_calc_type == "f")
-    converted_main_calc_type = "single";
-  else if (main_calc_type == "d")
-    converted_main_calc_type = "double";
-  else if (main_calc_type == "e")
-    converted_main_calc_type = "quad";
+void CreateTimeStamp(string out_file_name, const unique_ptr<RamanParams<Real1>>& raman_params) {
+  string main_calc_type = getTypeName<Real1>();
+  string second_calc_type = getTypeName<Real2>();
 
-  if (second_calc_type.find("N5boost14multiprecision6numberINS0_8backends18mpfr_float_backend") != string::npos) {
-    size_t prec_begin = second_calc_type.find("ILj") + 3;
-    size_t prec_end = second_calc_type.find("ELNS");
-    string precision = second_calc_type.substr(prec_begin, prec_end - prec_begin);
-    converted_second_calc_type = "custom with precision of " + precision + " bits";
-  } else if (second_calc_type == "f")
-    converted_second_calc_type = "single";
-  else if (second_calc_type == "d")
-    converted_second_calc_type = "double";
-  else if (second_calc_type == "e")
-    converted_second_calc_type = "quad";
-
-  ofstream log_file;
-  log_file.open(log_file_name, ios::out | ios::app);
+  ofstream out_file;
+  out_file.open(out_file_name, ios::out | ios::app);
   auto sys_time = chrono::system_clock::now();
   time_t sys_time_date = chrono::system_clock::to_time_t(sys_time);
-  log_file << "Session began at system time: " << ctime(&sys_time_date);
-  log_file << "Running RamanElasticScattering with type " << converted_main_calc_type;
-  log_file << " and " << converted_second_calc_type << endl;
-  log_file << "Parameters are DIA_MIN: " << raman_params->dia_min << ", DIA_MAX: " << raman_params->dia_max <<
-      ", N_RAD: " << raman_params->N_rad << ", N_THETA_P: " << raman_params->N_theta_p << endl;
-  log_file.flush();
-  log_file.close();
+  out_file << "Session began at system time: " << ctime(&sys_time_date);
+  out_file << "Running RamanElasticScattering with type " << main_calc_type;
+  out_file << " and " << second_calc_type << endl;
+  out_file.flush();
+  out_file.close();
 }
 
 template <class From, class To>
@@ -288,26 +262,12 @@ vector<unique_ptr<stTR<To>>> ConvertstTRList(const vector<unique_ptr<stTR<From>>
 }
 
 template <class Real1, class Real2>
-void RamanElasticScattering(string in_file_name, string log_file_name) {
+void RamanElasticScattering(string in_file_name, string out_dir) {
   Real2 PI = mp_pi<Real2>();
 
   unique_ptr<RamanParams<Real1>> raman_params1 = LoadParams<Real1>(in_file_name);
   unique_ptr<RamanParams<Real2>> raman_params2 = LoadParams<Real2>(in_file_name);
   bool write_output = raman_params1->write_output;
-  bool write_log = raman_params1->write_log;
-
-  ofstream log_file;
-  if (write_log) {
-    log_file.open(log_file_name, ios::out | ios::app);
-    log_file << endl;
-    if (!log_file.is_open()) {
-      cerr << "Warning: cannot create or open log file. Some output won't be written." << endl;
-      log_file.close();
-      write_log = false;
-    }
-  }
-  if (write_log)
-    CreateTimeStamp<Real1, Real2>(log_file_name, raman_params1);
 
   Tensor3r<Real2> sigma_yz(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
   Tensor3r<Real2> sigma_zy(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
@@ -335,16 +295,33 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
   ArrayXXr<Real2> r_mat_u = r_surf_u.replicate(N_theta, 1).transpose();
   ArrayXXr<Real2> theta_mat = theta_surf.replicate(1, N_r).transpose();
 
+  if (write_output)
+    std::filesystem::create_directory(out_dir);
+
   for (int h_ind = 0; h_ind < raman_params1->N_h; h_ind++) {
-    stringstream aspect_ratio_string;
-
-    aspect_ratio_string.precision(4);
-    aspect_ratio_string << "aspect ratio " << raman_params1->h_var(h_ind) << endl;
-    MultiPrint(aspect_ratio_string.str(), log_file_name, write_log);
-    aspect_ratio_string.str(string());
-
     #pragma omp parallel for schedule(dynamic)
     for (int k = 0; k < raman_params1->N_rad; k++) {
+      string out_file_name = out_dir + "/a2c_" + to_string(raman_params1->h_var(0)) +
+          "_to_" + to_string(raman_params1->h_var(last)) + "_dia_" + to_string(raman_params1->dia_min) +
+          "_to_" + to_string(raman_params1->dia_max) + "_range_" + to_string(omp_get_thread_num()) + ".txt";
+      if (write_output) {
+        ofstream out_file(out_file_name, ios::out | ios::app);
+        out_file << endl;
+        if (!out_file.good()) {
+          cerr << "Warning: cannot create or open output file. Some output won't be written." << endl;
+          out_file.close();
+          write_output = false;
+        }
+      }
+      if (write_output)
+        CreateTimeStamp<Real1, Real2>(out_file_name, raman_params1);
+      stringstream out_stream;
+
+      out_stream.precision(4);
+      out_stream << "aspect ratio " << raman_params1->h_var(h_ind) << endl;
+      MultiPrint(out_stream.str(), out_file_name, write_output);
+      out_stream.str(string());
+
       unique_ptr<stParams<Real1>> params1 = Raman2SmartiesParams(raman_params1, k, h_ind);
       unique_ptr<stParams<Real1>> params_rm1 = Raman2SmartiesParams(raman_params1, k, h_ind, "rm");
       unique_ptr<stParams<Real2>> params2 = Raman2SmartiesParams(raman_params2, k, h_ind);
@@ -352,7 +329,6 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
       Real2 a = params2->a;
       Real2 c = params2->c;
       int N = params2->N;
-      stringstream log_stream;
 
       ArrayXXr<Real2> r_mat = a*c*r_mat_u/sqrt(pow(c, 2)*sin(theta_mat).pow(2) + pow(a, 2)*cos(theta_mat).pow(2));
       ArrayXXr<Real2> d_theta = theta_mat(all, seq(1, last)) - theta_mat(all, seq(0, last - 1));
@@ -368,19 +344,19 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
       unique_ptr<stTmatrix<Real1>> T_mat = slvForT(params1, options);
       end = chrono::steady_clock::now();
       elapsed_seconds = end - begin;
-      log_stream << elapsed_seconds.count() << endl;
-      log_stream << "T-matrix calculatred for excitation" << endl;
-      MultiPrint(log_stream.str(), log_file_name, write_log);
-      log_stream.str(string());
+      out_stream << elapsed_seconds.count() << endl;
+      out_stream << "T-matrix calculatred for excitation" << endl;
+      MultiPrint(out_stream.str(), out_file_name, write_output);
+      out_stream.str(string());
 
       begin = chrono::steady_clock::now();
       unique_ptr<stTmatrix<Real1>> T_mat_rm = slvForT(params_rm1, options);
       end = chrono::steady_clock::now();
       elapsed_seconds = end - begin;
-      log_stream << elapsed_seconds.count() << endl;
-      log_stream << "T-matrix calculatred for Raman" << endl;
-      MultiPrint(log_stream.str(), log_file_name, write_log);
-      log_stream.str(string());
+      out_stream << elapsed_seconds.count() << endl;
+      out_stream << "T-matrix calculatred for Raman" << endl;
+      MultiPrint(out_stream.str(), out_file_name, write_output);
+      out_stream.str(string());
 
       vector<unique_ptr<stTR<Real2>>> st_TR_list = ConvertstTRList<Real1, Real2>(T_mat->st_TR_list);
       vector<unique_ptr<stTR<Real2>>> st_TR_list_rm = ConvertstTRList<Real1, Real2>(T_mat_rm->st_TR_list);
@@ -388,11 +364,12 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
       sca(k) = T_mat->st_coa->sca(0); // st_coa->sca should only contain 1 element
       ext(k) = T_mat->st_coa->ext(0); // st_coa->ext should only contain 1 element
       abs(k) = T_mat->st_coa->abs(0); // st_coa->abs should only contain 1 element
-      log_stream << "Csca " << sca(k) << endl;
-      log_stream << "Cext " << ext(k) << endl;
-      log_stream << "Cabs " << abs(k) << endl;
-      MultiPrint(log_stream.str(), log_file_name, write_log);
-      log_stream.str(string());
+      out_stream.precision(6);
+      out_stream << "Csca " << sca(k) << endl;
+      out_stream << "Cext " << ext(k) << endl;
+      out_stream << "Cabs " << abs(k) << endl;
+      MultiPrint(out_stream.str(), out_file_name, write_output);
+      out_stream.str(string());
 
       stSM_list[k] = pstScatteringMatrixOA(st_TR_list, params2->lambda(0), static_cast<Real2>(sca(k)));
 
@@ -515,22 +492,22 @@ void RamanElasticScattering(string in_file_name, string log_file_name) {
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
         sigma_zy(k, h_ind, t) = (tmp * dt_dr).sum()/(static_cast<Real2>(4.0)/3*PI*a*a*c);
 
-        log_stream.precision(5);
-        log_stream << "max diameter = " << max(a, c)*2e-3;
-        log_stream.precision(10);
-        log_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
-        log_stream.precision(11);
-        log_stream << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
-        log_stream << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
-        log_stream << "--- relative raman zy = " << sigma_zy(k, h_ind, t) << endl;
-        log_stream << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
+        out_stream.precision(5);
+        out_stream << "max diameter = " << max(a, c)*2e-3;
+        out_stream.precision(10);
+        out_stream << " µm, theta = " << theta_p * 180/PI << " degrees" << endl;
+        out_stream.precision(11);
+        out_stream << "--- relative raman zz = " << sigma_zz(k, h_ind, t) << endl;
+        out_stream << "--- relative raman yz = " << sigma_yz(k, h_ind, t) << endl;
+        out_stream << "--- relative raman zy = " << sigma_zy(k, h_ind, t) << endl;
+        out_stream << "--- relative raman yy = " << sigma_yy(k, h_ind, t) << endl;
 
         end = chrono::steady_clock::now();
         elapsed_seconds = end - begin;
-        log_stream << elapsed_seconds.count() << endl;
+        out_stream << elapsed_seconds.count() << endl;
 
-        MultiPrint(log_stream.str(), log_file_name, write_log);
-        log_stream.str(string());
+        MultiPrint(out_stream.str(), out_file_name, write_output);
+        out_stream.str(string());
       }
     }
   }

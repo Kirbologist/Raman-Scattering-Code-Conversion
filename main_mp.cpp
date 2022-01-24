@@ -24,11 +24,10 @@ extern template void RamanElasticScattering<RamanFloat, long double>(string, str
 extern template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string);
 
 string in_file_name = "config.txt";
-string out_file_name = "output/results.txt";
-string log_file_name = "output/log.txt";
+string out_dir = "output";
 
 int main(int argc, char** argv) {
-  vector<string> flags = {"--input=", "--log="};
+  vector<string> flags = {"--input=", "--output-dir="};
   for (int i = 0; i < argc; i++) {
     string arg = argv[i];
     for (size_t j = 0; j < flags.size(); j++) {
@@ -39,7 +38,7 @@ int main(int argc, char** argv) {
             break;
           }
           case 1 : {
-            log_file_name = arg.substr(flags[j].size());
+            out_dir = arg.substr(flags[j].size());
             break;
           }
         }
@@ -55,24 +54,24 @@ int main(int argc, char** argv) {
     case CalcType::SINGLE : {
       switch (calc_types[1]) {
         case CalcType::SINGLE : {
-          RamanElasticScattering<float, float>(in_file_name, log_file_name);
+          RamanElasticScattering<float, float>(in_file_name, out_dir);
           break;
         }
         case CalcType::DOUBLE : {
-          RamanElasticScattering<float, double>(in_file_name, log_file_name);
+          RamanElasticScattering<float, double>(in_file_name, out_dir);
           break;
         }
         case CalcType::QUAD : {
-          RamanElasticScattering<float, long double>(in_file_name, log_file_name);
+          RamanElasticScattering<float, long double>(in_file_name, out_dir);
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<float, RamanFloat>(in_file_name, log_file_name);
+          RamanElasticScattering<float, RamanFloat>(in_file_name, out_dir);
           break;
         }
         default : {
           cerr << "Warning: unrecognised calculation type. Running with double-double precision." << endl;
-          RamanElasticScattering<double, double>(in_file_name, log_file_name);
+          RamanElasticScattering<double, double>(in_file_name, out_dir);
         }
       }
       break;
@@ -80,24 +79,24 @@ int main(int argc, char** argv) {
     case CalcType::DOUBLE : {
       switch (calc_types[1]) {
         case CalcType::SINGLE : {
-          RamanElasticScattering<double, float>(in_file_name, log_file_name);
+          RamanElasticScattering<double, float>(in_file_name, out_dir);
           break;
         }
         case CalcType::DOUBLE : {
-          RamanElasticScattering<double, double>(in_file_name, log_file_name);
+          RamanElasticScattering<double, double>(in_file_name, out_dir);
           break;
         }
         case CalcType::QUAD : {
-          RamanElasticScattering<double, long double>(in_file_name, log_file_name);
+          RamanElasticScattering<double, long double>(in_file_name, out_dir);
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<double, RamanFloat>(in_file_name, log_file_name);
+          RamanElasticScattering<double, RamanFloat>(in_file_name, out_dir);
           break;
         }
         default : {
           cerr << "Warning: unrecognised calculation type. Running with double-double precision." << endl;
-          RamanElasticScattering<double, double>(in_file_name, log_file_name);
+          RamanElasticScattering<double, double>(in_file_name, out_dir);
         }
       }
       break;
@@ -105,24 +104,24 @@ int main(int argc, char** argv) {
     case CalcType::QUAD : {
       switch (calc_types[1]) {
         case CalcType::SINGLE : {
-          RamanElasticScattering<long double, float>(in_file_name, log_file_name);
+          RamanElasticScattering<long double, float>(in_file_name, out_dir);
           break;
         }
         case CalcType::DOUBLE : {
-          RamanElasticScattering<long double, double>(in_file_name, log_file_name);
+          RamanElasticScattering<long double, double>(in_file_name, out_dir);
           break;
         }
         case CalcType::QUAD : {
-          RamanElasticScattering<long double, long double>(in_file_name, log_file_name);
+          RamanElasticScattering<long double, long double>(in_file_name, out_dir);
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<long double, RamanFloat>(in_file_name, log_file_name);
+          RamanElasticScattering<long double, RamanFloat>(in_file_name, out_dir);
           break;
         }
         default : {
           cerr << "Warning: unrecognised calculation type. Running with double-double precision." << endl;
-          RamanElasticScattering<double, double>(in_file_name, log_file_name);
+          RamanElasticScattering<double, double>(in_file_name, out_dir);
         }
       }
       break;
@@ -130,31 +129,31 @@ int main(int argc, char** argv) {
     case CalcType::CUSTOM : {
       switch (calc_types[1]) {
         case CalcType::SINGLE : {
-          RamanElasticScattering<RamanFloat, float>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, float>(in_file_name, out_dir);
           break;
         }
         case CalcType::DOUBLE : {
-          RamanElasticScattering<RamanFloat, double>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, double>(in_file_name, out_dir);
           break;
         }
         case CalcType::QUAD : {
-          RamanElasticScattering<RamanFloat, long double>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, long double>(in_file_name, out_dir);
           break;
         }
         case CalcType::CUSTOM : {
-          RamanElasticScattering<RamanFloat, RamanFloat>(in_file_name, log_file_name);
+          RamanElasticScattering<RamanFloat, RamanFloat>(in_file_name, out_dir);
           break;
         }
         default : {
           cerr << "Warning: unrecognised calculation type. Running with double-double precision." << endl;
-          RamanElasticScattering<double, double>(in_file_name, log_file_name);
+          RamanElasticScattering<double, double>(in_file_name, out_dir);
         }
       }
       break;
     }
     default : {
       cerr << "Warning: unrecognised calculation type. Running with double-double precision." << endl;
-      RamanElasticScattering<double, double>(in_file_name, log_file_name);
+      RamanElasticScattering<double, double>(in_file_name, out_dir);
     }
   }
 

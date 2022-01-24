@@ -36,7 +36,7 @@ In either case, once the binaries have been built (this may take a few minutes),
 
 `[OPTIONS]` can contain any of the following parameters:
 - `--input=</path/to/file>` means that `raman_elastic_scattering` reads the parameters from the file specified by `<path/to/file>`. More information about these parameters can be found in the 'Configuration' subsection. By default, the input file is `config.txt`.
-- `--log=</path/to/file` means that `raman_elastic_scattering` logs the ongoing program output to the file specified by `<path/to/file>`, in parallel with printing them to the terminal. By default, the logs are written to `output/log.txt`.
+- `--output-dir=</path/to/directory` means that `raman_elastic_scattering` writes the program output to the directory specified by `<path/to/drectory>`, in parallel with printing them to the terminal. Each top-level thread prints to its own output file. By default, this directory is `output`.
 
 ### Configuration
 
@@ -49,8 +49,7 @@ Here's what each 'run' parameter does:
   - `double` for double-precision floating points.
   - `quad` for quadruple-precision floating points (using C++'s long double types).
   - `custom` for performing all calculations with customised floating points of arbitrary precision. (Only works if code was compiled using `make mp`).
-- `Print output to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes the output to `output/results.txt`. Otherwise, it doesn't write to any file. By default, this parameter is `no`.
-- `Print log to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes some of the text from the standard output to `output/log.txt`. By default, this parameter is `yes`.
+- `Print output to file` is a `yes`/`no` parameter. If `yes`, `raman_elastic_scattering` writes the output to `output/results.txt`. Otherwise, it doesn't write to any file. By default, this parameter is `yes`.
 
 The following parameters are for determining what sizes, shapes and orientations of spheroidal particles to calculate the Raman scattering of. These particles have parameters `a`, `c`, `h`, `theta` and `phi`. `a` is the radius of the particle along the x and y semi-axes. `c` is the radius of the particle along the z semi-axis. `h` is the ratio `a/c`. `theta` is the angle of tilt of the z semi-axis with respect to the surrounding medium (zero tilt means that the z semi-axis of the particle is aligned with the z axis of the surrounding medium). `phi` is the angle of rotation along the z semi-axis, the particles are rotationally symmetric along the z semi-axis, changing this parameter should not change the results of the calculations, outside of small rounding errors.
 - `Minimum diameter` is a floating-point parameter representing the minimum diameter in nanometres of the largest semi-axis. By default, this parameter is 1000.
@@ -143,11 +142,11 @@ Any value given will be converted to the types given in the `Calculation type` p
   - vshGetZnAll
 - Some structs that originally contained [1 x X] matrix members may now contain [X x 1] matrix members instead for slightly better syntax. Structs that have this include (but are not limited to):
   - stAbcdnm
-- Currently, auxPrepareIntegrals doesn't read from any pre-calculated values when preparing integrals.
-- sphCalculatePQ doesn't try to access stParams.output, since stParams is expected to be the same struct type as the one given in the specification, in which case output is not a member of stParams. Such a member does exist in stOptions however, so future implementations may take stOptions as an argument type. (For calculating Raman scattering, this option is true by default.)
+- auxPrepareIntegrals reads from binary `.dat` files instead of `.mat` files. It can only read files made using `storeGLquadrature`.
+- sphCalculatePQ doesn't try to access stParams.output, since stParams is expected to be the same struct type as the one given in the specification, in which case 'output' is not a member of stParams. Such a member does exist in stOptions however, so future implementations may take stOptions as an argument type. (For calculating Raman scattering, this option is true by default.)
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 - The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept.
-- sphEstimateDelta doesn't get called in slvForT in the final program for this, so this function isn't implemented.
+- sphEstimateDelta doesn't get called in slvForT in the original Raman scattering MATLAB program, so this function isn't implemented.
 - rvhGetSymmetricMat is not debugged since it's never used in the final `raman_elastic_scattering` program.
 - rvhTruncateMatrices, rvhGetSymmetricMat, rvhGetFieldCoefficients, rvhGetAverageCrossSections can only take stTR vectors as arguments and not stPR vectors. (Overloading these functions with versions that can take stPR vectors is relatively simple however.)
 
