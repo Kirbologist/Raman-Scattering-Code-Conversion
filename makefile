@@ -2,15 +2,15 @@
 UNSUPPORTED_FLAG=-Ilib/eigen-3.4.0/unsupported
 EIGEN_FLAG=-Ilib/eigen-3.4.0
 BOOST_FLAG=-Ilib/boost_1_77_0
-MP_LIBS=-lmpfr -lgmp
+STATIC_FLAG=-include /home/siwanli/glibc_version_header/version_headers/x64/force_link_glibc_2.17.h
+MP_LIBS=-l:libmpfr.a -l:libgmp.a
 
-SUBTHREADS=4
 PRECISION=113 # default value of 113 is number of significand bits in quadruple-precision
 
 BUILDDIR=build
 CC=g++
-CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp -ftree-parallelize-loops=$(SUBTHREADS)
-CPPFLAGS+=$(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
+CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp -static-libgcc -static-libstdc++
+CPPFLAGS+=$(STATIC_FLAG) $(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 MP_FLAGS=-DPRECISION=$(PRECISION)
 LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering

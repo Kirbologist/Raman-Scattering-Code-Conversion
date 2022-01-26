@@ -29,6 +29,11 @@ extern template RamanFloat mp_eps<RamanFloat>();
 */
 
 template unique_ptr<stGLQuad<RamanFloat>> auxInitLegendreQuad(int, RamanFloat, RamanFloat);
+template void writeBinary(const string, const ArrayXXr<RamanFloat>&);
+template void readBinary(const string, ArrayXXr<RamanFloat>&);
+template string getTypeName<RamanFloat>();
+template void updateGLquadrature<RamanFloat>(ArrayXi, bool);
+template void storeGLquadrature<RamanFloat>();
 template unique_ptr<stRtfunc<RamanFloat>> auxPrepareIntegrals(int, sInt);
 
 /*
@@ -158,6 +163,8 @@ extern template complex<float> mp_im_unit();
 
 extern template Tensor4c<float> tensor_conj(Tensor4c<float>&);
 
+extern template string getTypeName<float>();
+
 extern template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int, float, float, float);
 extern template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXf&,
     const ArrayXf&, const ArrayXXc<float>&, const ArrayXXc<float>&,
@@ -184,6 +191,8 @@ extern template complex<double> mp_im_unit();
 
 extern template Tensor4c<double> tensor_conj(Tensor4c<double>&);
 
+extern template string getTypeName<double>();
+
 extern template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
 extern template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
     const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
@@ -209,6 +218,8 @@ extern template long double mp_pi<long double>();
 extern template complex<long double> mp_im_unit();
 
 extern template Tensor4c<long double> tensor_conj(Tensor4c<long double>&);
+
+extern template string getTypeName<long double>();
 
 extern template unique_ptr<stIncPar<long double>> vshMakeIncidentParams(
     sIncType, int, long double, long double, long double);
@@ -247,10 +258,10 @@ template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr
 template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
 template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
-template void RamanElasticScattering<RamanFloat, float>(string, string);
-template void RamanElasticScattering<RamanFloat, double>(string, string);
-template void RamanElasticScattering<RamanFloat, long double>(string, string);
-template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string);
+template void RamanElasticScattering<RamanFloat, float>(string, string, int);
+template void RamanElasticScattering<RamanFloat, double>(string, string, int);
+template void RamanElasticScattering<RamanFloat, long double>(string, string, int);
+template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string, int);
 
 template void CreateTimeStamp<float, RamanFloat>(string, const unique_ptr<RamanParams<float>>&);
 template void CreateTimeStamp<double, RamanFloat>(string, const unique_ptr<RamanParams<double>>&);
@@ -258,6 +269,6 @@ template void CreateTimeStamp<long double, RamanFloat>(string, const unique_ptr<
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
-template void RamanElasticScattering<float, RamanFloat>(string, string);
-template void RamanElasticScattering<double, RamanFloat>(string, string);
-template void RamanElasticScattering<long double, RamanFloat>(string, string);
+template void RamanElasticScattering<float, RamanFloat>(string, string, int);
+template void RamanElasticScattering<double, RamanFloat>(string, string, int);
+template void RamanElasticScattering<long double, RamanFloat>(string, string, int);

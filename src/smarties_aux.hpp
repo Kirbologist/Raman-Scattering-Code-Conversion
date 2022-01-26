@@ -74,7 +74,7 @@ namespace Smarties {
   }
 
   template<class Matrix>
-  void writeBinary(const string filename, const Matrix& matrix){
+  void writeBinary(const string filename, const Matrix& matrix) {
     ofstream out(filename, ios::out | ios::binary | ios::trunc);
     typename Matrix::Index rows=matrix.rows(), cols=matrix.cols();
     out.write((char*) (&rows), sizeof(typename Matrix::Index));
@@ -84,7 +84,7 @@ namespace Smarties {
   }
 
   template<class Matrix>
-  void readBinary(const string filename, Matrix& matrix){
+  void readBinary(const string filename, Matrix& matrix) {
     ifstream in(filename, ios::in | ios::binary);
     typename Matrix::Index rows=0, cols=0;
     in.read((char*) (&rows),sizeof(typename Matrix::Index));

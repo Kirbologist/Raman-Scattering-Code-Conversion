@@ -19,8 +19,6 @@ enum CalcType {SINGLE, DOUBLE, QUAD, CUSTOM, NONE};
 
 template <class Real>
 struct RamanParams {
-  bool write_output = true;
-
   Real dia_min = 1000;
   Real dia_max = 2000;
 
@@ -52,7 +50,10 @@ struct RamanParams {
 
 // defined in raman_elastic_scattering.cpp
 std::array<CalcType, 2> GetCalcType(string in_file_name);
+string GetOption(string in_file_name, string option);
+bool CanWriteOutput(string in_file_name);
 int GetNumCPUs(string in_file_name);
+int GetNumParticleCPUs(string in_file_name);
 void MultiPrint(string out_string, string out_file_name, bool write_output = false);
 
 template <class Real>
@@ -79,14 +80,12 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
 
   string line;
   vector<string> options {
-    "Print output to file:",
     "Minimum diameter:", "Maximum diameter:", "Particle phi:", "Minimum h:", "Maximum h:",
     "epsilon1:", "epsilon2:", "Raman epsilon2:", "lambda:", "Raman lambda:",
     "No. of particle radii:", "No. of particle thetas:", "No. of h ratios:",
     "No. of r-coordinates:", "No. of theta-coordinates:", "No. of phi-coordinates:",
     "Nb_theta:", "Nb_theta_pst:"
   };
-  std::array<bool, 1> boolParams = {output->write_output};
   std::array<Real, 10> floatParams = {
     output->dia_min, output->dia_max, output->phi_p, output->h_min, output->h_max,
     output->epsilon1, output->epsilon2, output->epsilon2_rm, output->lambda, output->lambda_rm
@@ -97,27 +96,17 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
   };
   for (size_t i = 0; i < options.size(); i++) {
     string option = options[i];
-    do {
-      if (in_file.peek() == EOF)
-        throw runtime_error("Error: cannot find option " + option);
-      getline(in_file, line);
-    } while (line.find(option) == string::npos);
-    in_file.clear();
-    in_file.seekg(0, in_file.beg);
+    string value = GetOption(in_file_name, option);
 
     try {
-      string param = line.substr(line.find(option) + option.size());
-      if (i < boolParams.size())
-        boolParams[i] = (param == "yes");
-      else if (i < boolParams.size() + floatParams.size())
-        floatParams[i - boolParams.size()] = Frac2Float<Real>(param);
-      else if (i < boolParams.size() + floatParams.size() + intParams.size())
-        intParams[i - boolParams.size() - floatParams.size()] = lexical_cast<int>(param);
-    } catch(bad_lexical_cast &) {
+      if (i < floatParams.size())
+        floatParams[i] = Frac2Float<Real>(value);
+      else if (i < floatParams.size() + intParams.size())
+        intParams[i - floatParams.size()] = lexical_cast<int>(value);
+    } catch(bad_lexical_cast&) {
       cerr << "Cannot read value of option \"" << option << "\". Using default value.";
     }
 
-    output->write_output = boolParams[0];
     output->dia_min = floatParams[0];
     output->dia_max = floatParams[1];
     output->phi_p = floatParams[2];
@@ -137,7 +126,6 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
     output->Nb_theta = intParams[6];
     output->Nb_theta_pst = intParams[7];
   }
-  in_file.close();
   ArrayXr<Real> dia_var = ArrayXr<Real>::LinSpaced(output->N_rad, output->dia_min, output->dia_max);
   output->rad_var = dia_var/2;
   output->theta_p_var = ArrayXr<Real>::LinSpaced(output->N_theta_p, 0, mp_pi<Real>()/2);
@@ -187,8 +175,7 @@ void CreateTimeStamp(string out_file_name, const unique_ptr<RamanParams<Real1>>&
   string main_calc_type = getTypeName<Real1>();
   string second_calc_type = getTypeName<Real2>();
 
-  ofstream out_file;
-  out_file.open(out_file_name, ios::out | ios::app);
+  ofstream out_file(out_file_name, ios::out | ios::app);
   auto sys_time = chrono::system_clock::now();
   time_t sys_time_date = chrono::system_clock::to_time_t(sys_time);
   out_file << "Session began at system time: " << ctime(&sys_time_date);
@@ -262,12 +249,12 @@ vector<unique_ptr<stTR<To>>> ConvertstTRList(const vector<unique_ptr<stTR<From>>
 }
 
 template <class Real1, class Real2>
-void RamanElasticScattering(string in_file_name, string out_dir) {
+void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus = 1) {
   Real2 PI = mp_pi<Real2>();
 
   unique_ptr<RamanParams<Real1>> raman_params1 = LoadParams<Real1>(in_file_name);
   unique_ptr<RamanParams<Real2>> raman_params2 = LoadParams<Real2>(in_file_name);
-  bool write_output = raman_params1->write_output;
+  bool write_output = (out_dir != "");
 
   Tensor3r<Real2> sigma_yz(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
   Tensor3r<Real2> sigma_zy(raman_params2->N_rad, raman_params2->N_h, raman_params2->N_theta_p);
@@ -299,7 +286,7 @@ void RamanElasticScattering(string in_file_name, string out_dir) {
     std::filesystem::create_directory(out_dir);
 
   for (int h_ind = 0; h_ind < raman_params1->N_h; h_ind++) {
-    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for num_threads(cpus) schedule(dynamic)
     for (int k = 0; k < raman_params1->N_rad; k++) {
       string out_file_name = out_dir + "/a2c_" + to_string(raman_params1->h_var(0)) +
           "_to_" + to_string(raman_params1->h_var(last)) + "_dia_" + to_string(raman_params1->dia_min) +

@@ -18,21 +18,28 @@ CalcType String2CalcType(string calc_type_string) {
   return CalcType::NONE;
 }
 
-std::array<CalcType, 2> GetCalcType(string in_file_name) {
-  ifstream in_file;
-  in_file.open(in_file_name, ios::in);
-  if (!in_file.is_open())
+string GetOption(string in_file_name, string option) {
+  ifstream in_file(in_file_name, ios::in);
+  if (!in_file.good())
     throw runtime_error("Error: cannot open config.txt");
 
-  string option = "Calculation type:";
   string line;
   do {
     if (in_file.peek() == EOF)
       throw runtime_error("Error: cannot find option " + option);
     getline(in_file, line);
   } while (line.find(option) == string::npos);
-  string calc_types = line.substr(line.find(option) + option.size());
   in_file.close();
+  return line.substr(line.find(option) + option.size());
+}
+
+bool CanWriteOutput(string in_file_name) {
+  string can_write_output = GetOption(in_file_name, "Print output to file:");
+  return can_write_output == "yes";
+}
+
+std::array<CalcType, 2> GetCalcType(string in_file_name) {
+  string calc_types = GetOption(in_file_name, "Calculation type:");
   size_t delim_offset = calc_types.find("-");
   std::array<CalcType, 2> output;
   if (delim_offset == string::npos) {
@@ -46,20 +53,25 @@ std::array<CalcType, 2> GetCalcType(string in_file_name) {
 }
 
 int GetNumCPUs(string in_file_name) {
-  ifstream in_file;
-  in_file.open(in_file_name, ios::in);
-  if (!in_file.is_open())
-    throw runtime_error("Error: cannot open config.txt");
+  string value = GetOption(in_file_name, "No. of CPUs:");
+  int num_CPUs = 1;
+  try {
+    num_CPUs = stoi(value);
+  } catch (invalid_argument&) {
+    cerr << "Cannot read value of option \"No. of CPUs:\". Using default value.";
+  }
+  return num_CPUs;
+}
 
-  string option = "No. of CPUs:";
-  string line;
-  do {
-    if (in_file.peek() == EOF)
-      throw runtime_error("Error: cannot find option " + option);
-    getline(in_file, line);
-  } while (line.find(option) == string::npos);
-  string num_CPUs = line.substr(line.find(option) + option.size());
-  return (num_CPUs.size() > 0 && isdigit(num_CPUs[0])) ? stoi(num_CPUs, nullptr) : 1;
+int GetNumParticleCPUs(string in_file_name) {
+  string value = GetOption(in_file_name, "No. of CPUs to partition particle radii for:");
+  int num_particle_CPUs = 1;
+  try {
+    num_particle_CPUs = stoi(value);
+  } catch (invalid_argument&) {
+    cerr << "Cannot read value of option \"No. of CPUs to partition particle radii for:\". Using default value.";
+  }
+  return num_particle_CPUs;
 }
 
 void MultiPrint(string out_string, string out_file_name, bool write_output) {

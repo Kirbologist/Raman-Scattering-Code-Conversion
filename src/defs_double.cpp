@@ -28,6 +28,11 @@ extern template double mp_eps<double>();
 */
 
 template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(int, double, double);
+template void writeBinary(const string, const ArrayXXd&);
+template void readBinary(const string, ArrayXXd&);
+template string getTypeName<double>();
+template void updateGLquadrature<double>(ArrayXi, bool);
+template void storeGLquadrature<double>();
 template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(int, sInt);
 
 /*
@@ -157,6 +162,8 @@ extern template complex<float> mp_im_unit();
 
 extern template Tensor4c<float> tensor_conj(Tensor4c<float>&);
 
+extern template string getTypeName<float>();
+
 extern template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int, float, float, float);
 extern template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXf&,
     const ArrayXf&, const ArrayXXc<float>&, const ArrayXXc<float>&,
@@ -182,6 +189,8 @@ extern template long double mp_pi<long double>();
 extern template complex<long double> mp_im_unit();
 
 extern template Tensor4c<long double> tensor_conj(Tensor4c<long double>&);
+
+extern template string getTypeName<long double>();
 
 extern template unique_ptr<stIncPar<long double>> vshMakeIncidentParams(
     sIncType, int, long double, long double, long double);
@@ -217,6 +226,6 @@ template void CreateTimeStamp<double, long double>(string, const unique_ptr<Rama
 template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
-template void RamanElasticScattering<double, float>(string, string);
-template void RamanElasticScattering<double, double>(string, string);
-template void RamanElasticScattering<double, long double>(string, string);
+template void RamanElasticScattering<double, float>(string, string, int);
+template void RamanElasticScattering<double, double>(string, string, int);
+template void RamanElasticScattering<double, long double>(string, string, int);

@@ -22,7 +22,6 @@ make [OPTIONS]
 
 `[OPTIONS]` can contain any of the following parameters:
 - `mp`: `raman_elastic_scattering` will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
-- `SUBTHREADS=<value>`: within each top-level thread, `raman_elastic_scattering` will perform the inner calculations using `<value>` many sub-threads. By default, if this option is not specified, the number of sub-threads used is 1.
 - `PRECISION=<value>`: if used with `mp`, `raman_elastic_scattering` will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
 
 Note that to change the number of threads or bits of precision used, `raman_elastic_scattering` must be recompiled.
@@ -43,7 +42,8 @@ In either case, once the binaries have been built (this may take a few minutes),
 You can change the calculation parameters by editing the `config.txt` file, or the file specified under the flag `--input=</path/to/file>`. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, `raman_elastic_scattering` uses the default value. Otherwise if invalid values are given, it will fall back to the default values in the best case, or interpret the value in unexpected ways in the worst case. Examples of allowable formats for numerical values are given in its own subsection.
 
 Here's what each 'run' parameter does:
-- `No. of CPUs` is a non-negative integer representing the number of CPUs (threads) to be used to run the calculations. Specifically, it's the radii of the particles to calculate for is allocated among `<value>` many CPUs. Within each of these threads, more threads can be made to calculate the inner-most for loops of the code in parallel (this is controlled using the `SUBTHREADS=<value>` option above). If `<value>` is 0, `raman_elastic_scattering` will run with the maximum number of CPUs. By default, this parameter is 1.
+- `No. of CPUs` is a non-negative integer representing the number of CPUs (threads) to be used to run the calculations. Some algorithms like matrix products can take advantage of the extra threads to parallelise calculations. If `<value>` is 0, `raman_elastic_scattering` will run with the maximum number of CPUs. By default, this parameter is 1.
+- `No. of CPUs to partition particle radii for` is a non-negative integer. The different radii of the particles is partitioned among `<value>` threads, so each thread performs all calculations for particles of its allocated radii to its own output file. By default, this parameter is 1.
 - `Calculation type` is the type used for floating-point calculations. By default, this parameter is `double`. The value of this parameter must be of the form `XXXX` to run all calculations with type `XXXX` or `XXXX-YYYY` to calculate T-matrices with type `XXXX` and integrals with type `YYYY`, where `XXXX` and `YYYY` can be one of the following calculation types:
   - `single` for single-precision floating points (using C++'s float types).
   - `double` for double-precision floating points.
@@ -117,10 +117,10 @@ Any value given will be converted to the types given in the `Calculation type` p
   - [x] Arbitrary-precision support
   - [x] Automated parallel computing
 
-  - [ ] Make the program more user-friendly
+  - [x] Make the program more user-friendly
   - [ ] Make the code more readable
   - [ ] Run more rigorous tests
-  - [ ] Optimise code
+  - [x] Optimise code
   - [ ] Create a release
 
 ## Notable differences from SMARTIES
