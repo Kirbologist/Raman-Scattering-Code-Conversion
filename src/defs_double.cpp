@@ -12,7 +12,7 @@ template Tensor3c<double> tensorSlice(Tensor3c<double>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template Map<ArrayXXc<double>> subtensor2ArrMap(const Tensor3c<double>&,
+template ArrayXXc<double> subtensor2ArrMap(const Tensor3c<double>&,
     const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);

@@ -39,11 +39,15 @@ namespace Smarties {
 
   ArrayXi seq2Array(long int first, long int last, long int stride);
 
-  template <class Scalar>
-  Map<ArrayXXr<Scalar>> subtensor2ArrMap(const Tensor3r<Scalar>& tensor,
+  template <class Real>
+  ArrayXXc<Real> subtensor2ArrMap(const Tensor3c<Real>& tensor,
       const std::array<int, 3>& offsets, const std::array<int, 3>& extents, int rows, int cols) {
-    Tensor3r<Scalar> subtensor = tensor.slice(offsets, extents);
-    return Map<ArrayXXr<Scalar>>(subtensor.data(), rows, cols);
+    ArrayXXc<Real> output(rows, cols);
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++)
+        output(i, j) = tensor(offsets[0] + i, offsets[1] + j, offsets[2]);
+    }
+    return output;
   }
 
   template <class Real>

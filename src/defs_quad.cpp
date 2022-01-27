@@ -12,7 +12,7 @@ template Tensor3c<long double> tensorSlice(Tensor3c<long double>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template Map<ArrayXXc<long double>> subtensor2ArrMap(const Tensor3c<long double>&,
+template ArrayXXc<long double> subtensor2ArrMap(const Tensor3c<long double>&,
     const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<long double> invertLUcol(MatrixXc<long double>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
@@ -133,29 +133,6 @@ template unique_ptr<stRes<long double>> pstMakeStructForField(
     const unique_ptr<stAbcdnm<long double>>&, const unique_ptr<stParams<long double>>&);
 template unique_ptr<stSM<long double>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<long double>>>&,
     long double, long double, int);
-
-/*
-extern template long double mp_pi<long double>();
-
-extern template Tensor4c<long double> tensor_conj(Tensor4c<long double>&);
-
-extern template unique_ptr<stIncPar<long double>> vshMakeIncidentParams(sIncType, int, long double, long double, long double);
-extern template unique_ptr<stEAllPhi<long double>> vshEgenThetaAllPhi(const ArrayXr<long double>&,
-    const ArrayXr<long double>&, const ArrayXXc<long double>&, const ArrayXXc<long double>&,
-    const RowArrayXr<long double>&, const RowArrayXr<long double>&, sBessel, unique_ptr<stPinmTaunm<long double>>);
-extern template unique_ptr<stEforPhi<long double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<long double>>&, long double);
-
-extern template unique_ptr<stAbcdnm<long double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<long double>>>&,
-    const unique_ptr<stIncPar<long double>>&, unique_ptr<stIncEabnm<long double>>);
-
-extern template unique_ptr<stTmatrix<long double>> slvForT(const unique_ptr<stParams<long double>>&,
-    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<long double>>);
-
-extern template unique_ptr<stRes<long double>> pstMakeStructForField(
-    const unique_ptr<stAbcdnm<long double>>&, const unique_ptr<stParams<long double>>&);
-extern template unique_ptr<stSM<long double>> pstScatteringMatrixOA(
-    const vector<unique_ptr<stTR<long double>>>&, long double, long double, int);
-*/
 
 extern template float mp_pi();
 extern template complex<float> mp_im_unit();
