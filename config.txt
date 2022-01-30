@@ -1,6 +1,5 @@
 ### RUN PARAMETERS ###
 No. of CPUs:1
-No. of CPUs to partition particle radii for:1
 Calculation type:double
 Print output to file:yes
 

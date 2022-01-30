@@ -63,17 +63,6 @@ int GetNumCPUs(string in_file_name) {
   return num_CPUs;
 }
 
-int GetNumParticleCPUs(string in_file_name) {
-  string value = GetOption(in_file_name, "No. of CPUs to partition particle radii for:");
-  int num_particle_CPUs = 1;
-  try {
-    num_particle_CPUs = stoi(value);
-  } catch (invalid_argument&) {
-    cerr << "Cannot read value of option \"No. of CPUs to partition particle radii for:\". Using default value.";
-  }
-  return num_particle_CPUs;
-}
-
 void MultiPrint(string out_string, string out_file_name, bool write_output) {
   #pragma omp critical (multi_print)
   {

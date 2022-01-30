@@ -9,7 +9,6 @@
 #include <memory>
 #include <Eigen/Core>
 #include <Eigen/CXX11/Tensor>
-#include "tensor_matrix_cast.hpp"
 
 using namespace std;
 using namespace Eigen;

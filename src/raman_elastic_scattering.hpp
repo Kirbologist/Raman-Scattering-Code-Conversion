@@ -249,7 +249,7 @@ vector<unique_ptr<stTR<To>>> ConvertstTRList(const vector<unique_ptr<stTR<From>>
 }
 
 template <class Real1, class Real2>
-void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus = 1) {
+void RamanElasticScattering(string in_file_name, string out_dir = "") {
   Real2 PI = mp_pi<Real2>();
 
   unique_ptr<RamanParams<Real1>> raman_params1 = LoadParams<Real1>(in_file_name);
@@ -286,7 +286,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus =
     std::filesystem::create_directory(out_dir);
 
   for (int h_ind = 0; h_ind < raman_params1->N_h; h_ind++) {
-    #pragma omp parallel for num_threads(cpus) schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for (int k = 0; k < raman_params1->N_rad; k++) {
       string out_file_name = out_dir + "/a2c_" + to_string(raman_params1->h_var(0)) +
           "_to_" + to_string(raman_params1->h_var(last)) + "_dia_" + to_string(raman_params1->dia_min) +
@@ -449,7 +449,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus =
         std::array<int, 1> dim3 = {3}, dim2 = {2};
         Tensor<Real2, 2> inter_step = 2*PI/N_phi*(E_field_rm_z * tensor_conj(E_field_z))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
-        ArrayXXr<Real2> M_mat = MatrixCast(inter_step, N_r, N_theta).array();
+        Map<ArrayXXr<Real2>> M_mat = ArrayMap(inter_step);
         ArrayXXr<Real2> F = M_mat * r_mat.pow(2) * sin(theta_mat);
         ArrayXXr<Real2> tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
@@ -457,7 +457,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus =
 
         inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_z))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
-        M_mat = MatrixCast(inter_step, N_r, N_theta).array();
+        M_mat = ArrayMap(inter_step);
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
@@ -465,7 +465,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus =
 
         inter_step = 2*PI/N_phi*(E_field_rm_y * tensor_conj(E_field_y))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
-        M_mat = MatrixCast(inter_step, N_r, N_theta).array();
+        M_mat = ArrayMap(inter_step);
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;
@@ -473,7 +473,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus =
 
         inter_step = 2*PI/N_phi*(E_field_rm_z * tensor_conj(E_field_y))
             .sum(dim3).abs().pow(static_cast<Real2>(2.0)).sum(dim2);
-        M_mat = MatrixCast(inter_step, N_r, N_theta).array();
+        M_mat = ArrayMap(inter_step);
         F = M_mat * r_mat.pow(2) * sin(theta_mat);
         tmp = (F(seq(1, last), seq(1, last)) + F(seq(0, last - 1), seq(1, last)) +
             F(seq(1, last), seq(0, last - 1)) + F(seq(0, last - 1), seq(0, last - 1))) / 4;

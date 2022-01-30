@@ -8,12 +8,11 @@ template double mp_pi<double>();
 template double mp_eps<double>();
 template complex<double> mp_im_unit<double>();
 
-template Tensor3c<double> tensorSlice(Tensor3c<double>&,
+template Tensor3c<double> subtensor(Tensor3c<double>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<double> subtensor2ArrMap(const Tensor3c<double>&,
-    const std::array<int, 3>&, const std::array<int, 3>&, int, int);
+template ArrayXXc<double> reduceAndSlice(Tensor3c<double>&, int, int);
 template ArrayXXc<double> invertLUcol(MatrixXc<double>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
 template RowArrayXd logicalSlice(RowArrayXd&, RowArrayXb&);
@@ -28,11 +27,6 @@ extern template double mp_eps<double>();
 */
 
 template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(int, double, double);
-template void writeBinary(const string, const ArrayXXd&);
-template void readBinary(const string, ArrayXXd&);
-template string getTypeName<double>();
-template void updateGLquadrature<double>(ArrayXi, bool);
-template void storeGLquadrature<double>();
 template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(int, sInt);
 
 /*
@@ -134,35 +128,10 @@ template unique_ptr<stRes<double>> pstMakeStructForField(
 template unique_ptr<stSM<double>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<double>>>&,
     double, double, int);
 
-/*
-extern template double mp_pi<double>();
-
-extern template Tensor4c<double> tensor_conj(Tensor4c<double>&);
-
-extern template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
-extern template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
-    const ArrayXd&, const ArrayXXc<double>&, const ArrayXXc<double>&,
-    const RowArrayXd&, const RowArrayXd&, sBessel, unique_ptr<stPinmTaunm<double>>);
-extern template unique_ptr<stEforPhi<double>> vshEthetaForPhi(const unique_ptr<stEAllPhi<double>>&, double);
-
-extern template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
-    const unique_ptr<stIncPar<double>>&, unique_ptr<stIncEabnm<double>>);
-
-extern template unique_ptr<stTmatrix<double>> slvForT(const unique_ptr<stParams<double>>&,
-    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<double>>);
-
-extern template unique_ptr<stRes<double>> pstMakeStructForField(
-    const unique_ptr<stAbcdnm<double>>&, const unique_ptr<stParams<double>>&);
-extern template unique_ptr<stSM<double>> pstScatteringMatrixOA(
-    const vector<unique_ptr<stTR<double>>>&, double, double, int);
-*/
-
 extern template float mp_pi();
 extern template complex<float> mp_im_unit();
 
 extern template Tensor4c<float> tensor_conj(Tensor4c<float>&);
-
-extern template string getTypeName<float>();
 
 extern template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int, float, float, float);
 extern template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXf&,
@@ -189,8 +158,6 @@ extern template long double mp_pi<long double>();
 extern template complex<long double> mp_im_unit();
 
 extern template Tensor4c<long double> tensor_conj(Tensor4c<long double>&);
-
-extern template string getTypeName<long double>();
 
 extern template unique_ptr<stIncPar<long double>> vshMakeIncidentParams(
     sIncType, int, long double, long double, long double);
@@ -226,6 +193,6 @@ template void CreateTimeStamp<double, long double>(string, const unique_ptr<Rama
 template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
-template void RamanElasticScattering<double, float>(string, string, int);
-template void RamanElasticScattering<double, double>(string, string, int);
-template void RamanElasticScattering<double, long double>(string, string, int);
+template void RamanElasticScattering<double, float>(string, string);
+template void RamanElasticScattering<double, double>(string, string);
+template void RamanElasticScattering<double, long double>(string, string);

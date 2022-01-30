@@ -19,8 +19,43 @@ namespace Smarties {
   template <class Real>
   inline complex<Real> mp_im_unit(void) { return complex<Real>(0.0, 1.0); }
 
+  // View an existing Eigen::Tensor of rank 2 as an Eigen::Map<Eigen::Matrix>
+  // Rows/Cols are determined from the matrix
+  template<typename Scalar>
+  auto ArrayMap(Eigen::Tensor<Scalar, 2> &tensor) {
+      return Eigen::Map<ArrayXXr<Scalar>>(tensor.data(), tensor.dimension(0), tensor.dimension(1));
+  }
+
+  // Converts an Eigen::Matrix (or expression) to Eigen::Tensor
+  // with dimensions specified in std::array
+  template<typename Derived, typename T, auto rank>
+  Eigen::Tensor<typename Derived::Scalar, rank>
+  TensorCast(const Eigen::EigenBase<Derived> &matrix, const std::array<T, rank> &dims) {
+      return Eigen::TensorMap<const Eigen::Tensor<const typename Derived::Scalar, rank>>
+                  (matrix.derived().eval().data(), dims);
+  }
+
+  // Converts an Eigen::Matrix (or expression) to Eigen::Tensor
+  // with dimensions as variadic arguments
+  template<typename Derived, typename... Dims>
+  auto TensorCast(const Eigen::EigenBase<Derived> &matrix, const Dims... dims) {
+      static_assert(sizeof...(Dims) > 0, "TensorCast: sizeof... (Dims) must be larger than 0");
+      return TensorCast(matrix, std::array<Eigen::Index, sizeof...(Dims)>{dims...});
+  }
+
+  // Converts an Eigen::Matrix (or expression) to Eigen::Tensor
+  // with dimensions directly as arguments in a variadic template
+  template<typename Derived>
+  auto TensorCast(const Eigen::EigenBase<Derived> &matrix) {
+    if constexpr(Derived::ColsAtCompileTime == 1 or Derived::RowsAtCompileTime == 1) {
+      return TensorCast(matrix, matrix.size());
+    } else {
+      return TensorCast(matrix, matrix.rows(), matrix.cols());
+    }
+  }
+
   template <class Real>
-  Tensor3c<Real> tensorSlice(Tensor3c<Real>& tensor,
+  Tensor3c<Real> subtensor(Tensor3c<Real>& tensor,
       ArithmeticSequence<long int, long int, long int> slice_dim1,
       ArithmeticSequence<long int, long int, long int> slice_dim2,
       ArithmeticSequence<long int, long int, long int> slice_dim3) {
@@ -40,12 +75,12 @@ namespace Smarties {
   ArrayXi seq2Array(long int first, long int last, long int stride);
 
   template <class Real>
-  ArrayXXc<Real> subtensor2ArrMap(const Tensor3c<Real>& tensor,
-      const std::array<int, 3>& offsets, const std::array<int, 3>& extents, int rows, int cols) {
-    ArrayXXc<Real> output(rows, cols);
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < cols; j++)
-        output(i, j) = tensor(offsets[0] + i, offsets[1] + j, offsets[2]);
+  ArrayXXc<Real> reduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows) {
+    const auto dims = tensor.dimensions();
+    ArrayXXc<Real> output(num_rows, dims[1]);
+    for (int i = 0; i < num_rows; i++) {
+      for (int j = 0; j < dims[1]; j++)
+        output(i, j) = tensor(dims[0] - num_rows + i, j, offset);
     }
     return output;
   }
