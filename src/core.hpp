@@ -54,8 +54,6 @@ namespace Smarties {
   template <class Real>
   using VectorXc = Matrix<complex<Real>, Dynamic, 1>;
 
-  using Tensor3d = Tensor<double, 3>;
-
   template <class Real>
   using Tensor3r = Tensor<Real, 3>;
 

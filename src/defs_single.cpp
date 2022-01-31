@@ -8,7 +8,7 @@ template float mp_pi<float>();
 template float mp_eps<float>();
 template complex<float> mp_im_unit<float>();
 
-template Tensor3c<float> subtensor(Tensor3c<float>&,
+template Tensor3c<float> tensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
@@ -53,7 +53,7 @@ template ArrayXXc<float> vshRBpsi(ArrayXr<float>, const ArrayXr<float>&);
 extern template mp_eps<float>();
 extern template mp_im_unit<float>();
 
-extern template Tensor3c<float> subtensor(Tensor3c<float>&,
+extern template Tensor3c<float> tensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);

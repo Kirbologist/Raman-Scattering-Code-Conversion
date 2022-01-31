@@ -55,7 +55,7 @@ namespace Smarties {
   }
 
   template <class Real>
-  Tensor3c<Real> subtensor(Tensor3c<Real>& tensor,
+  Tensor3c<Real> tensorSlice(Tensor3c<Real>& tensor,
       ArithmeticSequence<long int, long int, long int> slice_dim1,
       ArithmeticSequence<long int, long int, long int> slice_dim2,
       ArithmeticSequence<long int, long int, long int> slice_dim3) {

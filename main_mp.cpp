@@ -52,7 +52,6 @@ int main(int argc, char** argv) {
   bool can_write_output = CanWriteOutput(in_file_name);
   if (!can_write_output)
     out_dir = "";
-  int num_particle_CPUs = GetNumParticleCPUs(in_file_name);
 
   std::array<CalcType, 2> calc_types = GetCalcType(in_file_name);
   switch (calc_types[0]) {

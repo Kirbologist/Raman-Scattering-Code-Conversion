@@ -5,151 +5,151 @@
 using namespace Eigen;
 using namespace Smarties;
 
-template raman_float mp_pi<raman_float>();
-template raman_float mp_eps<raman_float>();
-template complex<raman_float> mp_im_unit<raman_float>();
+template RamanFloat mp_pi<RamanFloat>();
+template RamanFloat mp_eps<RamanFloat>();
+template complex<RamanFloat> mp_im_unit<RamanFloat>();
 
-template Tensor3c<raman_float> subtensor(Tensor3c<raman_float>&,
+template Tensor3c<RamanFloat> tensorSlice(Tensor3c<RamanFloat>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<raman_float> reduceAndSlice(Tensor3c<raman_float>&, int, int);
-template ArrayXXc<raman_float> invertLUcol(MatrixXc<raman_float>&);
+template ArrayXXc<RamanFloat> reduceAndSlice(Tensor3c<RamanFloat>&, int, int);
+template ArrayXXc<RamanFloat> invertLUcol(MatrixXc<RamanFloat>&);
 template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
-template RowArrayXr<raman_float> logicalSlice(RowArrayXr<raman_float>&, RowArrayXb&);
-template ArrayXr<raman_float> logicalSlice(ArrayXr<raman_float>&, ArrayXb&);
-template Tensor4c<raman_float> tensor_conj(Tensor4c<raman_float>&);
-template ArrayXr<raman_float> arr_bessel_j(ArrayXr<raman_float>&, raman_float);
-template ArrayXr<raman_float> arr_bessel_y(ArrayXr<raman_float>&, raman_float);
+template RowArrayXr<RamanFloat> logicalSlice(RowArrayXr<RamanFloat>&, RowArrayXb&);
+template ArrayXr<RamanFloat> logicalSlice(ArrayXr<RamanFloat>&, ArrayXb&);
+template Tensor4c<RamanFloat> tensor_conj(Tensor4c<RamanFloat>&);
+template ArrayXr<RamanFloat> arr_bessel_j(ArrayXr<RamanFloat>&, RamanFloat);
+template ArrayXr<RamanFloat> arr_bessel_y(ArrayXr<RamanFloat>&, RamanFloat);
 
 /*
-extern template raman_float mp_pi<raman_float>();
-extern template raman_float mp_eps<raman_float>();
+extern template RamanFloat mp_pi<RamanFloat>();
+extern template RamanFloat mp_eps<RamanFloat>();
 */
 
-template unique_ptr<stGLQuad<raman_float>> auxInitLegendreQuad(int, raman_float, raman_float);
-template unique_ptr<stRtfunc<raman_float>> auxPrepareIntegrals(int, sInt);
+template unique_ptr<stGLQuad<RamanFloat>> auxInitLegendreQuad(int, RamanFloat, RamanFloat);
+template unique_ptr<stRtfunc<RamanFloat>> auxPrepareIntegrals(int, sInt);
 
 /*
-extern template raman_float mp_pi<raman_float>();
-extern template raman_float mp_im_unit<raman_float>();
+extern template RamanFloat mp_pi<RamanFloat>();
+extern template RamanFloat mp_im_unit<RamanFloat>();
 
-extern template ArrayXr<raman_float> arr_bessel_j(ArrayXr<raman_float>&, raman_float);
-extern template ArrayXr<raman_float> arr_bessel_y(ArrayXr<raman_float>&, raman_float);
+extern template ArrayXr<RamanFloat> arr_bessel_j(ArrayXr<RamanFloat>&, RamanFloat);
+extern template ArrayXr<RamanFloat> arr_bessel_y(ArrayXr<RamanFloat>&, RamanFloat);
 */
 
-template unique_ptr<stIncPar<raman_float>> vshMakeIncidentParams(sIncType, int);
-template unique_ptr<stIncPar<raman_float>> vshMakeIncidentParams(sIncType, int, raman_float, raman_float, raman_float);
-template unique_ptr<stPinmTaunm<raman_float>> vshPinmTaunm(int, const ArrayXr<raman_float>&);
-template unique_ptr<stIncEabnm<raman_float>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<raman_float>>&);
-template unique_ptr<stZnAll<raman_float>> vshGetZnAll(int, const ArrayXr<raman_float>&, sBessel);
-template unique_ptr<stEAllPhi<raman_float>> vshEgenThetaAllPhi(const ArrayXr<raman_float>&,
-    const ArrayXr<raman_float>&, const ArrayXXc<raman_float>&, const ArrayXXc<raman_float>&,
-    const RowArrayXr<raman_float>&, const RowArrayXr<raman_float>&, sBessel, unique_ptr<stPinmTaunm<raman_float>>);
-template unique_ptr<stEforPhi<raman_float>> vshEthetaForPhi(const unique_ptr<stEAllPhi<raman_float>>&, raman_float);
-template ArrayXXc<raman_float> vshRBchi(ArrayXr<raman_float>, const ArrayXr<raman_float>&);
-template ArrayXXc<raman_float> vshRBpsi(ArrayXr<raman_float>, const ArrayXr<raman_float>&);
+template unique_ptr<stIncPar<RamanFloat>> vshMakeIncidentParams(sIncType, int);
+template unique_ptr<stIncPar<RamanFloat>> vshMakeIncidentParams(sIncType, int, RamanFloat, RamanFloat, RamanFloat);
+template unique_ptr<stPinmTaunm<RamanFloat>> vshPinmTaunm(int, const ArrayXr<RamanFloat>&);
+template unique_ptr<stIncEabnm<RamanFloat>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<RamanFloat>>&);
+template unique_ptr<stZnAll<RamanFloat>> vshGetZnAll(int, const ArrayXr<RamanFloat>&, sBessel);
+template unique_ptr<stEAllPhi<RamanFloat>> vshEgenThetaAllPhi(const ArrayXr<RamanFloat>&,
+    const ArrayXr<RamanFloat>&, const ArrayXXc<RamanFloat>&, const ArrayXXc<RamanFloat>&,
+    const RowArrayXr<RamanFloat>&, const RowArrayXr<RamanFloat>&, sBessel, unique_ptr<stPinmTaunm<RamanFloat>>);
+template unique_ptr<stEforPhi<RamanFloat>> vshEthetaForPhi(const unique_ptr<stEAllPhi<RamanFloat>>&, RamanFloat);
+template ArrayXXc<RamanFloat> vshRBchi(ArrayXr<RamanFloat>, const ArrayXr<RamanFloat>&);
+template ArrayXXc<RamanFloat> vshRBpsi(ArrayXr<RamanFloat>, const ArrayXr<RamanFloat>&);
 
 /*
-extern template mp_eps<raman_float>();
-extern template mp_im_unit<raman_float>();
+extern template mp_eps<RamanFloat>();
+extern template mp_im_unit<RamanFloat>();
 
-extern template Tensor3c<raman_float> subtensor(Tensor3c<raman_float>&,
+extern template Tensor3c<RamanFloat> tensorSlice(Tensor3c<RamanFloat>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-extern template ArrayXXc<raman_float> reduceAndSlice(Tensor3c<raman_float>&, int, int);
-extern template RowArrayXr<raman_float> logicalSlice(RowArrayXr<raman_float>&, RowArrayXb&);
+extern template ArrayXXc<RamanFloat> reduceAndSlice(Tensor3c<RamanFloat>&, int, int);
+extern template RowArrayXr<RamanFloat> logicalSlice(RowArrayXr<RamanFloat>&, RowArrayXb&);
 
-extern template unique_ptr<stRtfunc<raman_float>> auxPrepareIntegrals(int, sInt);
+extern template unique_ptr<stRtfunc<RamanFloat>> auxPrepareIntegrals(int, sInt);
 
-extern template unique_ptr<stPinmTaunm<raman_float>> vshPinmTaunm(int, const ArrayXr<raman_float>&);
-extern template ArrayXXc<raman_float> vshRBchi(ArrayXr<raman_float>, const ArrayXr<raman_float>&);
-extern template ArrayXXc<raman_float> vshRBpsi(ArrayXr<raman_float>, const ArrayXr<raman_float>&);
+extern template unique_ptr<stPinmTaunm<RamanFloat>> vshPinmTaunm(int, const ArrayXr<RamanFloat>&);
+extern template ArrayXXc<RamanFloat> vshRBchi(ArrayXr<RamanFloat>, const ArrayXr<RamanFloat>&);
+extern template ArrayXXc<RamanFloat> vshRBpsi(ArrayXr<RamanFloat>, const ArrayXr<RamanFloat>&);
 */
 
-template unique_ptr<ArrayXXr<raman_float>> sphGetUforFp(int);
-template unique_ptr<stFprow<raman_float>> sphGetFpRow(int, raman_float, const ArrayXr<raman_float>&);
-template unique_ptr<stFpovx<raman_float>> sphGetFpovx(int, raman_float, const ArrayXr<raman_float>&);
-template unique_ptr<stBessel<raman_float>> sphGetXiPsi(int, raman_float, const ArrayXr<raman_float>&, int);
-template unique_ptr<stBesselPrimes<raman_float>> sphGetBesselProductsPrimes(const Tensor3c<raman_float>&);
-template unique_ptr<stBesselProducts<raman_float>> sphGetModifiedBesselProducts(int, raman_float, const ArrayXr<raman_float>&, int);
-template unique_ptr<stRtfunc<raman_float>> sphMakeGeometry(int, raman_float, raman_float, const unique_ptr<ArrayXr<raman_float>>);
-template int sphCheckBesselConvergence(int, raman_float, const ArrayXr<raman_float>&, raman_float, int);
-template int sphEstimateNB(int, const unique_ptr<stRtfunc<raman_float>>&, const unique_ptr<stParams<raman_float>>&, raman_float);
-template vector<unique_ptr<stPQ<raman_float>>> sphCalculatePQ(int, const ArrayXi&,
-    const unique_ptr<stRtfunc<raman_float>>&, const unique_ptr<stParams<raman_float>>&, int);
+template unique_ptr<ArrayXXr<RamanFloat>> sphGetUforFp(int);
+template unique_ptr<stFprow<RamanFloat>> sphGetFpRow(int, RamanFloat, const ArrayXr<RamanFloat>&);
+template unique_ptr<stFpovx<RamanFloat>> sphGetFpovx(int, RamanFloat, const ArrayXr<RamanFloat>&);
+template unique_ptr<stBessel<RamanFloat>> sphGetXiPsi(int, RamanFloat, const ArrayXr<RamanFloat>&, int);
+template unique_ptr<stBesselPrimes<RamanFloat>> sphGetBesselProductsPrimes(const Tensor3c<RamanFloat>&);
+template unique_ptr<stBesselProducts<RamanFloat>> sphGetModifiedBesselProducts(int, RamanFloat, const ArrayXr<RamanFloat>&, int);
+template unique_ptr<stRtfunc<RamanFloat>> sphMakeGeometry(int, RamanFloat, RamanFloat, const unique_ptr<ArrayXr<RamanFloat>>);
+template int sphCheckBesselConvergence(int, RamanFloat, const ArrayXr<RamanFloat>&, RamanFloat, int);
+template int sphEstimateNB(int, const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, RamanFloat);
+template vector<unique_ptr<stPQ<RamanFloat>>> sphCalculatePQ(int, const ArrayXi&,
+    const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
 
 /*
-extern template raman_float mp_pi<raman_float();
+extern template RamanFloat mp_pi<RamanFloat();
 
-extern template ArrayXXc<raman_float> invertLUcol(MatrixXc<raman_float>&);
+extern template ArrayXXc<RamanFloat> invertLUcol(MatrixXc<RamanFloat>&);
 extern template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
 
-extern template unique_ptr<stIncEabnm<raman_float>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<raman_float>>&);
+extern template unique_ptr<stIncEabnm<RamanFloat>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<RamanFloat>>&);
 */
 
-template vector<unique_ptr<stTR<raman_float>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<raman_float>>>&, bool);
-template vector<unique_ptr<stTR<raman_float>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<raman_float>>>&, int);
-template vector<unique_ptr<stTR<raman_float>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<raman_float>>>&, vector<string>);
-template unique_ptr<stAbcdnm<raman_float>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<raman_float>>>&,
-    const unique_ptr<stIncPar<raman_float>>&, unique_ptr<stIncEabnm<raman_float>>);
-template unique_ptr<stCrossSection<raman_float>> rvhGetAverageCrossSections(
-    const ArrayXr<raman_float>&, const vector<vector<unique_ptr<stTR<raman_float>>>>&);
+template vector<unique_ptr<stTR<RamanFloat>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<RamanFloat>>>&, bool);
+template vector<unique_ptr<stTR<RamanFloat>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<RamanFloat>>>&, int);
+template vector<unique_ptr<stTR<RamanFloat>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<RamanFloat>>>&, vector<string>);
+template unique_ptr<stAbcdnm<RamanFloat>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<RamanFloat>>>&,
+    const unique_ptr<stIncPar<RamanFloat>>&, unique_ptr<stIncEabnm<RamanFloat>>);
+template unique_ptr<stCrossSection<RamanFloat>> rvhGetAverageCrossSections(
+    const ArrayXr<RamanFloat>&, const vector<vector<unique_ptr<stTR<RamanFloat>>>>&);
 
 /*
-extern template int sphEstimateNB(int, const unique_ptr<stRtfunc<raman_float>>&,
-    const unique_ptr<stParams<raman_float>>&, raman_float);
-extern template vector<unique_ptr<stPQ<raman_float>>> sphCalculatePQ(int, const ArrayXi&,
-    const unique_ptr<stRtfunc<raman_float>>&, const unique_ptr<stParams<raman_float>>&, int);
+extern template int sphEstimateNB(int, const unique_ptr<stRtfunc<RamanFloat>>&,
+    const unique_ptr<stParams<RamanFloat>>&, RamanFloat);
+extern template vector<unique_ptr<stPQ<RamanFloat>>> sphCalculatePQ(int, const ArrayXi&,
+    const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
 
-extern template vector<unique_ptr<stTR<raman_float>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<raman_float>>>&, bool);
-extern template vector<unique_ptr<stTR<raman_float>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<raman_float>>>&, int);
-extern template vector<unique_ptr<stTR<raman_float>>> rvhGetSymmetricMat(
-    const vector<unique_ptr<stTR<raman_float>>>&, vector<string>);
-extern template unique_ptr<stCrossSection<raman_float>> rvhGetAverageCrossSections(
-    const ArrayXr<raman_float>&, const vector<vector<unique_ptr<stTR<raman_float>>>>&);
+extern template vector<unique_ptr<stTR<RamanFloat>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<RamanFloat>>>&, bool);
+extern template vector<unique_ptr<stTR<RamanFloat>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<RamanFloat>>>&, int);
+extern template vector<unique_ptr<stTR<RamanFloat>>> rvhGetSymmetricMat(
+    const vector<unique_ptr<stTR<RamanFloat>>>&, vector<string>);
+extern template unique_ptr<stCrossSection<RamanFloat>> rvhGetAverageCrossSections(
+    const ArrayXr<RamanFloat>&, const vector<vector<unique_ptr<stTR<RamanFloat>>>>&);
 */
 
-template unique_ptr<stTmatrix<raman_float>> slvForT(const unique_ptr<stParams<raman_float>>&,
-    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<raman_float>>);
+template unique_ptr<stTmatrix<RamanFloat>> slvForT(const unique_ptr<stParams<RamanFloat>>&,
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<RamanFloat>>);
 
 /*
-extern raman_float mp_pi<raman_float>();
-extern raman_float mp_eps<raman_float>();
-extern raman_float mp_im_unit<raman_float>();
+extern RamanFloat mp_pi<RamanFloat>();
+extern RamanFloat mp_eps<RamanFloat>();
+extern RamanFloat mp_im_unit<RamanFloat>();
 
-extern template unique_ptr<stIncPar<raman_float>> vshMakeIncidentParams(sIncType, int);
+extern template unique_ptr<stIncPar<RamanFloat>> vshMakeIncidentParams(sIncType, int);
 */
 
-template unique_ptr<stRes<raman_float>> pstMakeStructForField(const unique_ptr<stAbcdnm<raman_float>>&,
-    int, ArrayXr<raman_float>, ArrayXr<raman_float>, raman_float, unique_ptr<stIncPar<raman_float>>, raman_float, raman_float);
-template unique_ptr<stRes<raman_float>> pstMakeStructForField(
-    const unique_ptr<stAbcdnm<raman_float>>&, const unique_ptr<stParams<raman_float>>&);
-template unique_ptr<stSM<raman_float>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<raman_float>>>&,
-    raman_float, raman_float, int);
+template unique_ptr<stRes<RamanFloat>> pstMakeStructForField(const unique_ptr<stAbcdnm<RamanFloat>>&,
+    int, ArrayXr<RamanFloat>, ArrayXr<RamanFloat>, RamanFloat, unique_ptr<stIncPar<RamanFloat>>, RamanFloat, RamanFloat);
+template unique_ptr<stRes<RamanFloat>> pstMakeStructForField(
+    const unique_ptr<stAbcdnm<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&);
+template unique_ptr<stSM<RamanFloat>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<RamanFloat>>>&,
+    RamanFloat, RamanFloat, int);
 
 /*
-extern template raman_float mp_pi<raman_float>();
+extern template RamanFloat mp_pi<RamanFloat>();
 
-extern template Tensor4c<raman_float> tensor_conj(Tensor4c<raman_float>&);
+extern template Tensor4c<RamanFloat> tensor_conj(Tensor4c<RamanFloat>&);
 
-extern template unique_ptr<stIncPar<raman_float>> vshMakeIncidentParams(sIncType, int, raman_float, raman_float, raman_float);
-extern template unique_ptr<stEAllPhi<raman_float>> vshEgenThetaAllPhi(const ArrayXr<raman_float>&,
-    const ArrayXr<raman_float>&, const ArrayXXc<raman_float>&, const ArrayXXc<raman_float>&,
-    const RowArrayXr<raman_float>&, const RowArrayXr<raman_float>&, sBessel, unique_ptr<stPinmTaunm<raman_float>>);
-extern template unique_ptr<stEforPhi<raman_float>> vshEthetaForPhi(const unique_ptr<stEAllPhi<raman_float>>&, raman_float);
+extern template unique_ptr<stIncPar<RamanFloat>> vshMakeIncidentParams(sIncType, int, RamanFloat, RamanFloat, RamanFloat);
+extern template unique_ptr<stEAllPhi<RamanFloat>> vshEgenThetaAllPhi(const ArrayXr<RamanFloat>&,
+    const ArrayXr<RamanFloat>&, const ArrayXXc<RamanFloat>&, const ArrayXXc<RamanFloat>&,
+    const RowArrayXr<RamanFloat>&, const RowArrayXr<RamanFloat>&, sBessel, unique_ptr<stPinmTaunm<RamanFloat>>);
+extern template unique_ptr<stEforPhi<RamanFloat>> vshEthetaForPhi(const unique_ptr<stEAllPhi<RamanFloat>>&, RamanFloat);
 
-extern template unique_ptr<stAbcdnm<raman_float>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<raman_float>>>&,
-    const unique_ptr<stIncPar<raman_float>>&, unique_ptr<stIncEabnm<raman_float>>);
+extern template unique_ptr<stAbcdnm<RamanFloat>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<RamanFloat>>>&,
+    const unique_ptr<stIncPar<RamanFloat>>&, unique_ptr<stIncEabnm<RamanFloat>>);
 
-extern template unique_ptr<stTmatrix<raman_float>> slvForT(const unique_ptr<stParams<raman_float>>&,
-    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<raman_float>>);
+extern template unique_ptr<stTmatrix<RamanFloat>> slvForT(const unique_ptr<stParams<RamanFloat>>&,
+    const unique_ptr<stOptions>&, unique_ptr<stRtfunc<RamanFloat>>);
 
-extern template unique_ptr<stRes<raman_float>> pstMakeStructForField(
-    const unique_ptr<stAbcdnm<raman_float>>&, const unique_ptr<stParams<raman_float>>&);
-extern template unique_ptr<stSM<raman_float>> pstScatteringMatrixOA(
-    const vector<unique_ptr<stTR<raman_float>>>&, raman_float, raman_float, int);
+extern template unique_ptr<stRes<RamanFloat>> pstMakeStructForField(
+    const unique_ptr<stAbcdnm<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&);
+extern template unique_ptr<stSM<RamanFloat>> pstScatteringMatrixOA(
+    const vector<unique_ptr<stTR<RamanFloat>>>&, RamanFloat, RamanFloat, int);
 */
 
 extern template float mp_pi();
@@ -234,29 +234,29 @@ extern template unique_ptr<RamanParams<long double>> LoadParams<long double>(str
 extern template unique_ptr<stParams<long double>> Raman2SmartiesParams(
     const unique_ptr<RamanParams<long double>>&, int, int, string);
 
-template raman_float Frac2Float(string);
-template unique_ptr<RamanParams<raman_float>> LoadParams<raman_float>(string);
-template unique_ptr<stParams<raman_float>> Raman2SmartiesParams(
-    const unique_ptr<RamanParams<raman_float>>&, int, int, string);
-template void CreateTimeStamp<raman_float, float>(string, const unique_ptr<RamanParams<raman_float>>&);
-template void CreateTimeStamp<raman_float, double>(string, const unique_ptr<RamanParams<raman_float>>&);
-template void CreateTimeStamp<raman_float, long double>(string, const unique_ptr<RamanParams<raman_float>>&);
-template void CreateTimeStamp<raman_float, raman_float>(string, const unique_ptr<RamanParams<raman_float>>&);
-template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
-template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
-template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
-template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<raman_float>>>&);
-template void RamanElasticScattering<raman_float, float>(string, string, int);
-template void RamanElasticScattering<raman_float, double>(string, string, int);
-template void RamanElasticScattering<raman_float, long double>(string, string, int);
-template void RamanElasticScattering<raman_float, raman_float>(string, string, int);
+template RamanFloat Frac2Float(string);
+template unique_ptr<RamanParams<RamanFloat>> LoadParams<RamanFloat>(string);
+template unique_ptr<stParams<RamanFloat>> Raman2SmartiesParams(
+    const unique_ptr<RamanParams<RamanFloat>>&, int, int, string);
+template void CreateTimeStamp<RamanFloat, float>(string, const unique_ptr<RamanParams<RamanFloat>>&);
+template void CreateTimeStamp<RamanFloat, double>(string, const unique_ptr<RamanParams<RamanFloat>>&);
+template void CreateTimeStamp<RamanFloat, long double>(string, const unique_ptr<RamanParams<RamanFloat>>&);
+template void CreateTimeStamp<RamanFloat, RamanFloat>(string, const unique_ptr<RamanParams<RamanFloat>>&);
+template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
+template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
+template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
+template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
+template void RamanElasticScattering<RamanFloat, float>(string, string);
+template void RamanElasticScattering<RamanFloat, double>(string, string);
+template void RamanElasticScattering<RamanFloat, long double>(string, string);
+template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string);
 
-template void CreateTimeStamp<float, raman_float>(string, const unique_ptr<RamanParams<float>>&);
-template void CreateTimeStamp<double, raman_float>(string, const unique_ptr<RamanParams<double>>&);
-template void CreateTimeStamp<long double, raman_float>(string, const unique_ptr<RamanParams<long double>>&);
-template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
-template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
-template vector<unique_ptr<stTR<raman_float>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
-template void RamanElasticScattering<float, raman_float>(string, string, int);
-template void RamanElasticScattering<double, raman_float>(string, string, int);
-template void RamanElasticScattering<long double, raman_float>(string, string, int);
+template void CreateTimeStamp<float, RamanFloat>(string, const unique_ptr<RamanParams<float>>&);
+template void CreateTimeStamp<double, RamanFloat>(string, const unique_ptr<RamanParams<double>>&);
+template void CreateTimeStamp<long double, RamanFloat>(string, const unique_ptr<RamanParams<long double>>&);
+template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
+template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<double>>>&);
+template vector<unique_ptr<stTR<RamanFloat>>> ConvertstTRList(const vector<unique_ptr<stTR<long double>>>&);
+template void RamanElasticScattering<float, RamanFloat>(string, string);
+template void RamanElasticScattering<double, RamanFloat>(string, string);
+template void RamanElasticScattering<long double, RamanFloat>(string, string);

@@ -440,11 +440,11 @@ namespace Smarties {
     while (to_continue && NB < max_N) {
       NB_next = NB + NB_step;
       prod_new = sphGetFpovx<Real>(NB_next, s, x);
-      tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
-          subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+      tmp = tensorSlice<Real>(prod->Fpovx, seq1, seq1, seq3) /
+          tensorSlice<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
       rel_acc_ee = tmp.abs().real().maximum();
-      tmp = subtensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
-          subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+      tmp = tensorSlice<Real>(prod->Fpovx, seq2, seq2, seq3) /
+          tensorSlice<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
       rel_acc_oo = tmp.abs().real().maximum();
       rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
       if (rel_acc < acc)
@@ -462,11 +462,11 @@ namespace Smarties {
       while (to_continue && NB < max_N) {
         NB += NB_step;
         prod = sphGetFpovx<Real>(NB, s, x);
-        tmp = subtensor<Real>(prod->Fpovx, seq1, seq1, seq3) /
-            subtensor<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+        tmp = tensorSlice<Real>(prod->Fpovx, seq1, seq1, seq3) /
+            tensorSlice<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
         rel_acc_ee = tmp.abs().maximum().real();
-        tmp = subtensor<Real>(prod->Fpovx, seq2, seq2, seq3) /
-            subtensor<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+        tmp = tensorSlice<Real>(prod->Fpovx, seq2, seq2, seq3) /
+            tensorSlice<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
         rel_acc_oo = tmp.abs().maximum().real();
         rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
         if (rel_acc < acc)
@@ -514,8 +514,6 @@ namespace Smarties {
       output[i] = make_unique<stPQ<Real>>();
     Real s = params->s(0);
     Real k1 = params->k1(0);
-    int N_int = Rt_func->Nb_theta;
-    int T = N_int; // Number of theta's
     ArrayXr<Real> x = Rt_func->r * k1; // [T x 1] x(theta)
     ArrayXr<Real> x_theta = Rt_func->dr_dt * k1; // [T x 1] x'(theta)
 
@@ -526,40 +524,27 @@ namespace Smarties {
     ArrayXr<Real> An_vec = sqrt((2*tmp1 + 1) / (2*tmp1 * (tmp1 + 1))); // [N x 1]
     ArrayXXr<Real> An_Ak = (An_vec.matrix() * An_vec.transpose().matrix()).array(); // [N x N]
 
+    std::array<int, 3> shuffle = {0, 2, 1};
     unique_ptr<stBesselProducts<Real>> prods = sphGetModifiedBesselProducts(N_max, s, x, NB); // prods contains [N x N x T] tensors
     // Converting these [N x N x T] tensors into [N x T x N] tensors
-    Tensor3c<Real> xi_prime_psi(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> xi_psi_prime(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> xi_psi(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx(N_max + 1, T, N_max + 1);
-    for (int k = 0; k <= N_max; k++) {
-      xi_psi.chip(k, 2) = prods->st_xi_psi_all->xi_psi.chip(k, 1);
-      xi_prime_psi.chip(k, 2) = prods->st_xi_psi_all->xi_prime_psi.chip(k, 1);
-      xi_psi_prime.chip(k, 2) = prods->st_xi_psi_all->xi_psi_prime.chip(k, 1);
-      xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 2) =
-          prods->st_xi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 1);
-      xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 2) =
-          prods->st_xi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 1);
-    }
+    Tensor3c<Real> xi_psi = prods->st_xi_psi_all->xi_psi.shuffle(shuffle);
+    Tensor3c<Real> xi_prime_psi = prods->st_xi_psi_all->xi_prime_psi.shuffle(shuffle);
+    Tensor3c<Real> xi_psi_prime = prods->st_xi_psi_all->xi_psi_prime.shuffle(shuffle);
+    Tensor3c<Real> xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx =
+        prods->st_xi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.shuffle(shuffle);
+    Tensor3c<Real> xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx =
+        prods->st_xi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.shuffle(shuffle);
     ArrayXXc<Real> for_Q_diag_Lt1 = prods->st_xi_psi_all->for_diag_Lt1;
     ArrayXXc<Real> for_Q_diag_Lt2 = prods->st_xi_psi_all->for_diag_Lt2;
     ArrayXXc<Real> for_Q_diag_Lt3 = prods->st_xi_psi_all->for_diag_Lt3;
 
-    Tensor3c<Real> psi_prime_psi(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> psi_psi_prime(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> psi_psi(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> psi_prime_psi_prime_plus_kkp1_psi_psi_over_sxx(N_max + 1, T, N_max + 1);
-    Tensor3c<Real> psi_prime_psi_prime_plus_nnp1_psi_psi_over_sxx(N_max + 1, T, N_max + 1);
-    for (int k = 0; k <= N_max; k++) {
-      psi_psi.chip(k, 2) = prods->st_psi_psi_all->xi_psi.chip(k, 1);
-      psi_prime_psi.chip(k, 2) = prods->st_psi_psi_all->xi_prime_psi.chip(k, 1);
-      psi_psi_prime.chip(k, 2) = prods->st_psi_psi_all->xi_psi_prime.chip(k, 1);
-      psi_prime_psi_prime_plus_kkp1_psi_psi_over_sxx.chip(k, 2) =
-          prods->st_psi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.chip(k, 1);
-      psi_prime_psi_prime_plus_nnp1_psi_psi_over_sxx.chip(k, 2) =
-          prods->st_psi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.chip(k, 1);
-    }
+    Tensor3c<Real> psi_psi = prods->st_psi_psi_all->xi_psi.shuffle(shuffle);
+    Tensor3c<Real> psi_prime_psi = prods->st_psi_psi_all->xi_prime_psi.shuffle(shuffle);
+    Tensor3c<Real> psi_psi_prime = prods->st_psi_psi_all->xi_psi_prime.shuffle(shuffle);
+    Tensor3c<Real> psi_prime_psi_prime_plus_kkp1_psi_psi_over_sxx =
+        prods->st_psi_psi_all->xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx.shuffle(shuffle);
+    Tensor3c<Real> psi_prime_psi_prime_plus_nnp1_psi_psi_over_sxx =
+        prods->st_psi_psi_all->xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx.shuffle(shuffle);
     ArrayXXc<Real> for_P_diag_Lt1 = prods->st_psi_psi_all->for_diag_Lt1;
     ArrayXXc<Real> for_P_diag_Lt2 = prods->st_psi_psi_all->for_diag_Lt2;
     ArrayXXc<Real> for_P_diag_Lt3 = prods->st_psi_psi_all->for_diag_Lt3;
