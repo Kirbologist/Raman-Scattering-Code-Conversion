@@ -67,8 +67,8 @@ The following parameters are for determining the spherical coordinates of the sa
 - `No. of theta-coordinates` is a positive integer representing the number of polar angle/colatitude coordinates to use within the particle when performing field calculations/integrations. By default, this parameter is 320.
 
 The following parameters are used for calculating the T-matrices.
-- `Nb_theta` is a positive integer used to calculate the P and Q matrices.
-- `Nb_theta_pst` is a positive integer used for postprocessing.
+- `Nb_theta` is a positive integer, which is the number of angles used in Gaussian quadratures for the evaluation of P and Q matrix integrals.
+- `Nb_theta_pst` is a positive integer, which is the number of angles used for surface field averaging in postprocessing.
 
 The following 'calculation' parameters are for describing the incident light and the mediums that the light passes through.
 - `epsilon1` is a floating-point value representing the dielectric constant of the surrounding medium.
@@ -171,6 +171,6 @@ The following libraries are open-source and were written by their respective dev
 SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015). The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package here:
 https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
 
-The casting code in math.hpp is based on code that was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
+The casting code in misc.hpp is based on code that was written by DavidAce on the following stackoverflow thread: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix (accessed 17 Dec 2021)
 
 Parts of the Eigen 3.4.0 library have been included under the MPL2 license and parts of the Boost 1.77.0 library have been included under the Boost license. Eigen and Boost were made by their respective developers listed on their websites.

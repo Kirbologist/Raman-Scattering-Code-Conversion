@@ -4,7 +4,7 @@
 #include "core.hpp"
 #include "sph.hpp"
 #include "vsh.hpp"
-#include "math.hpp"
+#include "misc.hpp"
 
 using namespace Eigen;
 using namespace std;
@@ -32,9 +32,9 @@ namespace Smarties {
 
   template <class Real>
   struct stCrossSection {
-    ArrayXr<Real> ext;
-    ArrayXr<Real> sca;
-    ArrayXr<Real> abs;
+    ArrayXr<Real> C_ext;
+    ArrayXr<Real> C_sca;
+    ArrayXr<Real> C_abs;
   };
 
   template <class Real>
@@ -73,13 +73,13 @@ namespace Smarties {
       int m = st_PQ->st_4M_P_eo().m;
 
       if (!m) {
-        st_TR->st_4M_R_oe().M11 = invertLUcol(Q11_oo);
+        st_TR->st_4M_R_oe().M11 = InvertLUcol(Q11_oo);
         st_TR->st_4M_T_oe().M11 = -P11_oo * st_TR->st_4M_R_oe().M11.matrix();
-        st_TR->st_4M_R_oe().M22 = invertLUcol(Q22_ee);
+        st_TR->st_4M_R_oe().M22 = InvertLUcol(Q22_ee);
         st_TR->st_4M_T_oe().M22 = -P22_ee * st_TR->st_4M_R_oe().M22.matrix();
-        st_TR->st_4M_R_eo().M11 = invertLUcol(Q11_ee);
+        st_TR->st_4M_R_eo().M11 = InvertLUcol(Q11_ee);
         st_TR->st_4M_T_eo().M11 = -P11_ee * st_TR->st_4M_R_eo().M11.matrix();
-        st_TR->st_4M_R_eo().M22 = invertLUcol(Q22_oo);
+        st_TR->st_4M_R_eo().M22 = InvertLUcol(Q22_oo);
         st_TR->st_4M_T_eo().M22 = -P22_oo * st_TR->st_4M_R_eo().M22.matrix();
 
         st_TR->st_4M_T_eo().M12 = ArrayXXc<Real>::Zero(num_even, num_odd);
@@ -94,13 +94,13 @@ namespace Smarties {
           st_TR->st_4M_R_oe().M21 = ArrayXXc<Real>::Zero(num_even, num_odd);
         }
       } else {
-        MatrixXc<Real> Q11_inv = invertLUcol(Q11_ee);
+        MatrixXc<Real> Q11_inv = InvertLUcol(Q11_ee);
 
         MatrixXc<Real> G1 = P11_ee * Q11_inv;
         MatrixXc<Real> G3 = P21_oe * Q11_inv;
         MatrixXc<Real> G5 = Q21_oe * Q11_inv;
         MatrixXc<Real> F2_m1 = Q22_oo - G5 * Q12_eo;
-        MatrixXc<Real> F2 = invertLUcol(F2_m1);
+        MatrixXc<Real> F2 = InvertLUcol(F2_m1);
 
         MatrixXc<Real> G2 = P22_oo * F2;
         MatrixXc<Real> G4 = P12_eo * F2;
@@ -118,13 +118,13 @@ namespace Smarties {
           st_TR->st_4M_R_eo().M21 = -st_TR->st_4M_R_eo().M22.matrix() * G5;
         }
 
-        Q11_inv = invertLUcol(Q11_oo);
+        Q11_inv = InvertLUcol(Q11_oo);
 
         G1 = P11_oo * Q11_inv;
         G3 = P21_eo * Q11_inv;
         G5 = Q21_eo * Q11_inv;
         F2_m1 = Q22_ee - G5 * Q12_oe;
-        F2 = invertLUcol(F2_m1);
+        F2 = InvertLUcol(F2_m1);
 
         G2 = P22_ee * F2;
         G4 = P12_oe * F2;
@@ -177,8 +177,8 @@ namespace Smarties {
           ArrayXb ind1_valid = st_mat_list[i]->st_4M_list[j].ind1 <= new_size;
           ArrayXb ind2_valid = st_mat_list[i]->st_4M_list[j].ind2 <= new_size;
 
-          ArrayXi new_ind1 = logicalIndices(ind1_valid);
-          ArrayXi new_ind2 = logicalIndices(ind2_valid);
+          ArrayXi new_ind1 = LogicalIndices(ind1_valid);
+          ArrayXi new_ind2 = LogicalIndices(ind2_valid);
 
           output_st_TR->st_4M_list[j].ind1 = st_mat_list[i]->st_4M_list[j].ind1(new_ind1);
           output_st_TR->st_4M_list[j].ind2 = st_mat_list[i]->st_4M_list[j].ind2(new_ind2);
@@ -273,7 +273,7 @@ namespace Smarties {
       get_R = true;
 
     ArrayXb abs_m_vec_valid = st_inc_par->abs_m_vec <= N_max;
-    ArrayXi abs_m_vec = logicalSlice(st_inc_par->abs_m_vec, abs_m_vec_valid);
+    ArrayXi abs_m_vec = LogicalSlice(st_inc_par->abs_m_vec, abs_m_vec_valid);
 
     int num_M = st_TR_list.size();
     int M = abs_m_vec.size();
@@ -301,8 +301,8 @@ namespace Smarties {
       int m = abs_m_vec(m_ind11);
       int N_min = max(m, 1);
 
-      ArrayXi n_vec_e = seq2Array(N_min + N_min % 2, N_max, 2);
-      ArrayXi n_vec_o = seq2Array(N_min + 1 - N_min % 2, N_max, 2);
+      ArrayXi n_vec_e = Seq2Array(N_min + N_min % 2, N_max, 2);
+      ArrayXi n_vec_o = Seq2Array(N_min + 1 - N_min % 2, N_max, 2);
 
       ArrayXi p_vec_e = n_vec_e * (n_vec_e + 1) + m;
       ArrayXi p_vec_o = n_vec_o * (n_vec_o + 1) + m;
@@ -453,9 +453,9 @@ namespace Smarties {
     }
 
     auto output = make_unique<stCrossSection<Real>>();
-    output->ext = -4*mp_pi<Real>()/k1.pow(2) * ext_sum.real();
-    output->sca = 4*mp_pi<Real>()/k1.pow(2) * sca_sum.real();
-    output->abs = -4*mp_pi<Real>()/k1.pow(2) * (ext_sum.real() + sca_sum.real());
+    output->C_ext = -4*mp_pi<Real>()/k1.pow(2) * ext_sum.real();
+    output->C_sca = 4*mp_pi<Real>()/k1.pow(2) * sca_sum.real();
+    output->C_abs = -4*mp_pi<Real>()/k1.pow(2) * (ext_sum.real() + sca_sum.real());
 
     return output;
   }

@@ -11,10 +11,9 @@ CC=g++
 CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp -static-libgcc -static-libstdc++
 CPPFLAGS+=$(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 MP_FLAGS=-DPRECISION=$(PRECISION)
-LINK_FLAGS=-fopenmp
 PRODUCT_NAME=raman_elastic_scattering
 PRODUCT=$(PRODUCT_NAME)
-DEF_OBJS=$(BUILDDIR)/math.o $(BUILDDIR)/raman_elastic_scattering.o
+DEF_OBJS=$(BUILDDIR)/misc.o $(BUILDDIR)/raman_elastic_scattering.o
 DEF_OBJS+=$(BUILDDIR)/defs_single.o $(BUILDDIR)/defs_double.o $(BUILDDIR)/defs_quad.o
 MP_OBJS=$(BUILDDIR)/defs_custom.o
 

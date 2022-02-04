@@ -1,10 +1,10 @@
-#include "math.hpp"
+#include "misc.hpp"
 
 using namespace Eigen;
 
 namespace Smarties {
 
-  ArrayXi seq2Array(long int first, long int last, long int stride) {
+  ArrayXi Seq2Array(long int first, long int last, long int stride) {
     ArithmeticSequence<long int, long int, long int> sequence = seq(first, last, stride);
     int rows = sequence.size();
     ArrayXi output(rows);
@@ -13,7 +13,7 @@ namespace Smarties {
     return output;
   }
 
-  ArrayXi logicalIndices(ArrayXb& bool_array) {
+  ArrayXi LogicalIndices(ArrayXb& bool_array) {
     int output_size = bool_array.count();
     ArrayXi output(output_size);
     int index = 0;

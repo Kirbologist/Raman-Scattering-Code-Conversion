@@ -4,7 +4,7 @@
 #include "core.hpp"
 #include "rvh.hpp"
 #include "vsh.hpp"
-#include "math.hpp"
+#include "misc.hpp"
 
 using namespace Eigen;
 using namespace std;

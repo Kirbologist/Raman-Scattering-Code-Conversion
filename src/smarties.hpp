@@ -1,5 +1,5 @@
 #include "core.hpp"
-#include "math.hpp"
+#include "misc.hpp"
 #include "smarties_aux.hpp"
 #include "vsh.hpp"
 #include "sph.hpp"

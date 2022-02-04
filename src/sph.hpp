@@ -4,7 +4,7 @@
 #include "core.hpp"
 #include "smarties_aux.hpp"
 #include "vsh.hpp"
-#include "math.hpp"
+#include "misc.hpp"
 #include <stdexcept>
 
 using namespace Eigen;
@@ -163,7 +163,7 @@ namespace Smarties {
           if (x_not_converged.any())
             test = x_not_converged.select(abs(current_term) > mp_eps<Real>() * abs(S.row(k)), test);
           if (test.any()) {
-            if (logicalSlice(current_term, test).isInf().all()) // if all non-converged x values are infinite
+            if (LogicalSlice(current_term, test).isInf().all()) // if all non-converged x values are infinite
               cout << "Problem (1) in sphGetFpovx..." << endl;
             S.row(k) += test.select(current_term, 0);
             max_term_S.row(k) = test.select(abs(current_term).max(max_term_S.row(k)), max_term_S.row(k));
@@ -440,11 +440,11 @@ namespace Smarties {
     while (to_continue && NB < max_N) {
       NB_next = NB + NB_step;
       prod_new = sphGetFpovx<Real>(NB_next, s, x);
-      tmp = tensorSlice<Real>(prod->Fpovx, seq1, seq1, seq3) /
-          tensorSlice<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+      tmp = TensorSlice<Real>(prod->Fpovx, seq1, seq1, seq3) /
+          TensorSlice<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
       rel_acc_ee = tmp.abs().real().maximum();
-      tmp = tensorSlice<Real>(prod->Fpovx, seq2, seq2, seq3) /
-          tensorSlice<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+      tmp = TensorSlice<Real>(prod->Fpovx, seq2, seq2, seq3) /
+          TensorSlice<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
       rel_acc_oo = tmp.abs().real().maximum();
       rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
       if (rel_acc < acc)
@@ -462,11 +462,11 @@ namespace Smarties {
       while (to_continue && NB < max_N) {
         NB += NB_step;
         prod = sphGetFpovx<Real>(NB, s, x);
-        tmp = tensorSlice<Real>(prod->Fpovx, seq1, seq1, seq3) /
-            tensorSlice<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+        tmp = TensorSlice<Real>(prod->Fpovx, seq1, seq1, seq3) /
+            TensorSlice<Real>(prod_new->Fpovx, seq1, seq1, seq3) - tmp.constant(static_cast<complex<Real>>(1));
         rel_acc_ee = tmp.abs().maximum().real();
-        tmp = tensorSlice<Real>(prod->Fpovx, seq2, seq2, seq3) /
-            tensorSlice<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
+        tmp = TensorSlice<Real>(prod->Fpovx, seq2, seq2, seq3) /
+            TensorSlice<Real>(prod_new->Fpovx, seq2, seq2, seq3) - tmp.constant(static_cast<complex<Real>>(1));
         rel_acc_oo = tmp.abs().maximum().real();
         rel_acc = max(rel_acc_ee(0), rel_acc_oo(0));
         if (rel_acc < acc)
@@ -577,38 +577,38 @@ namespace Smarties {
         VectorXr<Real> dx_dt_tau_k_sin_t = dx_dt_wt * tau_k;
         VectorXr<Real> dx_dt_d_k_sin_t = dx_dt_wt * d_k;
 
-        MatrixXc<Real> pi_n_xi_prime_psi = pi_nm * reduceAndSlice(xi_prime_psi, k, Nm);
-        MatrixXc<Real> pi_n_xi_psi_prime = pi_nm * reduceAndSlice(xi_psi_prime, k, Nm);
+        MatrixXc<Real> pi_n_xi_prime_psi = pi_nm * ReduceAndSlice(xi_prime_psi, k, Nm);
+        MatrixXc<Real> pi_n_xi_psi_prime = pi_nm * ReduceAndSlice(xi_psi_prime, k, Nm);
         K1.col(k_ind) = pi_n_xi_psi_prime * dx_dt_d_k_sin_t;
         K2.col(k_ind) = pi_n_xi_prime_psi * dx_dt_d_k_sin_t;
 
-        pi_n_xi_prime_psi = pi_nm * reduceAndSlice(psi_prime_psi, k, Nm);
-        pi_n_xi_psi_prime = pi_nm * reduceAndSlice(psi_psi_prime, k, Nm);
+        pi_n_xi_prime_psi = pi_nm * ReduceAndSlice(psi_prime_psi, k, Nm);
+        pi_n_xi_psi_prime = pi_nm * ReduceAndSlice(psi_psi_prime, k, Nm);
         K1P.col(k_ind) = pi_n_xi_psi_prime * dx_dt_d_k_sin_t;
         K2P.col(k_ind) = pi_n_xi_prime_psi * dx_dt_d_k_sin_t;
 
-        MatrixXc<Real> d_n_xi_psi_nnp1 = d_n_times_nnp1 * reduceAndSlice(xi_psi, k, Nm);
-        MatrixXc<Real> tau_n_xi_psi = tau_nm * reduceAndSlice(xi_psi, k, Nm);
+        MatrixXc<Real> d_n_xi_psi_nnp1 = d_n_times_nnp1 * ReduceAndSlice(xi_psi, k, Nm);
+        MatrixXc<Real> tau_n_xi_psi = tau_nm * ReduceAndSlice(xi_psi, k, Nm);
 
         L5.col(k_ind) = d_n_xi_psi_nnp1 * dx_dt_tau_k_sin_t - tau_n_xi_psi * dx_dt_d_k_sin_t*k*(k + 1);
 
-        d_n_xi_psi_nnp1 = d_n_times_nnp1 * reduceAndSlice(psi_psi, k, Nm);
-        tau_n_xi_psi = tau_nm *  reduceAndSlice(psi_psi, k, Nm);
+        d_n_xi_psi_nnp1 = d_n_times_nnp1 * ReduceAndSlice(psi_psi, k, Nm);
+        tau_n_xi_psi = tau_nm *  ReduceAndSlice(psi_psi, k, Nm);
 
         L5P.col(k_ind) = d_n_xi_psi_nnp1 * dx_dt_tau_k_sin_t - tau_n_xi_psi * dx_dt_d_k_sin_t*k*(k + 1);
 
         MatrixXc<Real> d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 =
-            d_n_times_nnp1 * reduceAndSlice(xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx, k, Nm);
+            d_n_times_nnp1 * ReduceAndSlice(xi_prime_psi_prime_plus_kkp1_xi_psi_over_sxx, k, Nm);
         MatrixXc<Real> tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 =
-            tau_nm * reduceAndSlice(xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx, k, Nm);
+            tau_nm * ReduceAndSlice(xi_prime_psi_prime_plus_nnp1_xi_psi_over_sxx, k, Nm);
 
         L6.col(k_ind) = d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 * dx_dt_tau_k_sin_t -
             tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 * dx_dt_d_k_sin_t * k*(k + 1);
 
         d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 =
-            d_n_times_nnp1 * reduceAndSlice(psi_prime_psi_prime_plus_kkp1_psi_psi_over_sxx, k, Nm);
+            d_n_times_nnp1 * ReduceAndSlice(psi_prime_psi_prime_plus_kkp1_psi_psi_over_sxx, k, Nm);
         tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 =
-            tau_nm * reduceAndSlice(psi_prime_psi_prime_plus_nnp1_psi_psi_over_sxx, k, Nm);
+            tau_nm * ReduceAndSlice(psi_prime_psi_prime_plus_nnp1_psi_psi_over_sxx, k, Nm);
 
         L6P.col(k_ind) = d_n_xi_prime_psi_prime_nnp1_plus_xi_psi_over_sxx_nnp1_kkp1 * dx_dt_tau_k_sin_t -
             tau_n_xi_prime_psi_prime_plus_xi_psi_over_sxx_nnp1 * dx_dt_d_k_sin_t * k*(k + 1);
@@ -651,8 +651,8 @@ namespace Smarties {
         P22(j, j) = prefact_diag1(j) * Ltilde2(j) + prefact_diag2(j) * Ltilde3(j);
       }
 
-      ArrayXi inde = seq2Array(N_min % 2, Nm - 1, 2);
-      ArrayXi indo = seq2Array(1 - N_min % 2, Nm - 1, 2);
+      ArrayXi inde = Seq2Array(N_min % 2, Nm - 1, 2);
+      ArrayXi indo = Seq2Array(1 - N_min % 2, Nm - 1, 2);
 
       output[i]->st_4M_Q_eo().M12 = Q12(inde, indo);
       output[i]->st_4M_Q_eo().M21 = Q21(indo, inde);

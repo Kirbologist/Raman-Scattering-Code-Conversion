@@ -2,7 +2,7 @@
 #define VSH_HPP
 
 #include "core.hpp"
-#include "math.hpp"
+#include "misc.hpp"
 
 namespace Smarties {
 
@@ -50,8 +50,8 @@ namespace Smarties {
   unique_ptr<stIncPar<Real>> vshMakeIncidentParams(sIncType type, int N_max) {
     auto output = make_unique<stIncPar<Real>>();
     switch (type) {
-      case KxEz: {
-        output->type = KxEz;
+      case Kx_Ez: {
+        output->type = Kx_Ez;
         output->theta_p = mp_pi<Real>()/2;
         output->phi_p = 0;
         output->alpha_p = mp_pi<Real>();
@@ -59,8 +59,8 @@ namespace Smarties {
         break;
       }
 
-      case KxEy: {
-        output->type = KxEy;
+      case Kx_Ey: {
+        output->type = Kx_Ey;
         output->theta_p = mp_pi<Real>()/2;
         output->phi_p = 0;
         output->alpha_p = mp_pi<Real>()/2;
@@ -68,8 +68,8 @@ namespace Smarties {
         break;
       }
 
-      case KyEz: {
-        output->type = KyEz;
+      case Ky_Ez: {
+        output->type = Ky_Ez;
         output->theta_p = mp_pi<Real>()/2;
         output->phi_p = mp_pi<Real>()/2;
         output->alpha_p = mp_pi<Real>();
@@ -77,8 +77,8 @@ namespace Smarties {
         break;
       }
 
-      case KyEx: {
-        output->type = KyEx;
+      case Ky_Ex: {
+        output->type = Ky_Ex;
         output->theta_p = mp_pi<Real>()/2;
         output->phi_p = mp_pi<Real>()/2;
         output->alpha_p = -mp_pi<Real>()/2;
@@ -86,8 +86,8 @@ namespace Smarties {
         break;
       }
 
-      case KzEx: {
-        output->type = KzEx;
+      case Kz_Ex: {
+        output->type = Kz_Ex;
         output->theta_p = 0;
         output->phi_p = 0;
         output->alpha_p = 0;
@@ -95,8 +95,8 @@ namespace Smarties {
         break;
       }
 
-      case KzEy: {
-        output->type = KzEy;
+      case Kz_Ey: {
+        output->type = Kz_Ey;
         output->theta_p = 0;
         output->phi_p = 0;
         output->alpha_p = mp_pi<Real>()/2;
@@ -105,7 +105,7 @@ namespace Smarties {
       }
 
       default:
-        output->type = KzEx;
+        output->type = Kz_Ex;
         output->theta_p = 0;
         output->phi_p = 0;
         output->alpha_p = 0;
@@ -243,7 +243,7 @@ namespace Smarties {
     ArrayXXc<Real> f(rho.size(), N_max + 1);
 
     for (int i = 0; i < rho.size(); i++) {
-      f.row(i) = arr_bessel_j(nu, rho(i));
+      f.row(i) = ArrBesselJ(nu, rho(i));
       if ((f.row(i) == static_cast<complex<Real>>(0)).any()) {
         cerr << "Warning: Bessel (j) calculation went beyond precision in vshGetZnAll()" << endl;
         cerr << "x = " << rho(i) << " N_max = " << N_max << endl;
@@ -252,7 +252,7 @@ namespace Smarties {
 
     if (type == H1) {
       for (int i = 0; i < rho.size(); i++) {
-        ArrayXr<Real> y = arr_bessel_y(nu, rho(i));
+        ArrayXr<Real> y = ArrBesselY(nu, rho(i));
         if ((f.row(i).isInf()).any()) {
           cerr << "Warning: Bessel (y) calculation went beyond precision in vshGetZnAll()" << endl;
           cerr << "x = " << rho(i) << ", N_max = " << N_max << endl;
@@ -419,7 +419,7 @@ namespace Smarties {
     ArrayXXc<Real> chi_x(x.size(), n.size());
     n += 0.5;
     for (int i = 0; i < x.size(); i++) {
-      ArrayXr<Real> yx = arr_bessel_y(n, x(i));
+      ArrayXr<Real> yx = ArrBesselY(n, x(i));
       if ((yx.isInf()).any())
         cerr << "Warning: Bessel (y) calculation went beyond precision in vshRBchi()" << endl;
       chi_x.row(i) = sqrt(static_cast<complex<Real>>(x(i)*mp_pi<Real>()/2))*yx;
@@ -433,7 +433,7 @@ namespace Smarties {
     ArrayXXc<Real> psi_x(x.size(), n.size());
     n += 0.5;
     for (int i = 0; i < x.size(); i++) {
-      ArrayXr<Real> jx = arr_bessel_j(n, x(i));
+      ArrayXr<Real> jx = ArrBesselJ(n, x(i));
       if ((jx == 0.0).any())
         cerr << "Warning: Bessel (j) calculation went beyond precision in vshRBpsi()" << endl;
       psi_x.row(i) = sqrt(static_cast<complex<Real>>(x(i)*mp_pi<Real>()/2))*jx;

@@ -2,7 +2,7 @@
 #define SMARTIES_AUX_HPP
 
 #include "core.hpp"
-#include "math.hpp"
+#include "misc.hpp"
 #include <filesystem>
 #include <iostream>
 #include <fstream>
@@ -74,7 +74,7 @@ namespace Smarties {
   }
 
   template<class Matrix>
-  void writeBinary(const string filename, const Matrix& matrix) {
+  void WriteBinary(const string filename, const Matrix& matrix) {
     ofstream out(filename, ios::out | ios::binary | ios::trunc);
     typename Matrix::Index rows=matrix.rows(), cols=matrix.cols();
     out.write((char*) (&rows), sizeof(typename Matrix::Index));
@@ -84,7 +84,7 @@ namespace Smarties {
   }
 
   template<class Matrix>
-  void readBinary(const string filename, Matrix& matrix) {
+  void ReadBinary(const string filename, Matrix& matrix) {
     ifstream in(filename, ios::in | ios::binary);
     typename Matrix::Index rows=0, cols=0;
     in.read((char*) (&rows),sizeof(typename Matrix::Index));
@@ -95,25 +95,8 @@ namespace Smarties {
   }
 
   template <class Real>
-  string getTypeName() {
-    string calc_type = typeid(static_cast<Real>(0)).name();
-    if (calc_type.find("N5boost14multiprecision6numberINS0_8backends18mpfr_float_backend") != string::npos) {
-      size_t prec_begin = calc_type.find("ILj") + 3;
-      size_t prec_end = calc_type.find("ELNS");
-      string precision = calc_type.substr(prec_begin, prec_end - prec_begin);
-      calc_type = "custom_" + precision;
-    } else if (calc_type == "f")
-      calc_type = "single";
-    else if (calc_type == "d")
-      calc_type = "double";
-    else if (calc_type == "e")
-      calc_type = "quad";
-    return calc_type;
-  }
-
-  template <class Real>
-  void updateGLquadrature(ArrayXi N_theta, bool keep_old = true) {
-    string calc_type = getTypeName<Real>();
+  void UpdateGLquadrature(ArrayXi N_theta, bool keep_old = true) {
+    string calc_type = GetTypeName<Real>();
     string data_path = "data/" + calc_type;
     string quad_table_file_name = data_path + "/quad_table.dat";
     std::filesystem::create_directory(data_path);
@@ -122,7 +105,7 @@ namespace Smarties {
     ArrayXi new_N_theta(N_theta.size());
     if (keep_old && quad_table_file.good()) {
       ArrayXi old_N_theta;
-      readBinary(quad_table_file_name, old_N_theta);
+      ReadBinary(quad_table_file_name, old_N_theta);
       auto it = set_difference(N_theta.data(), N_theta.data() + N_theta.size(),
           old_N_theta.data(), old_N_theta.data() + old_N_theta.size(), new_N_theta.data());
       new_N_theta.conservativeResize(distance(new_N_theta.data(), it));
@@ -134,24 +117,24 @@ namespace Smarties {
       ArrayXXr<Real> values(GL_quad->x.size(), 2);
       values << acos(GL_quad->x), GL_quad->w;
       string values_file_name = data_path + "/quad_table_values_" + to_string(new_N_theta(i)) + ".dat";
-      writeBinary(values_file_name, values);
+      WriteBinary(values_file_name, values);
     }
     quad_table_file.close();
 
-    writeBinary(quad_table_file_name, N_theta);
+    WriteBinary(quad_table_file_name, N_theta);
   }
 
   template <class Real>
-  void storeGLquadrature() {
-    ArrayXi N_theta1 = seq2Array(50, 505, 5);
+  void StoreGLquadrature() {
+    ArrayXi N_theta1 = Seq2Array(50, 505, 5);
     ArrayXXi N_theta2((2000 - 600) / 100 + 1, 2);
-    N_theta2.col(0) = seq2Array(600, 2000, 100);
+    N_theta2.col(0) = Seq2Array(600, 2000, 100);
     N_theta2.col(1) = N_theta2.col(0) + 5;
     ArrayXi N_theta3 = N_theta2.reshaped();
     ArrayXi N_theta(N_theta1.size() + N_theta3.size());
     N_theta << N_theta1, N_theta3;
 
-    updateGLquadrature<Real>(N_theta, false);
+    UpdateGLquadrature<Real>(N_theta, false);
   }
 
   template <class Real>
@@ -166,13 +149,13 @@ namespace Smarties {
           output->theta = acos(GL_quad->x);
           output->w_theta = GL_quad->w;
         } else {
-          string calc_type = getTypeName<Real>();
+          string calc_type = GetTypeName<Real>();
           string data_path = "data/" + calc_type;
           string values_file_name = data_path + "/quad_table_values_" + to_string(N_int) + ".dat";
           ifstream values_file(values_file_name, ios::in | ios::binary);
           if (values_file.good()) {
             ArrayXXr<Real> values;
-            readBinary(values_file_name, values);
+            ReadBinary(values_file_name, values);
             output->theta = values.col(0);
             output->w_theta = values.col(1);
           } else {

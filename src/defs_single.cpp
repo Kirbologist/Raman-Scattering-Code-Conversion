@@ -1,3 +1,29 @@
+/*
+This file is a part of Raman-Scattering-Code-Conversion.
+<https://github.com/Kirbologist/Raman-Scattering-Code-Conversion>
+
+Written by Siwan Li for the UQ School of Maths and Physics.
+Based on the SMARTIES MATLAB package by W.R.C. Somerville, B. Auguié, E.C. Le Ru
+Copyright (C) 2021-2022 Siwan Li
+
+This source code form is subject to the terms of the MIT License.
+If a copy of the MIT License was not distributed with this file,
+you can obtain one at <https://opensource.org/licenses/MIT>.
+
+
+This code is an instantiation of all template functions using
+template argument 'float', i.e. single-precision floating-points.
+In the case where there are two template arguments, such functions are always used in RamanElastiScattering,
+where two different types are used for different parts of the calculation.
+Thus, the only instantiations instantiated for those functions are for when the
+template arguemnt `Real1` of RamanElasticScattering is float.
+
+Instantiations are split into segments based on which file they are from.
+Before each segment is a set of commented out external instantiations; these would've
+instantiated all the dependencies of the segment. These are written so that if any of the
+segments were to be instantiated on their own, these external instantiations can be used with the segment.
+*/
+
 #include "smarties.hpp"
 #include "raman_elastic_scattering.hpp"
 
@@ -8,18 +34,18 @@ template float mp_pi<float>();
 template float mp_eps<float>();
 template complex<float> mp_im_unit<float>();
 
-template Tensor3c<float> tensorSlice(Tensor3c<float>&,
+template Tensor3c<float> TensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<float> reduceAndSlice(Tensor3c<float>&, int, int);
-template ArrayXXc<float> invertLUcol(MatrixXc<float>&);
-template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
-template RowArrayXr<float> logicalSlice(RowArrayXr<float>&, RowArrayXb&);
-template ArrayXr<float> logicalSlice(ArrayXr<float>&, ArrayXb&);
-template Tensor4c<float> tensor_conj(Tensor4c<float>&);
-template ArrayXr<float> arr_bessel_j(ArrayXr<float>&, float);
-template ArrayXr<float> arr_bessel_y(ArrayXr<float>&, float);
+template ArrayXXc<float> ReduceAndSlice(Tensor3c<float>&, int, int);
+template ArrayXXc<float> InvertLUcol(MatrixXc<float>&);
+template ArrayXi LogicalSlice(ArrayXi&, ArrayXb&);
+template RowArrayXr<float> LogicalSlice(RowArrayXr<float>&, RowArrayXb&);
+template ArrayXr<float> LogicalSlice(ArrayXr<float>&, ArrayXb&);
+template Tensor4c<float> TensorConj(Tensor4c<float>&);
+template ArrayXr<float> ArrBesselJ(ArrayXr<float>&, float);
+template ArrayXr<float> ArrBesselY(ArrayXr<float>&, float);
 
 /*
 extern template float mp_pi<float>();
@@ -33,8 +59,8 @@ template unique_ptr<stRtfunc<float>> auxPrepareIntegrals(int, sInt);
 extern template float mp_pi<float>();
 extern template float mp_im_unit<float>();
 
-extern template ArrayXr<float> arr_bessel_j(ArrayXr<float>&, float);
-extern template ArrayXr<float> arr_bessel_y(ArrayXr<float>&, float);
+extern template ArrayXr<float> ArrBesselJ(ArrayXr<float>&, float);
+extern template ArrayXr<float> ArrBesselY(ArrayXr<float>&, float);
 */
 
 template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int);
@@ -53,12 +79,12 @@ template ArrayXXc<float> vshRBpsi(ArrayXr<float>, const ArrayXr<float>&);
 extern template mp_eps<float>();
 extern template mp_im_unit<float>();
 
-extern template Tensor3c<float> tensorSlice(Tensor3c<float>&,
+extern template Tensor3c<float> TensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-extern template ArrayXXc<float> reduceAndSlice(Tensor3c<float>&, int, int);
-extern template RowArrayXr<float> logicalSlice(RowArrayXr<float>&, RowArrayXb&);
+extern template ArrayXXc<float> ReduceAndSlice(Tensor3c<float>&, int, int);
+extern template RowArrayXr<float> LogicalSlice(RowArrayXr<float>&, RowArrayXb&);
 
 extern template unique_ptr<stRtfunc<float>> auxPrepareIntegrals(int, sInt);
 
@@ -82,8 +108,8 @@ template vector<unique_ptr<stPQ<float>>> sphCalculatePQ(int, const ArrayXi&,
 /*
 extern template float mp_pi<float();
 
-extern template ArrayXXc<float> invertLUcol(MatrixXc<float>&);
-extern template ArrayXi logicalSlice(ArrayXi&, ArrayXb&);
+extern template ArrayXXc<float> InvertLUcol(MatrixXc<float>&);
+extern template ArrayXi LogicalSlice(ArrayXi&, ArrayXb&);
 
 extern template unique_ptr<stIncEabnm<float>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<float>>&);
 */
@@ -131,7 +157,7 @@ template unique_ptr<stSM<float>> pstScatteringMatrixOA(const vector<unique_ptr<s
 extern template double mp_pi<double>();
 extern template complex<double> mp_im_unit();
 
-extern template Tensor4c<double> tensor_conj(Tensor4c<double>&);
+extern template Tensor4c<double> TensorConj(Tensor4c<double>&);
 
 extern template unique_ptr<stIncPar<double>> vshMakeIncidentParams(sIncType, int, double, double, double);
 extern template unique_ptr<stEAllPhi<double>> vshEgenThetaAllPhi(const ArrayXd&,
@@ -158,7 +184,7 @@ extern template unique_ptr<stParams<double>> Raman2SmartiesParams(
 extern template long double mp_pi<long double>();
 extern template complex<long double> mp_im_unit();
 
-extern template Tensor4c<long double> tensor_conj(Tensor4c<long double>&);
+extern template Tensor4c<long double> TensorConj(Tensor4c<long double>&);
 
 extern template unique_ptr<stIncPar<long double>> vshMakeIncidentParams(
     sIncType, int, long double, long double, long double);
@@ -191,9 +217,9 @@ template unique_ptr<stParams<float>> Raman2SmartiesParams(const unique_ptr<Raman
 template void CreateTimeStamp<float, float>(string, const unique_ptr<RamanParams<float>>&);
 template void CreateTimeStamp<float, double>(string, const unique_ptr<RamanParams<float>>&);
 template void CreateTimeStamp<float, long double>(string, const unique_ptr<RamanParams<float>>&);
-template vector<unique_ptr<stTR<float>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
-template vector<unique_ptr<stTR<double>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
-template vector<unique_ptr<stTR<long double>>> ConvertstTRList(const vector<unique_ptr<stTR<float>>>&);
+template vector<unique_ptr<stTR<float>>> ConvertStTRList(const vector<unique_ptr<stTR<float>>>&);
+template vector<unique_ptr<stTR<double>>> ConvertStTRList(const vector<unique_ptr<stTR<float>>>&);
+template vector<unique_ptr<stTR<long double>>> ConvertStTRList(const vector<unique_ptr<stTR<float>>>&);
 template void RamanElasticScattering<float, float>(string, string);
 template void RamanElasticScattering<float, double>(string, string);
 template void RamanElasticScattering<float, long double>(string, string);
