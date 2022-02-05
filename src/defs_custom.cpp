@@ -24,8 +24,8 @@ instantiated all the dependencies of the segment. These are written so that if a
 segments were to be instantiated on their own, these external instantiations can be used with the segment.
 */
 
-#include "../src/smarties.hpp"
-#include "../src/raman_elastic_scattering.hpp"
+#include "smarties.hpp"
+#include "raman_elastic_scattering.hpp"
 #include "core_mp.hpp"
 
 using namespace Eigen;

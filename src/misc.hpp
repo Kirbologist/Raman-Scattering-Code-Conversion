@@ -1,3 +1,19 @@
+/*
+This file is a part of Raman-Scattering-Code-Conversion.
+<https://github.com/Kirbologist/Raman-Scattering-Code-Conversion>
+
+Written by Siwan Li for the UQ School of Maths and Physics.
+Based on the SMARTIES MATLAB package by W.R.C. Somerville, B. Auguié, E.C. Le Ru
+Copyright (C) 2021-2022 Siwan Li
+
+This source code form is subject to the terms of the MIT License.
+If a copy of the MIT License was not distributed with this file,
+you can obtain one at <https://opensource.org/licenses/MIT>.
+
+
+Various small maths functions, helper functions and others used throughout SMARTIES functions that don't fit anywhere.
+*/
+
 #ifndef SMARTIES_MATH_HPP
 #define SMARTIES_MATH_HPP
 
@@ -10,24 +26,31 @@ using namespace Eigen;
 using namespace std;
 
 namespace Smarties {
+  /* Returns the mathematical constant pi with the amount of precision specified by template argument */
   template <class Real>
   inline Real mp_pi(void) { return boost::math::constants::pi<Real>(); }
 
+  /* Returns the machine epsilon of the type given in the template argument */
   template <class Real>
   inline Real mp_eps(void) { return numeric_limits<Real>::epsilon(); }
 
+  /* Returns the imaginary unit 'i' with the type given in the template argument */
   template <class Real>
   inline complex<Real> mp_im_unit(void) { return complex<Real>(0.0, 1.0); }
 
-  // View an existing Eigen::Tensor of rank 2 as an Eigen::Map<Eigen::Matrix>
-  // Rows/Cols are determined from the matrix
+  /*
+  View an existing Eigen::Tensor of rank 2 as an Eigen::Map<Eigen::Matrix>
+  Rows/Cols are determined from the matrix
+  */
   template<typename Scalar>
   auto ArrayMap(Eigen::Tensor<Scalar, 2> &tensor) {
       return Eigen::Map<ArrayXXr<Scalar>>(tensor.data(), tensor.dimension(0), tensor.dimension(1));
   }
 
-  // Converts an Eigen::Matrix (or expression) to Eigen::Tensor
-  // with dimensions specified in std::array
+  /*
+  Converts an Eigen::Matrix (or expression) to Eigen::Tensor
+  with dimensions specified in std::array
+  */
   template<typename Derived, typename T, auto rank>
   Eigen::Tensor<typename Derived::Scalar, rank>
   TensorCast(const Eigen::EigenBase<Derived> &matrix, const std::array<T, rank> &dims) {
@@ -35,16 +58,20 @@ namespace Smarties {
                   (matrix.derived().eval().data(), dims);
   }
 
-  // Converts an Eigen::Matrix (or expression) to Eigen::Tensor
-  // with dimensions as variadic arguments
+  /*
+  Converts an Eigen::Matrix (or expression) to Eigen::Tensor
+  with dimensions as variadic arguments
+  */
   template<typename Derived, typename... Dims>
   auto TensorCast(const Eigen::EigenBase<Derived> &matrix, const Dims... dims) {
       static_assert(sizeof...(Dims) > 0, "TensorCast: sizeof... (Dims) must be larger than 0");
       return TensorCast(matrix, std::array<Eigen::Index, sizeof...(Dims)>{dims...});
   }
 
-  // Converts an Eigen::Matrix (or expression) to Eigen::Tensor
-  // with dimensions directly as arguments in a variadic template
+  /*
+  Converts an Eigen::Matrix (or expression) to Eigen::Tensor
+  with dimensions directly as arguments in a variadic template
+  */
   template<typename Derived>
   auto TensorCast(const Eigen::EigenBase<Derived> &matrix) {
     if constexpr(Derived::ColsAtCompileTime == 1 or Derived::RowsAtCompileTime == 1) {
@@ -54,6 +81,7 @@ namespace Smarties {
     }
   }
 
+  /* Get a readable name/description of the type given in the template argument */
   template <class Real>
   string GetTypeName() {
     string calc_type = typeid(static_cast<Real>(0)).name();
@@ -71,6 +99,10 @@ namespace Smarties {
     return calc_type;
   }
 
+  /*
+  Get a slice of a rank-3 tensor, so that the indices of the slices are given by Eigen::ArithmeticSequence.
+  This is just a helper function for sphCheckBesselConvergence, and is not usable for general purpose.
+  */
   template <class Real>
   Tensor3c<Real> TensorSlice(Tensor3c<Real>& tensor,
       ArithmeticSequence<long int, long int, long int> slice_dim1,
@@ -89,8 +121,18 @@ namespace Smarties {
     return output;
   }
 
+  /*
+  Initialize a linearly-spaced single-column Eigen::Array by converting from an Eigen::ArithmeticSequence.
+  Parameters are the same ones used to construct an Eigen::ArithmeticSequence.
+  */
   ArrayXi Seq2Array(long int first, long int last, long int stride);
 
+  /*
+  Reduce a complex rank-3 Eigen::Tensor into a complex Eigen::Array by
+  reducing the third dimension of the tensor down to only coefficients whose third index is `offset`,
+  and reducing the first dimenstion down to only the last `num_rows` rows.
+  This was used specifically as a helper function in sphCalculatePQ.
+  */
   template <class Real>
   ArrayXXc<Real> ReduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows) {
     const auto dims = tensor.dimensions();
@@ -102,6 +144,7 @@ namespace Smarties {
     return output;
   }
 
+  /* Performs matrix inversion using LU with partial pivoting of columns. This is used in rvhGetTRfromPQ. */
   template <class Real>
   ArrayXXc<Real> InvertLUcol(MatrixXc<Real>& B) {
     PartialPivLU<MatrixXc<Real>> PLU_decomp = B.matrix().lu();
@@ -112,9 +155,10 @@ namespace Smarties {
     return U.lu().solve(Y).array();
   }
 
-  // Expects base_array.dimensions() = bool_array.dimensions()
+  /* Performs the equivalent of MATLAB's logical indexing on a single-column Eigen::Array. */
   template <class Real>
   ArrayXr<Real> LogicalSlice(ArrayXr<Real>& base_array, ArrayXb& bool_array) {
+    assert(base_array.size() == bool_array.size());
     int output_size = bool_array.count();
     ArrayXr<Real> output(output_size);
     int base_index = 0;
@@ -126,9 +170,10 @@ namespace Smarties {
     return output;
   }
 
-  // Expects base_array.dimensions() = bool_array.dimensions()
+  /* Performs the equivalent of MATLAB's logical indexing on a single-row Eigen::Array. */
   template <class Real>
   RowArrayXr<Real> LogicalSlice(RowArrayXr<Real>& base_array, RowArrayXb& bool_array) {
+    assert(base_array.size() == bool_array.size());
     int output_size = bool_array.count();
     RowArrayXr<Real> output(output_size);
     int base_index = 0;
@@ -140,8 +185,10 @@ namespace Smarties {
     return output;
   }
 
+  /* Gets the indices of all 'true' components of a single-column boolean Eigen::Array. */
   ArrayXi LogicalIndices(ArrayXb& bool_array);
 
+  /* Take a tensor and return the same tensor, but with all its coefficients conjugated. */
   template <class Real>
   Tensor4c<Real> TensorConj(Tensor4c<Real>& base) {
     Tensor4c<Real> output = base;
@@ -156,6 +203,7 @@ namespace Smarties {
     return output;
   }
 
+  /* Calculates the Bessel function of the first kind with many values of `nu` and a fixed value of `x`. */
   template <class Real>
   ArrayXr<Real> ArrBesselJ(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());
@@ -164,6 +212,7 @@ namespace Smarties {
     return output;
   }
 
+  /* Calculates the Bessel function of the second kind with many values of `nu` and a fixed value of `x`. */
   template <class Real>
   ArrayXr<Real> ArrBesselY(ArrayXr<Real>& nu, Real x) {
     ArrayXr<Real> output(nu.size());

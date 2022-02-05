@@ -10,7 +10,7 @@ If a copy of the MIT License was not distributed with this file,
 you can obtain one at <https://opensource.org/licenses/MIT>.
 
 
-This code is used to calculate Raman scattering off of spheroidal droplets in air.
+This code is used to calculate Raman scattering off of spheroids.
 None of the code was included in the original SMARTIES package.
 Many functions are used to provide I/O support to the main function.
 */
@@ -82,13 +82,48 @@ struct RamanParams {
 /*
 Get the 2 types to be used for floating-point calculations from a text file.
 Inputs:
-  in_file_name: path of the text file which describes
+  in_file_name: path of the text file which contains the calculation type
+Output:
+  String array of size 2 that specifies 2 calculation types.
 */
 std::array<CalcType, 2> GetCalcType(string in_file_name);
+
+/*
+Get the value given for some parameter from a text file.
+Inputs:
+  in_file_name: path of the text file which contains the option
+  option: The exact string of the specific option/parameter to look for
+Output:
+  The user-defined value given to the option, as a string
+*/
 string GetOption(string in_file_name, string option);
+
+/*
+Determine if it's okay to write calculation info to a file from an option in a text file.
+I.e. it checks the "Print output to file:" parameter.
+Inputs:
+  in_file_name: path of the text file which specifies if it's okay to write to output or not
+Output:
+  True if the file says "yes", i.e. it is okay, false otherwise
+*/
 bool CanWriteOutput(string in_file_name);
+
+/*
+Determine number of CPUs to use from a text file. I.e. it checks the "No. of CPUs" parameter.
+Inputs:
+  in_file_name: path of the text file which specifies the number of CPUs.
+Output:
+  The number of CPUs that are allowed
+*/
 int GetNumCPUs(string in_file_name);
-int GetNumParticleCPUs(string in_file_name);
+
+/*
+Prints a string to both standard output (the terminal) and appends it to a text ilfe (if allowed).
+Inputs:
+  out_string: the string to print/write
+  out_file_name: path of the text file to write to
+  write_output: true enables writing to output, false disables it.
+*/
 void MultiPrint(string out_string, string out_file_name, bool write_output = false);
 
 /*

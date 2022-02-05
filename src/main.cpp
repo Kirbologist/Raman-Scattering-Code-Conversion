@@ -1,4 +1,17 @@
-#include "src/raman_elastic_scattering.hpp"
+/*
+This file is a part of Raman-Scattering-Code-Conversion.
+<https://github.com/Kirbologist/Raman-Scattering-Code-Conversion>
+
+Written by Siwan Li for the UQ School of Maths and Physics.
+Based on the SMARTIES MATLAB package by W.R.C. Somerville, B. Auguié, E.C. Le Ru
+Copyright (C) 2021-2022 Siwan Li
+
+This source code form is subject to the terms of the MIT License.
+If a copy of the MIT License was not distributed with this file,
+you can obtain one at <https://opensource.org/licenses/MIT>.
+*/
+
+#include "raman_elastic_scattering.hpp"
 #include <omp.h>
 
 using namespace std;
@@ -16,7 +29,9 @@ extern template void RamanElasticScattering<long double, long double>(string, st
 string in_file_name = "config.txt";
 string out_dir = "output";
 
+/* Runs Raman Elastic Scattering calculations without fully custom multiprecision functionality */
 int main(int argc, char** argv) {
+  // Check flags
   vector<string> flags = {"--input=", "--output-dir="};
   for (int i = 0; i < argc; i++) {
     string arg = argv[i];
@@ -36,14 +51,16 @@ int main(int argc, char** argv) {
     }
   }
 
+  // Get the rest of the run parameters
   int num_CPUs = GetNumCPUs(in_file_name);
   if (num_CPUs > 0)
     omp_set_num_threads(num_CPUs);
   bool can_write_output = CanWriteOutput(in_file_name);
   if (!can_write_output)
     out_dir = "";
-
   std::array<CalcType, 2> calc_types = GetCalcType(in_file_name);
+
+  // Run the calculations
   switch (calc_types[0]) {
     case CalcType::SINGLE : {
       switch (calc_types[1]) {

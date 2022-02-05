@@ -8,7 +8,7 @@ PRECISION=113 # default value of 113 is number of significand bits in quadruple-
 
 BUILDDIR=build
 CC=g++
-CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp -static-libgcc -static-libstdc++
+CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp
 CPPFLAGS+=$(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 MP_FLAGS=-DPRECISION=$(PRECISION)
 PRODUCT_NAME=raman_elastic_scattering
@@ -54,14 +54,11 @@ info :
 $(BUILDDIR) :
 	@mkdir $@
 
-$(BUILDDIR)/main.o : main.cpp
-	$(CC) -c -o $@ $< $(CPPFLAGS)
+$(BUILDDIR)/defs_custom.o : src/defs_custom.cpp
+	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
 
-$(BUILDDIR)/main_mp.o : main_mp.cpp
+$(BUILDDIR)/main_mp.o : src/main_mp.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
 
 $(BUILDDIR)/%.o : src/%.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS)
-
-$(BUILDDIR)/%.o : src_mp/%.cpp
-	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
