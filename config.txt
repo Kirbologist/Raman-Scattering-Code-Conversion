@@ -1,11 +1,11 @@
 ### RUN PARAMETERS ###
 No. of CPUs:1
-Calculation type:double
+Calculation type:custom-double
 Print output to file:yes
 
 ### CALCULATION PARAMETERS ###
-Minimum diameter:1000
-Maximum diameter:2000
+Minimum diameter:10
+Maximum diameter:20
 Minimum h:1/3
 Maximum h:1/3
 

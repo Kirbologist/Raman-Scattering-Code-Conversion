@@ -3,10 +3,12 @@
 *.exe
 *.o
 raman_elastic_scattering
+store_GL_quadrature
 results.txt
 log.txt
 callgrind.out.*
 temp/*
+data/*
 a2c*
 
 # Packages #

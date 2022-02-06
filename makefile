@@ -26,6 +26,9 @@ regular : $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/main.o
 mp : $(BUILDDIR) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o
 	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o $(CPPFLAGS) $(MP_LIBS)
 
+utils: $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/store_GL_quadrature.o
+	$(CC) -o store_GL_quadrature $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/store_GL_quadrature.o $(CPPFLAGS) $(MP_LIBS)
+
 clean :
 	@rm -f $(DEF_OBJS)
 	@rm -f $(MP_OBJS)
@@ -53,6 +56,9 @@ info :
 ### Prerequisites
 $(BUILDDIR) :
 	@mkdir $@
+
+$(BUILDDIR)/store_GL_quadrature.o : src/utils.cpp
+	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
 
 $(BUILDDIR)/defs_custom.o : src/defs_custom.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
