@@ -146,13 +146,9 @@ namespace Smarties {
 
   /* Performs matrix inversion using LU with partial pivoting of columns. This is used in rvhGetTRfromPQ. */
   template <class Real>
-  ArrayXXc<Real> InvertLUcol(MatrixXc<Real>& B) {
-    PartialPivLU<MatrixXc<Real>> PLU_decomp = B.matrix().lu();
-    MatrixXc<Real> P = PLU_decomp.permutationP();
-    MatrixXc<Real> L = PLU_decomp.matrixLU().template triangularView<UnitLower>();
-    MatrixXc<Real> U = PLU_decomp.matrixLU().template triangularView<Upper>();
-    MatrixXc<Real> Y = L.lu().solve(P);
-    return U.lu().solve(Y).array();
+  ArrayXXc<Real> InvertLUcol(MatrixXc<Real>& M) {
+    PartialPivLU<MatrixXc<Real>> PLU_decomp = M.matrix().lu();
+    return PLU_decomp.inverse().array();
   }
 
   /* Performs the equivalent of MATLAB's logical indexing on a single-column Eigen::Array. */
