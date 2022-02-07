@@ -38,14 +38,15 @@ template Tensor3c<float> TensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<float> ReduceAndSlice(Tensor3c<float>&, int, int);
+template ArrayXXc<float> Subtensor2ArrMap(const Tensor3c<float>&,
+    const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<float> InvertLUcol(MatrixXc<float>&);
 template ArrayXi LogicalSlice(ArrayXi&, ArrayXb&);
-template RowArrayXr<float> LogicalSlice(RowArrayXr<float>&, RowArrayXb&);
-template ArrayXr<float> LogicalSlice(ArrayXr<float>&, ArrayXb&);
+template RowArrayXf LogicalSlice(RowArrayXf&, RowArrayXb&);
+template ArrayXf LogicalSlice(ArrayXf&, ArrayXb&);
 template Tensor4c<float> TensorConj(Tensor4c<float>&);
-template ArrayXr<float> ArrBesselJ(ArrayXr<float>&, float);
-template ArrayXr<float> ArrBesselY(ArrayXr<float>&, float);
+template ArrayXf ArrBesselJ(ArrayXf&, float);
+template ArrayXf ArrBesselY(ArrayXf&, float);
 
 /*
 extern template float mp_pi<float>();
@@ -59,21 +60,21 @@ template unique_ptr<stRtfunc<float>> auxPrepareIntegrals(int, sInt);
 extern template float mp_pi<float>();
 extern template float mp_im_unit<float>();
 
-extern template ArrayXr<float> ArrBesselJ(ArrayXr<float>&, float);
-extern template ArrayXr<float> ArrBesselY(ArrayXr<float>&, float);
+extern template ArrayXf ArrBesselJ(ArrayXf&, float);
+extern template ArrayXf ArrBesselY(ArrayXf&, float);
 */
 
 template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int);
 template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int, float, float, float);
-template unique_ptr<stPinmTaunm<float>> vshPinmTaunm(int, const ArrayXr<float>&);
+template unique_ptr<stPinmTaunm<float>> vshPinmTaunm(int, const ArrayXf&);
 template unique_ptr<stIncEabnm<float>> vshGetIncidentCoeffs(int, const unique_ptr<stIncPar<float>>&);
-template unique_ptr<stZnAll<float>> vshGetZnAll(int, const ArrayXr<float>&, sBessel);
-template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXr<float>&,
-    const ArrayXr<float>&, const ArrayXXc<float>&, const ArrayXXc<float>&,
-    const RowArrayXr<float>&, const RowArrayXr<float>&, sBessel, unique_ptr<stPinmTaunm<float>>);
+template unique_ptr<stZnAll<float>> vshGetZnAll(int, const ArrayXf&, sBessel);
+template unique_ptr<stEAllPhi<float>> vshEgenThetaAllPhi(const ArrayXf&,
+    const ArrayXf&, const ArrayXXc<float>&, const ArrayXXc<float>&,
+    const RowArrayXf&, const RowArrayXf&, sBessel, unique_ptr<stPinmTaunm<float>>);
 template unique_ptr<stEforPhi<float>> vshEthetaForPhi(const unique_ptr<stEAllPhi<float>>&, float);
-template ArrayXXc<float> vshRBchi(ArrayXr<float>, const ArrayXr<float>&);
-template ArrayXXc<float> vshRBpsi(ArrayXr<float>, const ArrayXr<float>&);
+template ArrayXXc<float> vshRBchi(ArrayXf, const ArrayXf&);
+template ArrayXXc<float> vshRBpsi(ArrayXf, const ArrayXf&);
 
 /*
 extern template mp_eps<float>();
@@ -84,23 +85,23 @@ extern template Tensor3c<float> TensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
 extern template ArrayXXc<float> ReduceAndSlice(Tensor3c<float>&, int, int);
-extern template RowArrayXr<float> LogicalSlice(RowArrayXr<float>&, RowArrayXb&);
+extern template RowArrayXf LogicalSlice(RowArrayXf&, RowArrayXb&);
 
 extern template unique_ptr<stRtfunc<float>> auxPrepareIntegrals(int, sInt);
 
-extern template unique_ptr<stPinmTaunm<float>> vshPinmTaunm(int, const ArrayXr<float>&);
-extern template ArrayXXc<float> vshRBchi(ArrayXr<float>, const ArrayXr<float>&);
-extern template ArrayXXc<float> vshRBpsi(ArrayXr<float>, const ArrayXr<float>&);
+extern template unique_ptr<stPinmTaunm<float>> vshPinmTaunm(int, const ArrayXf&);
+extern template ArrayXXc<float> vshRBchi(ArrayXf, const ArrayXf&);
+extern template ArrayXXc<float> vshRBpsi(ArrayXf, const ArrayXf&);
 */
 
-template unique_ptr<ArrayXXr<float>> sphGetUforFp(int);
-template unique_ptr<stFprow<float>> sphGetFpRow(int, float, const ArrayXr<float>&);
-template unique_ptr<stFpovx<float>> sphGetFpovx(int, float, const ArrayXr<float>&);
-template unique_ptr<stBessel<float>> sphGetXiPsi(int, float, const ArrayXr<float>&, int);
+template ArrayXXf sphGetUforFp(int);
+template unique_ptr<stFpRow<float>> sphGetFpRow(int, float, const ArrayXf&);
+template unique_ptr<stFpovx<float>> sphGetFpovx(int, float, const ArrayXf&);
+template unique_ptr<stBessel<float>> sphGetXiPsi(int, float, const ArrayXf&, int);
 template unique_ptr<stBesselPrimes<float>> sphGetBesselProductsPrimes(const Tensor3c<float>&);
-template unique_ptr<stBesselProducts<float>> sphGetModifiedBesselProducts(int, float, const ArrayXr<float>&, int);
-template unique_ptr<stRtfunc<float>> sphMakeGeometry(int, float, float, const unique_ptr<ArrayXr<float>>);
-template int sphCheckBesselConvergence(int, float, const ArrayXr<float>&, float, int);
+template unique_ptr<stBesselProducts<float>> sphGetModifiedBesselProducts(int, float, const ArrayXf&, int);
+template unique_ptr<stRtfunc<float>> sphMakeGeometry(int, float, float, const unique_ptr<ArrayXf>);
+template int sphCheckBesselConvergence(int, float, const ArrayXf&, float, int);
 template int sphEstimateNB(int, const unique_ptr<stRtfunc<float>>&, const unique_ptr<stParams<float>>&, float);
 template vector<unique_ptr<stPQ<float>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<float>>&, const unique_ptr<stParams<float>>&, int);
@@ -120,7 +121,7 @@ template vector<unique_ptr<stTR<float>>> rvhGetSymmetricMat(const vector<unique_
 template unique_ptr<stAbcdnm<float>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<float>>>&,
     const unique_ptr<stIncPar<float>>&, unique_ptr<stIncEabnm<float>>);
 template unique_ptr<stCrossSection<float>> rvhGetAverageCrossSections(
-    const ArrayXr<float>&, const vector<vector<unique_ptr<stTR<float>>>>&);
+    const ArrayXf&, const vector<vector<unique_ptr<stTR<float>>>>&);
 
 /*
 extern template int sphEstimateNB(int, const unique_ptr<stRtfunc<float>>&,
@@ -133,7 +134,7 @@ extern template vector<unique_ptr<stTR<float>>> rvhTruncateMatrices(const vector
 extern template vector<unique_ptr<stTR<float>>> rvhGetSymmetricMat(
     const vector<unique_ptr<stTR<float>>>&, vector<string>);
 extern template unique_ptr<stCrossSection<float>> rvhGetAverageCrossSections(
-    const ArrayXr<float>&, const vector<vector<unique_ptr<stTR<float>>>>&);
+    const ArrayXf&, const vector<vector<unique_ptr<stTR<float>>>>&);
 */
 
 template unique_ptr<stTmatrix<float>> slvForT(const unique_ptr<stParams<float>>&,
@@ -148,7 +149,7 @@ extern template unique_ptr<stIncPar<float>> vshMakeIncidentParams(sIncType, int)
 */
 
 template unique_ptr<stRes<float>> pstMakeStructForField(const unique_ptr<stAbcdnm<float>>&,
-    int, ArrayXr<float>, ArrayXr<float>, float, unique_ptr<stIncPar<float>>, float, float);
+    int, ArrayXf, ArrayXf, float, unique_ptr<stIncPar<float>>, float, float);
 template unique_ptr<stRes<float>> pstMakeStructForField(
     const unique_ptr<stAbcdnm<float>>&, const unique_ptr<stParams<float>>&);
 template unique_ptr<stSM<float>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<float>>>&,

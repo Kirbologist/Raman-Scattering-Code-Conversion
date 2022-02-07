@@ -13,7 +13,7 @@ you can obtain one at <https://opensource.org/licenses/MIT>.
 
 This code contains all 'pst' SMARTIES functions that are used in Raman scattering calculations,
 i.e. high-level functions used for post-processing. Much of the code here is based on the Fortran code in tmd.lp.f
-written by Mishcehnko and co-workers publicly available at % http://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html
+written by Mishcehnko and co-workers publicly available at http://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html
 */
 
 #ifndef PST_HPP

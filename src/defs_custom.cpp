@@ -39,7 +39,8 @@ template Tensor3c<RamanFloat> TensorSlice(Tensor3c<RamanFloat>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<RamanFloat> ReduceAndSlice(Tensor3c<RamanFloat>&, int, int);
+template ArrayXXc<RamanFloat> Subtensor2ArrMap(const Tensor3c<RamanFloat>&,
+    const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<RamanFloat> InvertLUcol(MatrixXc<RamanFloat>&);
 template ArrayXi LogicalSlice(ArrayXi&, ArrayXb&);
 template RowArrayXr<RamanFloat> LogicalSlice(RowArrayXr<RamanFloat>&, RowArrayXb&);
@@ -94,8 +95,8 @@ extern template ArrayXXc<RamanFloat> vshRBchi(ArrayXr<RamanFloat>, const ArrayXr
 extern template ArrayXXc<RamanFloat> vshRBpsi(ArrayXr<RamanFloat>, const ArrayXr<RamanFloat>&);
 */
 
-template unique_ptr<ArrayXXr<RamanFloat>> sphGetUforFp(int);
-template unique_ptr<stFprow<RamanFloat>> sphGetFpRow(int, RamanFloat, const ArrayXr<RamanFloat>&);
+template ArrayXXr<RamanFloat> sphGetUforFp(int);
+template unique_ptr<stFpRow<RamanFloat>> sphGetFpRow(int, RamanFloat, const ArrayXr<RamanFloat>&);
 template unique_ptr<stFpovx<RamanFloat>> sphGetFpovx(int, RamanFloat, const ArrayXr<RamanFloat>&);
 template unique_ptr<stBessel<RamanFloat>> sphGetXiPsi(int, RamanFloat, const ArrayXr<RamanFloat>&, int);
 template unique_ptr<stBesselPrimes<RamanFloat>> sphGetBesselProductsPrimes(const Tensor3c<RamanFloat>&);

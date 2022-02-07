@@ -55,7 +55,7 @@ namespace Smarties {
   template <class Real>
   unique_ptr<stTmatrix<Real>> slvForT(const unique_ptr<stParams<Real>>& params,
       const unique_ptr<stOptions>& options,
-      unique_ptr<stRtfunc<Real>> stGeometry = unique_ptr<stRtfunc<Real>>()) {
+      unique_ptr<stRtfunc<Real>> st_geometry = unique_ptr<stRtfunc<Real>>()) {
     Real c = params->c;
     Real a = params->a;
 
@@ -66,12 +66,12 @@ namespace Smarties {
     ArrayXi abs_m_vec = options->abs_m_vec.size() ? options->abs_m_vec : ArrayXi::LinSpaced(N + 1, 0, N);
 
     // Make structure describing spheroidal geometry and quadrature points for numerical integrations
-    if (!stGeometry)
-      stGeometry = sphMakeGeometry(Nb_theta, a, c);
+    if (!st_geometry)
+      st_geometry = sphMakeGeometry(Nb_theta, a, c);
 
     // We won't be estimating delta for the Raman scattering code
     // if (options->delta < 0) {
-    //  sphEstimateDelta(stGeometry, params);
+    //  sphEstimateDelta(st_geometry, params);
     // }
 
     int NQ = N + options->delta; // NQ>=N: Maximum multipole order for computing P and Q matrices
@@ -79,12 +79,12 @@ namespace Smarties {
 
     // Estimating NB, the number of multipoles to compute the Bessel functions (NB >= NQ)
     if (NB <= 0)
-      NB = sphEstimateNB(NQ, stGeometry, params);
+      NB = sphEstimateNB(NQ, st_geometry, params);
     if (NB < NQ)
       NB = NQ;
 
     // Calculate P and Q matrices
-    vector<unique_ptr<stPQ<Real>>> st_PQ_list = sphCalculatePQ(NQ, abs_m_vec, stGeometry, params, NB);
+    vector<unique_ptr<stPQ<Real>>> st_PQ_list = sphCalculatePQ(NQ, abs_m_vec, st_geometry, params, NB);
     // Calculate T (and possibly R) matrices
     vector<unique_ptr<stTR<Real>>> st_TR_list = rvhGetTRfromPQ(st_PQ_list, options->get_R);
 

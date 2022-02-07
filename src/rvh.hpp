@@ -29,7 +29,7 @@ using namespace std;
 
 namespace Smarties {
 
-  /* Struct of four matrices, which in this context describes the T and R matrices of a set of electric fields */
+  /* Specialisation of stMat for a describing a T, R matrix pair */
   template <class Real>
   struct stTR : stMat<Real> {
     using stMat<Real>::stMat;

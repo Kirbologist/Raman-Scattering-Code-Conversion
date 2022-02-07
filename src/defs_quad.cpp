@@ -38,7 +38,8 @@ template Tensor3c<long double> TensorSlice(Tensor3c<long double>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>);
-template ArrayXXc<long double> ReduceAndSlice(Tensor3c<long double>&, int, int);
+template ArrayXXc<long double> Subtensor2ArrMap(const Tensor3c<long double>&,
+    const std::array<int, 3>&, const std::array<int, 3>&, int, int);
 template ArrayXXc<long double> InvertLUcol(MatrixXc<long double>&);
 template ArrayXi LogicalSlice(ArrayXi&, ArrayXb&);
 template RowArrayXr<long double> LogicalSlice(RowArrayXr<long double>&, RowArrayXb&);
@@ -93,8 +94,8 @@ extern template ArrayXXc<long double> vshRBchi(ArrayXr<long double>, const Array
 extern template ArrayXXc<long double> vshRBpsi(ArrayXr<long double>, const ArrayXr<long double>&);
 */
 
-template unique_ptr<ArrayXXr<long double>> sphGetUforFp(int);
-template unique_ptr<stFprow<long double>> sphGetFpRow(int, long double, const ArrayXr<long double>&);
+template ArrayXXr<long double> sphGetUforFp(int);
+template unique_ptr<stFpRow<long double>> sphGetFpRow(int, long double, const ArrayXr<long double>&);
 template unique_ptr<stFpovx<long double>> sphGetFpovx(int, long double, const ArrayXr<long double>&);
 template unique_ptr<stBessel<long double>> sphGetXiPsi(int, long double, const ArrayXr<long double>&, int);
 template unique_ptr<stBesselPrimes<long double>> sphGetBesselProductsPrimes(const Tensor3c<long double>&);

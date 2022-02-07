@@ -9,6 +9,11 @@ Copyright (C) 2021-2022 Siwan Li
 This source code form is subject to the terms of the MIT License.
 If a copy of the MIT License was not distributed with this file,
 you can obtain one at <https://opensource.org/licenses/MIT>.
+
+
+This files runs the storeGLquadrature script, which was located in the utils folder in the original MATLAB
+code. Note, this needs to be linked with the multiprecision libraries gmp and mpfr.
+storeGLquadrature is ran using whichever one or two calculation types are written in the input file.
 */
 
 #include "smarties_aux.hpp"
@@ -21,6 +26,22 @@ using namespace std;
 string in_file_name = "config.txt";
 
 int main(int argc, char** argv) {
+  // Check flags
+  vector<string> flags = {"--input="};
+  for (int i = 0; i < argc; i++) {
+    string arg = argv[i];
+    for (size_t j = 0; j < flags.size(); j++) {
+      if (arg.find(flags[j]) == 0) {
+        switch (j) {
+          case 0 : {
+            in_file_name = arg.substr(flags[j].size());
+            break;
+          }
+        }
+      }
+    }
+  }
+  
   std::array<CalcType, 2> calc_types = GetCalcType(in_file_name);
   for (CalcType calc_type : calc_types) {
     switch (calc_type) {

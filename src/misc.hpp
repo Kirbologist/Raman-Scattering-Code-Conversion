@@ -134,12 +134,12 @@ namespace Smarties {
   This was used specifically as a helper function in sphCalculatePQ.
   */
   template <class Real>
-  ArrayXXc<Real> ReduceAndSlice(Tensor3c<Real>& tensor, int offset, int num_rows) {
-    const auto dims = tensor.dimensions();
-    ArrayXXc<Real> output(num_rows, dims[1]);
-    for (int i = 0; i < num_rows; i++) {
-      for (int j = 0; j < dims[1]; j++)
-        output(i, j) = tensor(dims[0] - num_rows + i, j, offset);
+  ArrayXXc<Real> Subtensor2ArrMap(const Tensor3c<Real>& tensor,
+      const std::array<int, 3>& offsets, const std::array<int, 3>& extents, int rows, int cols) {
+    ArrayXXc<Real> output(rows, cols);
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++)
+        output(i, j) = tensor(offsets[0] + i, offsets[1], offsets[2] + j);
     }
     return output;
   }

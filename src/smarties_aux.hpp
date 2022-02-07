@@ -35,25 +35,26 @@ namespace Smarties {
 
   enum sInt {GAUSS, RECTANGLE, PTS};
 
-  // Struct containing information for a Gaussian Legendre quadrature of order N
+  /* Struct containing information for a Gaussian Legendre quadrature of order N */
   template <class Real>
   struct stGLQuad {
     ArrayXr<Real> x;  // Legendre-Gauss nodes, [(N + 1) X 1]
     ArrayXr<Real> w; // Legendre-Gauss weights, [(N + 1) X 1]
   };
 
+  /* Struct containing geometric information for spheroids */
   template <class Real>
   struct stRtfunc {
-    int Nb_theta;
-    ArrayXr<Real> theta;
-    ArrayXr<Real> w_theta;
-    ArrayXr<Real> r;
-    ArrayXr<Real> dr_dt;
-    Real a;
-    Real c;
-    Real h;
-    Real r0;
-    sInt type;
+    int Nb_theta; // number of theta
+    ArrayXr<Real> theta; // theta angles where things are computed
+    ArrayXr<Real> w_theta; // weights from quadrature
+    ArrayXr<Real> r; // r(theta) defining the geometry
+    ArrayXr<Real> dr_dt; // derivative of r(theta)
+    Real a; // semi-axis length for axes along x, y
+    Real c; // semi-axis length along z
+    Real h; // the aspect ratio between max(a, c) and min(a, c)
+    Real r0; // equivalent-volume-sphere radius
+    sInt type; // describes how the points were computed
   };
 
   /*
