@@ -18,7 +18,6 @@ storeGLquadrature is ran using whichever one or two calculation types are writte
 
 #include "smarties_aux.hpp"
 #include "raman_elastic_scattering.hpp"
-#include "core_mp.hpp"
 
 using namespace Eigen;
 using namespace std;
@@ -41,7 +40,7 @@ int main(int argc, char** argv) {
       }
     }
   }
-  
+
   std::array<CalcType, 2> calc_types = GetCalcType(in_file_name);
   for (CalcType calc_type : calc_types) {
     switch (calc_type) {
@@ -55,10 +54,6 @@ int main(int argc, char** argv) {
       }
       case QUAD : {
         StoreGLquadrature<long double>();
-        break;
-      }
-      case CUSTOM : {
-        StoreGLquadrature<RamanFloat>();
         break;
       }
       default :

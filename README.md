@@ -105,7 +105,7 @@ Any value given will be converted to the types given in the `Calculation type` p
 
 ### Running `StoreGLquadrature` script
 
-Run the command `make utils` to compile the binary, then execute the file `store_GL_quadrature`. Running this will calculate and store Gauss-Legendre quadrature Eigen::Arrays for some values of `N_theta` as raw binary files in the `data/` directory. These will be calculated for the one or two calculation types given in `config.txt`. This allows these quadratures to just be looked up in the future, instead of being calculated from scratch. Unfortunately, since the data is stored as raw binary, this makes it rather unsafe to use. Therefore, it's highly recommended to re-calculate this data when using the code on a different machine. There are also problems reading quadratures that were calculated for the custom type (i.e. `RamanFloat`). More details are given in the source code in `smarties_aux.hpp`.
+Run the command `make utils` to compile the binary, then execute the file `store_GL_quadrature`. Running this will calculate and store Gauss-Legendre quadrature Eigen::Arrays for some values of `N_theta` as raw binary files in the `data/` directory. These will be calculated for the one or two calculation types given in `config.txt`. This allows these quadratures to just be looked up in the future, instead of being calculated from scratch. Unfortunately, since the data is stored as raw binary, this makes it rather unsafe to use. Therefore, it's highly recommended to re-calculate this data when using the code on a different machine. There are also problems reading quadratures that were calculated for the custom type (i.e. `RamanFloat`), as such, storing quadratures of that type is disabled. More details are given in the source code in `smarties_aux.hpp`.
 
 ## Reading the code
 
@@ -168,7 +168,6 @@ If this project were to continue, here are a few ideas for ways to improve or sp
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 - The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept.
 - sphEstimateDelta doesn't get called in slvForT in the original Raman scattering MATLAB program, so this function isn't implemented.
-- rvhGetSymmetricMat is not debugged since it's never used in the final `raman_elastic_scattering` program.
 - rvhTruncateMatrices, rvhGetSymmetricMat, rvhGetFieldCoefficients, rvhGetAverageCrossSections can only take stTR vectors as arguments and not stPR vectors. (Overloading these functions with versions that can take stPR vectors is relatively simple however.)
 - Many of the original functions had extra functionality for when the code is ran on Octave instead of MATLAB. Since this is only C++, such code (including the `isOctave` function itself) is not implemented.
 

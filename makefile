@@ -27,7 +27,7 @@ mp : $(BUILDDIR) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o
 	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o $(CPPFLAGS) $(MP_LIBS)
 
 utils: $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/store_GL_quadrature.o
-	$(CC) -o store_GL_quadrature $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/store_GL_quadrature.o $(CPPFLAGS) $(MP_LIBS)
+	$(CC) -o store_GL_quadrature $(DEF_OBJS) $(BUILDDIR)/store_GL_quadrature.o $(CPPFLAGS)
 
 clean :
 	@rm -f $(DEF_OBJS)

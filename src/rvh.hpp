@@ -262,7 +262,6 @@ namespace Smarties {
     return output;
   }
 
-  // Untested
   /*
   Symmetrises the matrices given in mat_list, and leaves other matrices present in st_mat_list unchanged.
   Uses the upper triangular matrices to deduce the lower triangular parts from the symmetry relations
@@ -286,7 +285,7 @@ namespace Smarties {
 
     for (int i = 0; i < num_entries; i++) {
       output[i] = make_unique<stTR<Real>>(*(st_mat_list[i])); // Make a deep copy at the ith entry of st_mat_list
-      int num_st_4M = mat_list.size() * 2;
+      int num_st_4M = mat_list.size();
       for (int j = 0; j < num_st_4M; j++) {
         for (int k = EO; k != END; k++) { // Symmetrise eo matrix, then oe matrix
           st4M<Real>* st_4M;
@@ -295,20 +294,18 @@ namespace Smarties {
               st_4M = &(output[i]->st_4M_T_eo());
             else if (k == OE)
               st_4M = &(output[i]->st_4M_T_oe());
-          }
-          else if (mat_list[j] == "st_4M_R") {
+          } else if (mat_list[j] == "st_4M_R") {
             if (k == EO)
-              st_4M = &(output[i]->st_4M_T_eo());
+              st_4M = &(output[i]->st_4M_R_eo());
             else if (k == OE)
-              st_4M = &(output[i]->st_4M_T_oe());
-          }
-          else
+              st_4M = &(output[i]->st_4M_R_oe());
+          } else
             continue;
           ArrayXi ind1 = st_4M->ind1;
           ArrayXi ind2 = st_4M->ind2;
 
-          if (!ind1.size() && !ind2.size()) { // Check that neither two are empty
-            int offset12 = (ind1(0) - ind2(0) + 1)/2;
+          if (ind1.size() && ind2.size()) { // Check that neither two are empty
+            int offset12 = (ind2(0) - ind1(0) + 1)/2;
             // int offset21 = 1 - offset12;
 
             // Upper triangular without diagonal
@@ -331,7 +328,7 @@ namespace Smarties {
               upper2 = st_4M->M21.matrix().template triangularView<StrictlyUpper>();
             }
             st_4M->M12 = (upper1 - upper2.transpose()).array(); // Symmetrised matrix
-            st_4M->M21 = st_4M->M12.transpose(); // Symmetrised matrix
+            st_4M->M21 = -st_4M->M12.transpose(); // Symmetrised matrix
           }
         }
       }
