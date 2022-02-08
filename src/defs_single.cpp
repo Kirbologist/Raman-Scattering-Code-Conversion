@@ -34,6 +34,8 @@ template float mp_pi<float>();
 template float mp_eps<float>();
 template complex<float> mp_im_unit<float>();
 
+// TODO: instantiate ArrayMap and TensorCast functions for both Real and Complex
+template string GetTypeName<float>();
 template Tensor3c<float> TensorSlice(Tensor3c<float>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,

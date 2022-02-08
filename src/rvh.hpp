@@ -73,6 +73,8 @@ namespace Smarties {
     get_R - if true, R is computed and returned
   Output:
     A std::vector of size M of unique pointers to stTR structs.
+  Dependencies:
+    InvertLUcol
   */
   template <class Real>
   vector<unique_ptr<stTR<Real>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<Real>>>& st_PQ_list, bool get_R = false) {
@@ -220,6 +222,8 @@ namespace Smarties {
   Output:
     returns a deep copy of the same st_mat_list vector, but where all M11, M12, M21 and M22 members
     have been truncated to N = N_max and values of m > N_max are removed.
+  Dependencies:
+    LogicalIndices
   */
   template <class Real>
   vector<unique_ptr<stTR<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<Real>>>& st_mat_list, int N_max) {
@@ -358,7 +362,7 @@ namespace Smarties {
     P = (N_max + 1)^2. The padding exists to simplify the indexing.
     c_nm and d_nm are only defined if R is defined in st_TR_list.
   Dependencies:
-    vshGetIncidentCoefficients
+    Seq2Array, LogicalSlice, vshGetIncidentCoefficients
   */
   template <class Real>
   unique_ptr<stAbcdnm<Real>> rvhGetFieldCoefficients(int N_max,
@@ -533,6 +537,8 @@ namespace Smarties {
   Output:
     Returns a stCrossSection struct, where each member is of size [L X 1] and
     contains information for each wavelength.
+  Dependencies:
+    mp_pi
   */
   template <class Real>
   unique_ptr<stCrossSection<Real>> rvhGetAverageCrossSections(
@@ -551,14 +557,14 @@ namespace Smarties {
           cout << "Warning in rvhGetAverageCrossSections: CstTRa does not seem to contain T-matrices for all m" << endl;
         Real m_factor = m ? 1 : 0.5;
 
-        // From eq. 5.107 of Mischenko 2002
+        // From eq. 5.107 of Mishchenko 2002
         ext_sum(l) += m_factor * (
             st_TR_list[l][m]->st_4M_T_eo().M11.matrix().diagonal().sum() +
             st_TR_list[l][m]->st_4M_T_oe().M11.matrix().diagonal().sum() +
             st_TR_list[l][m]->st_4M_T_eo().M22.matrix().diagonal().sum() +
             st_TR_list[l][m]->st_4M_T_oe().M22.matrix().diagonal().sum());
 
-        // From eq. 5.141 of Mischenko 2002
+        // From eq. 5.141 of Mishchenko 2002
         sca_sum(l) += m_factor * (
             st_TR_list[l][m]->st_4M_T_eo().M11.abs().pow(2).sum() +
             st_TR_list[l][m]->st_4M_T_eo().M12.abs().pow(2).sum() +

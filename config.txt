@@ -1,6 +1,6 @@
 ### RUN PARAMETERS ###
 No. of CPUs:1
-Calculation type:double
+Calculation type:quad
 Print output to file:yes
 
 ### CALCULATION PARAMETERS ###

@@ -97,6 +97,9 @@ namespace Smarties {
   the definite integral using sum(f.*w);
 
   Written by Greg von Winckel - 02/25/2004
+
+  Dependencies:
+    mp_pi, mp_eps
   */
   template <class Real>
   unique_ptr<stGLQuad<Real>> auxInitLegendreQuad(int N, Real a = -1.0, Real b = 1.0) {
@@ -191,7 +194,7 @@ namespace Smarties {
     Nt - vector containing the nodes to be tabulated
     keep_old - if true, add to existing data, otherwise overwrite any existing data
   Dependencies:
-    auxInitLegendreQuad
+    GetTypeName, auxInitLegendreQuad
   */
   template <class Real>
   void UpdateGLquadrature(ArrayXi N_theta, bool keep_old = true) {
@@ -230,6 +233,8 @@ namespace Smarties {
   Thus, if the program is being used on a new system, it's highly recommended that you re-run this.
   This calculates Nt in steps of 5 from 50 to 505, then in steps of 100 from 600 to 2000,
   as well as 5 above each of those values (605, 705, etc.).
+  Dependencies:
+    Seq2Array
   */
   template <class Real>
   void StoreGLquadrature() {
@@ -255,7 +260,7 @@ namespace Smarties {
   Output:
     Returns unique pointer to a stRTfunc struct
   Dependencies:
-    auxInitLegendreQuad
+    mp_pi, auxInitLegendreQuad
   */
   template <class Real>
   unique_ptr<stRtfunc<Real>> auxPrepareIntegrals(int N_int, sInt type) {

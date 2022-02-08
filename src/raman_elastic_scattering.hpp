@@ -236,6 +236,8 @@ Inputs:
            of the excitation T-matrix.
 Output:
   returns a unique pointer to a new stParams struct
+Dependencies:
+  mp_pi
 */
 template <class Real>
 unique_ptr<stParams<Real>> Raman2SmartiesParams(
@@ -390,7 +392,7 @@ Inputs:
                   Parameter details are given in the README file.
   - out_dir: directory to write output files to. If empty, output files are written to.
 Dependencies:
-  mp_pi, TensorCast, TensorConj, LoadParams, CreateTimeStamp, MultiPrint,
+  mp_pi, ArrayMap, TensorCast, TensorConj, LoadParams, CreateTimeStamp, MultiPrint,
   Raman2SmartiesParams, ConvertStTRList, slvForT, pstScatteringMatrixOA, vshMakeIncidentParams,
   rvhGetFieldCoefficients, pstMakeStructForField, vshEgenThetaAllPhi, vshEthetaForPhi
 */
@@ -540,10 +542,10 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
         for (int m = 0; m <= N_phi; m++) {
           Real2 phi = phi_var(m);
           unique_ptr<stEforPhi<Real2>> st_E_for_phi = vshEthetaForPhi(st_E_surf, phi);
-          long int dims[2] = {st_E_for_phi->Er.cols(), 3*st_E_for_phi->Er.rows()};
+          long int dims[2] = {st_E_for_phi->E_r.cols(), 3*st_E_for_phi->E_r.rows()};
           ArrayXXc<Real2> E_field_phi(dims[0], dims[1]);
-          E_field_phi << st_E_for_phi->Er.matrix().adjoint(),
-              st_E_for_phi->Et.matrix().adjoint(), st_E_for_phi->Ef.matrix().adjoint();
+          E_field_phi << st_E_for_phi->E_r.matrix().adjoint(),
+              st_E_for_phi->E_t.matrix().adjoint(), st_E_for_phi->E_f.matrix().adjoint();
           E_field_z.chip(m, 2) = TensorCast(E_field_phi).reshape(new_dims);
         }
 
@@ -561,10 +563,10 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
         for (int m = 0; m <= N_phi; m++) {
           Real2 phi = phi_var(m);
           unique_ptr<stEforPhi<Real2>> st_E_for_phi = vshEthetaForPhi(st_E_surf, phi);
-          long int dims[2] = {st_E_for_phi->Er.cols(), 3*st_E_for_phi->Er.rows()};
+          long int dims[2] = {st_E_for_phi->E_r.cols(), 3*st_E_for_phi->E_r.rows()};
           ArrayXXc<Real2> E_field_phi(dims[0], dims[1]);
-          E_field_phi << st_E_for_phi->Er.matrix().adjoint(),
-              st_E_for_phi->Et.matrix().adjoint(), st_E_for_phi->Ef.matrix().adjoint();
+          E_field_phi << st_E_for_phi->E_r.matrix().adjoint(),
+              st_E_for_phi->E_t.matrix().adjoint(), st_E_for_phi->E_f.matrix().adjoint();
           E_field_y.chip(m, 2) = TensorCast(E_field_phi).reshape(new_dims);
         }
 
@@ -583,10 +585,10 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
         for (int m = 0; m <= N_phi; m++) {
           Real2 phi = phi_var(m);
           unique_ptr<stEforPhi<Real2>> st_E_for_phi = vshEthetaForPhi(st_E_surf, phi);
-          long int dims[2] = {st_E_for_phi->Er.cols(), 3*st_E_for_phi->Er.rows()};
+          long int dims[2] = {st_E_for_phi->E_r.cols(), 3*st_E_for_phi->E_r.rows()};
           ArrayXXc<Real2> E_field_phi(dims[0], dims[1]);
-          E_field_phi << st_E_for_phi->Er.matrix().adjoint(),
-              st_E_for_phi->Et.matrix().adjoint(), st_E_for_phi->Ef.matrix().adjoint();
+          E_field_phi << st_E_for_phi->E_r.matrix().adjoint(),
+              st_E_for_phi->E_t.matrix().adjoint(), st_E_for_phi->E_f.matrix().adjoint();
           E_field_rm_z.chip(m, 2) = TensorCast(E_field_phi).reshape(new_dims);
         }
 
@@ -604,10 +606,10 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
         for (int m = 0; m <= N_phi; m++) {
           Real2 phi = phi_var(m);
           unique_ptr<stEforPhi<Real2>> st_E_for_phi = vshEthetaForPhi(st_E_surf, phi);
-          long int dims[2] = {st_E_for_phi->Er.cols(), 3*st_E_for_phi->Er.rows()};
+          long int dims[2] = {st_E_for_phi->E_r.cols(), 3*st_E_for_phi->E_r.rows()};
           ArrayXXc<Real2> E_field_phi(dims[0], dims[1]);
-          E_field_phi << st_E_for_phi->Er.matrix().adjoint(),
-              st_E_for_phi->Et.matrix().adjoint(), st_E_for_phi->Ef.matrix().adjoint();
+          E_field_phi << st_E_for_phi->E_r.matrix().adjoint(),
+              st_E_for_phi->E_t.matrix().adjoint(), st_E_for_phi->E_f.matrix().adjoint();
           E_field_rm_y.chip(m, 2) = TensorCast(E_field_phi).reshape(new_dims);
         }
 

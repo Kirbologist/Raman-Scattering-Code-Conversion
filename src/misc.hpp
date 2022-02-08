@@ -43,7 +43,7 @@ namespace Smarties {
   Rows/Cols are determined from the matrix
   */
   template<typename Scalar>
-  auto ArrayMap(Eigen::Tensor<Scalar, 2> &tensor) {
+  auto ArrayMap(Tensor<Scalar, 2>& tensor) {
       return Eigen::Map<ArrayXXr<Scalar>>(tensor.data(), tensor.dimension(0), tensor.dimension(1));
   }
 
@@ -52,9 +52,9 @@ namespace Smarties {
   with dimensions specified in std::array
   */
   template<typename Derived, typename T, auto rank>
-  Eigen::Tensor<typename Derived::Scalar, rank>
-  TensorCast(const Eigen::EigenBase<Derived> &matrix, const std::array<T, rank> &dims) {
-      return Eigen::TensorMap<const Eigen::Tensor<const typename Derived::Scalar, rank>>
+  Tensor<typename Derived::Scalar, rank>
+  TensorCast(const EigenBase<Derived>& matrix, const std::array<T, rank>& dims) {
+      return Eigen::TensorMap<const Tensor<const typename Derived::Scalar, rank>>
                   (matrix.derived().eval().data(), dims);
   }
 
@@ -63,7 +63,7 @@ namespace Smarties {
   with dimensions as variadic arguments
   */
   template<typename Derived, typename... Dims>
-  auto TensorCast(const Eigen::EigenBase<Derived> &matrix, const Dims... dims) {
+  auto TensorCast(const EigenBase<Derived>& matrix, const Dims... dims) {
       static_assert(sizeof...(Dims) > 0, "TensorCast: sizeof... (Dims) must be larger than 0");
       return TensorCast(matrix, std::array<Eigen::Index, sizeof...(Dims)>{dims...});
   }
@@ -73,7 +73,7 @@ namespace Smarties {
   with dimensions directly as arguments in a variadic template
   */
   template<typename Derived>
-  auto TensorCast(const Eigen::EigenBase<Derived> &matrix) {
+  auto TensorCast(const EigenBase<Derived>& matrix) {
     if constexpr(Derived::ColsAtCompileTime == 1 or Derived::RowsAtCompileTime == 1) {
       return TensorCast(matrix, matrix.size());
     } else {

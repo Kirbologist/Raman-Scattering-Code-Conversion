@@ -172,7 +172,7 @@ namespace Smarties {
     loss_prec_S - [K = n - 3 x X] potential loss of precision estimated as
                   abs(Max term in series)/S. Problem if loss_prec_S is large, i.e. 10^4 means 4-digit loss.
   Dependencies:
-    sphGetUforFp
+    mp_eps, LogicalSlice, sphGetUforFp
   */
   template <class Real>
   unique_ptr<stFpRow<Real>> sphGetFpRow(int n, Real s, const ArrayXr<Real>& x) {
@@ -404,7 +404,7 @@ namespace Smarties {
   Output:
     Returns a unique pointer to a struct containing various Bessel functions and their products.
   Dependencies:
-    sphGetFpovx, vshRBpsi
+    mp_im_unit, sphGetFpovx, vshRBpsi
   */
   template <class Real>
   unique_ptr<stBessel<Real>> sphGetXiPsi(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
@@ -532,7 +532,7 @@ namespace Smarties {
     as used in Q and P matrices. The member tensors all have size [(N + 1) X (N + 1) X T] or [(N + 1) X T].
     The cases where n or k = 0 are included as padding, as it makes the indexing simpler.
   Dependencies:
-    sphGetBesselProductsPrimes, sphGetXiPsi
+    mp_im_unit, sphGetBesselProductsPrimes, sphGetXiPsi
   */
   template <class Real>
   unique_ptr<stBesselProducts<Real>> sphGetModifiedBesselProducts(int N_max, Real s, const ArrayXr<Real>& x, int NB) {
@@ -761,7 +761,7 @@ namespace Smarties {
   Output:
     Returns a std::vector of size M containing unique pointers to stPQ structs, one for each m.
   Dependencies:
-    sphGetModifiedBesselProducts, vshPinmTaunm
+    mp_im_unit, Seq2Array, sphGetModifiedBesselProducts, vshPinmTaunm
   */
   template <class Real>
   vector<unique_ptr<stPQ<Real>>> sphCalculatePQ(int N_max, const ArrayXi& abs_m_vec,

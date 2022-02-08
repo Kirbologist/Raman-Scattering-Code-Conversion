@@ -315,7 +315,7 @@ namespace Smarties {
   /*
   Calculates the quantities related to the scattering matrix of an ensemble of
   randomly-oriented scatterers.
-  Based on the Fortran code by Mischenko and co-workers. Variable names and loop structures are kept from there.
+  Based on the Fortran code by Mishchenko and co-workers. Variable names and loop structures are kept from there.
   The method consists in computing first a number of expansion coefficients
   alpha_n and beta_n up to some maximum n<=LMAX, from which the scattering
   matrix elements F11 etc... can be computed accurately at any angle in a second stage.
@@ -332,7 +332,7 @@ namespace Smarties {
     ALFXn and BETXn are [(N + 1) X 1] arrays, theta and theta_deg are [Nb_theta X 1] arrays,
     all_AB is a [(N + 1) X 7] array and all_F is a [(Nb_theta) X 7] array.
   Dependencies:
-    CCG
+    mp_pi, mp_im_unit, CCG
   */
   template <class Real>
   unique_ptr<stSM<Real>> pstScatteringMatrixOA(const vector<unique_ptr<stTR<Real>>>& st_TR_list,

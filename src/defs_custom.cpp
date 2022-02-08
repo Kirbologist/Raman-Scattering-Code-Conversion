@@ -35,6 +35,8 @@ template RamanFloat mp_pi<RamanFloat>();
 template RamanFloat mp_eps<RamanFloat>();
 template complex<RamanFloat> mp_im_unit<RamanFloat>();
 
+// TODO: instantiate ArrayMap and TensorCast functions for both Real and Complex
+template string GetTypeName<RamanFloat>();
 template Tensor3c<RamanFloat> TensorSlice(Tensor3c<RamanFloat>&,
     ArithmeticSequence<long int, long int, long int>,
     ArithmeticSequence<long int, long int, long int>,
