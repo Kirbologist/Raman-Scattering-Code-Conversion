@@ -1,12 +1,12 @@
 ### RUN PARAMETERS ###
-No. of CPUs:4
+No. of CPUs:1
 No. of CPUs to partition particle radii for:1
-Calculation type:quad
+Calculation type:double
 Print output to file:yes
 
 ### CALCULATION PARAMETERS ###
-Minimum diameter:10
-Maximum diameter:20
+Minimum diameter:1000
+Maximum diameter:2000
 Minimum h:1/3
 Maximum h:1/3
 
