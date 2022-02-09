@@ -232,6 +232,6 @@ template void CreateTimeStamp<long double, long double>(string, const unique_ptr
 template vector<unique_ptr<stTR<float>>> ConvertStTRList(const vector<unique_ptr<stTR<long double>>>&);
 template vector<unique_ptr<stTR<double>>> ConvertStTRList(const vector<unique_ptr<stTR<long double>>>&);
 template vector<unique_ptr<stTR<long double>>> ConvertStTRList(const vector<unique_ptr<stTR<long double>>>&);
-template void RamanElasticScattering<long double, float>(string, string);
-template void RamanElasticScattering<long double, double>(string, string);
-template void RamanElasticScattering<long double, long double>(string, string);
+template void RamanElasticScattering<long double, float>(string, string, int);
+template void RamanElasticScattering<long double, double>(string, string, int);
+template void RamanElasticScattering<long double, long double>(string, string, int);

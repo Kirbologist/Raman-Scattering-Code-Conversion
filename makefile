@@ -20,6 +20,8 @@ MP_OBJS=$(BUILDDIR)/defs_custom.o
 ### Recipes
 .PHONY=regular clean info
 
+all : mp utils
+
 regular : $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/main.o
 	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(BUILDDIR)/main.o $(CPPFLAGS)
 

@@ -114,7 +114,7 @@ template int sphCheckBesselConvergence(int, RamanFloat, const ArrayXr<RamanFloat
 template int sphEstimateNB(int, const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, RamanFloat);
 template vector<unique_ptr<stPQ<RamanFloat>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
-template template stDelta<RamanFloat> sphEstimateDelta(
+template stDelta<RamanFloat> sphEstimateDelta(
     const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
 
 /*
@@ -286,10 +286,10 @@ template vector<unique_ptr<stTR<float>>> ConvertStTRList(const vector<unique_ptr
 template vector<unique_ptr<stTR<double>>> ConvertStTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
 template vector<unique_ptr<stTR<long double>>> ConvertStTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertStTRList(const vector<unique_ptr<stTR<RamanFloat>>>&);
-template void RamanElasticScattering<RamanFloat, float>(string, string);
-template void RamanElasticScattering<RamanFloat, double>(string, string);
-template void RamanElasticScattering<RamanFloat, long double>(string, string);
-template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string);
+template void RamanElasticScattering<RamanFloat, float>(string, string, int);
+template void RamanElasticScattering<RamanFloat, double>(string, string, int);
+template void RamanElasticScattering<RamanFloat, long double>(string, string, int);
+template void RamanElasticScattering<RamanFloat, RamanFloat>(string, string, int);
 
 template void CreateTimeStamp<float, RamanFloat>(string, const unique_ptr<RamanParams<float>>&);
 template void CreateTimeStamp<double, RamanFloat>(string, const unique_ptr<RamanParams<double>>&);
@@ -297,6 +297,6 @@ template void CreateTimeStamp<long double, RamanFloat>(string, const unique_ptr<
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertStTRList(const vector<unique_ptr<stTR<float>>>&);
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertStTRList(const vector<unique_ptr<stTR<double>>>&);
 template vector<unique_ptr<stTR<RamanFloat>>> ConvertStTRList(const vector<unique_ptr<stTR<long double>>>&);
-template void RamanElasticScattering<float, RamanFloat>(string, string);
-template void RamanElasticScattering<double, RamanFloat>(string, string);
-template void RamanElasticScattering<long double, RamanFloat>(string, string);
+template void RamanElasticScattering<float, RamanFloat>(string, string, int);
+template void RamanElasticScattering<double, RamanFloat>(string, string, int);
+template void RamanElasticScattering<long double, RamanFloat>(string, string, int);

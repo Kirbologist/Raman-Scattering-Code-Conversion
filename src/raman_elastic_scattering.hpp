@@ -71,6 +71,9 @@ struct RamanParams {
   int Nb_theta = 1000;
   int Nb_theta_pst = 1;
 
+  // Used for stOptions struct
+  int delta = 0;
+
   // Vectors of all possible radii/theta/h values
   ArrayXr<Real> rad_var;
   ArrayXr<Real> theta_p_var;
@@ -116,6 +119,17 @@ Output:
   The number of CPUs that are allowed
 */
 int GetNumCPUs(string in_file_name);
+
+/*
+Determine number of threads to split the particle radii for from a text file.
+I.e. it checks the "No. of CPUs to partition particle radii for:" parameter.
+Note that any one of these threads can still fork into more threads if there are any available.
+Inputs:
+  in_file_name: path of the text file which specifies the number of CPUs.
+Output:
+  The number of CPUs to partition particle radii for
+*/
+int GetNumParticleCPUs(string in_file_name);
 
 /*
 Prints a string to both standard output (the terminal) and appends it to a text ilfe (if allowed).
@@ -174,15 +188,15 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
     "epsilon1:", "epsilon2:", "Raman epsilon2:", "lambda:", "Raman lambda:",
     "No. of particle radii:", "No. of particle thetas:", "No. of h ratios:",
     "No. of r-coordinates:", "No. of theta-coordinates:", "No. of phi-coordinates:",
-    "Nb_theta:", "Nb_theta_pst:"
+    "Nb_theta:", "Nb_theta_pst:", "Delta:"
   };
   std::array<Real, 10> float_params = {
     output->dia_min, output->dia_max, output->phi_p, output->h_min, output->h_max,
     output->epsilon1, output->epsilon2, output->epsilon2_rm, output->lambda, output->lambda_rm
   };
-  std::array<int, 8> int_params = {
+  std::array<int, 9> int_params = {
     output->N_rad, output->N_theta_p, output->N_h, output->N_r, output->N_theta, output->N_phi,
-    output->Nb_theta, output->Nb_theta_pst
+    output->Nb_theta, output->Nb_theta_pst, output->delta
   };
   for (size_t i = 0; i < options.size(); i++) {
     string option = options[i];
@@ -215,6 +229,7 @@ unique_ptr<RamanParams<Real>> LoadParams(string in_file_name) {
     output->N_phi = int_params[5];
     output->Nb_theta = int_params[6];
     output->Nb_theta_pst = int_params[7];
+    output->delta = int_params[8];
   }
   ArrayXr<Real> dia_var = ArrayXr<Real>::LinSpaced(output->N_rad, output->dia_min, output->dia_max);
   output->rad_var = dia_var/2;
@@ -397,7 +412,7 @@ Dependencies:
   rvhGetFieldCoefficients, pstMakeStructForField, vshEgenThetaAllPhi, vshEthetaForPhi
 */
 template <class Real1, class Real2>
-void RamanElasticScattering(string in_file_name, string out_dir = "") {
+void RamanElasticScattering(string in_file_name, string out_dir = "", int cpus = 1) {
   // Initialise all parameters and variables
   Real2 PI = mp_pi<Real2>();
 
@@ -416,7 +431,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
 
   auto options = make_unique<stOptions>();
   options->get_R = true; // Needed for near fields and will be overridden in any case
-  options->delta = 0; // Use delta=-1 to estimate it automatically.
+  options->delta = raman_params1->delta; // Use delta=-1 to estimate it automatically.
   options->NB = 0; // NB will be estimated automatically
   options->get_symmetric_T = false;
   Real2 phi_p = raman_params2->phi_p;
@@ -440,7 +455,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
 
   for (int h_ind = 0; h_ind < raman_params1->N_h; h_ind++) {
     // Split the iterations of the next for-loop among threads for parallel processing.
-    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for num_threads(cpus) schedule(dynamic)
     for (int k = 0; k < raman_params1->N_rad; k++) {
       string out_file_name = out_dir + "/a2c_" + to_string(raman_params1->h_var(0)) +
           "_to_" + to_string(raman_params1->h_var(last)) + "_dia_" + to_string(raman_params1->dia_min) +

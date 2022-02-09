@@ -24,7 +24,13 @@ make [OPTIONS]
 - `mp`: `raman_elastic_scattering` will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
 - `PRECISION=<value>`: if used with `mp`, `raman_elastic_scattering` will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
 
-Note that to change the number of threads or bits of precision used, `raman_elastic_scattering` must be recompiled.
+To change the number of threads or bits of precision used, `raman_elastic_scattering` must be recompiled. This as simple as running
+
+```
+make clean-mp
+```
+
+to clean remove the existing multiprecision binaries, then running `make` again, specifying the amount of precision with the `PRECISION` flag.
 
 ### Running `raman_elastic_scattering`
 
@@ -43,6 +49,7 @@ You can change the calculation parameters by editing the `config.txt` file, or t
 
 Here's what each 'run' parameter does:
 - `No. of CPUs` is a non-negative integer representing the number of CPUs (threads) to be used to run the calculations. Some algorithms like matrix products can take advantage of the extra threads to parallelise calculations. If `<value>` is 0, `raman_elastic_scattering` will run with the maximum number of CPUs. By default, this parameter is 1.
+- `No. of CPUs to partition particle radii for` is a non-negative integer. The different radii of the particles is partitioned among ``<value>`` threads, so each thread performs all calculations for particles of its allocated radii to its own output file. Note that each thread that was allocated a set of radii can fork into more threads to compute for the same set of radii. By default, this parameter is 1.
 - `Calculation type` is the type used for floating-point calculations. By default, this parameter is `double`. The value of this parameter must be of the form `XXXX` to run all calculations with type `XXXX` or `XXXX-YYYY` to calculate T-matrices with type `XXXX` and integrals with type `YYYY`, where `XXXX` and `YYYY` can be one of the following calculation types:
   - `single` for single-precision floating points (using C++'s float types).
   - `double` for double-precision floating points.
@@ -68,6 +75,7 @@ The following parameters are for determining the spherical coordinates of the sa
 The following parameters are used for calculating the T-matrices.
 - `Nb_theta` is a positive integer, which is the number of angles used in Gaussian quadratures for the evaluation of P and Q matrix integrals.
 - `Nb_theta_pst` is a positive integer, which is the number of angles used for surface field averaging in postprocessing.
+- `Delta` is the number of extra multipoles to use for P and Q matrices. If `Delta = -1`, then the code tries to estimate it itself by calling `sphEstimateDelta`.
 
 The following 'calculation' parameters are for describing the incident light and the mediums that the light passes through.
 - `epsilon1` is a floating-point value representing the dielectric constant of the surrounding medium.

@@ -59,12 +59,9 @@ namespace Smarties {
     Real c = params->c;
     Real a = params->a;
 
-    ArrayXr<Real> s = params->s;
-    ArrayXr<Real> k1 = params->k1;
-
     auto st_k1_s = make_unique<stParams<Real>>();
-    st_k1_s->k1 = k1;
-    st_k1_s->s = s;
+    st_k1_s->k1 = params->k1;
+    st_k1_s->s = params->s;
 
     int N = params->N;
     int Nb_theta = params->Nb_theta;

@@ -658,7 +658,7 @@ namespace Smarties {
     ArrayXr<Real> T_2211_err = ArrayXr<Real>::Zero((NQ_max + 1)/2);
     // Calculate P,Q matrices
     vector<unique_ptr<stPQ<Real>>> st_PQ_list = sphCalculatePQ(NQ_max, abs_m_vec, st_geometry, param1, NQ_max);
-    complex<Real> T_2211 = 0;
+    complex<Real> T_2211 = complex<Real>(0.0, 0.0);
 
     for (int N = 1; N <= NQ_max; N += 2) { // Loop over truncation (only odd numbers)
       // Truncate P,Q to N and get corresponding T
