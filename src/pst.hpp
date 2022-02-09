@@ -376,7 +376,7 @@ namespace Smarties {
     vector<ArrayXXc<Real>> CT22(N1);
 
     for (int m = 0; m <= N; m++) {
-      int N_min_m1 = max(1, m);
+      int N_min_m1 = max(1, m) - 1;
       CT11[m] = ArrayXXc<Real>::Zero(N1, N1);
       CT12[m] = ArrayXXc<Real>::Zero(N1, N1);
       CT21[m] = ArrayXXc<Real>::Zero(N1, N1);

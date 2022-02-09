@@ -130,6 +130,7 @@ namespace Smarties {
     ArrayXr<Real> lambda; // Wavelength (in free space. Same unit as a and c)
     Real epsilon1; // Relative dielectric constant of embedding medium (real positive)
     ArrayXr<Real> epsilon2; // Dielectric function of scatterer (may be complex, but that hasn't been implemented)
+    bool output = true; // Originally not in the specification of User Guide, but some functions still use this anyway
   };
 
   /* Optional settings */

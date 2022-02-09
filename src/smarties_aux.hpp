@@ -258,7 +258,7 @@ namespace Smarties {
     N_int - the number of integration points required
     type - the integration scheme, either `GAUSS` for Gaussian quadrature, or `rectangle` for Simpson
   Output:
-    Returns unique pointer to a stRTfunc struct
+    Returns unique pointer to a stRtfunc struct
   Dependencies:
     mp_pi, auxInitLegendreQuad
   */

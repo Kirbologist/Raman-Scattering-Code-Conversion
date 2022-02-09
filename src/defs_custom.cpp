@@ -57,6 +57,12 @@ extern template RamanFloat mp_eps<RamanFloat>();
 */
 
 template unique_ptr<stGLQuad<RamanFloat>> auxInitLegendreQuad(int, RamanFloat, RamanFloat);
+extern template void WriteBinary(const string, const ArrayXi&);
+template void WriteBinary(const string, const ArrayXXr<RamanFloat>&);
+extern template void ReadBinary(const string, ArrayXi&);
+template void ReadBinary(const string, ArrayXXr<RamanFloat>&);
+template void UpdateGLquadrature<float>(ArrayXi, bool);
+template void StoreGLquadrature<float>();
 template unique_ptr<stRtfunc<RamanFloat>> auxPrepareIntegrals(int, sInt);
 
 /*
@@ -108,6 +114,8 @@ template int sphCheckBesselConvergence(int, RamanFloat, const ArrayXr<RamanFloat
 template int sphEstimateNB(int, const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, RamanFloat);
 template vector<unique_ptr<stPQ<RamanFloat>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
+template template stDelta<RamanFloat> sphEstimateDelta(
+    const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
 
 /*
 extern template RamanFloat mp_pi<RamanFloat();
@@ -119,6 +127,7 @@ extern template unique_ptr<stIncEabnm<RamanFloat>> vshGetIncidentCoeffs(int, con
 */
 
 template vector<unique_ptr<stTR<RamanFloat>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<RamanFloat>>>&, bool);
+template vector<unique_ptr<stPQ<RamanFloat>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<RamanFloat>>>&, int);
 template vector<unique_ptr<stTR<RamanFloat>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<RamanFloat>>>&, int);
 template vector<unique_ptr<stTR<RamanFloat>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<RamanFloat>>>&, vector<string>);
 template unique_ptr<stAbcdnm<RamanFloat>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<RamanFloat>>>&,
@@ -131,6 +140,8 @@ extern template int sphEstimateNB(int, const unique_ptr<stRtfunc<RamanFloat>>&,
     const unique_ptr<stParams<RamanFloat>>&, RamanFloat);
 extern template vector<unique_ptr<stPQ<RamanFloat>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<RamanFloat>>&, const unique_ptr<stParams<RamanFloat>>&, int);
+extern template template stDelta<RamanFloat> sphEstimateDelta(
+    unique_ptr<stRtfunc<RamanFloat>>, unique_ptr<stParams<RamanFloat>>, int);
 
 extern template vector<unique_ptr<stTR<RamanFloat>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<RamanFloat>>>&, bool);
 extern template vector<unique_ptr<stTR<RamanFloat>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<RamanFloat>>>&, int);

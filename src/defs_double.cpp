@@ -55,6 +55,12 @@ extern template double mp_eps<double>();
 */
 
 template unique_ptr<stGLQuad<double>> auxInitLegendreQuad(int, double, double);
+extern template void WriteBinary(const string, const ArrayXi&);
+template void WriteBinary(const string, const ArrayXXd&);
+extern template void ReadBinary(const string, ArrayXi&);
+template void ReadBinary(const string, ArrayXXd&);
+template void UpdateGLquadrature<double>(ArrayXi, bool);
+template void StoreGLquadrature<double>();
 template unique_ptr<stRtfunc<double>> auxPrepareIntegrals(int, sInt);
 
 /*
@@ -106,6 +112,8 @@ template int sphCheckBesselConvergence(int, double, const ArrayXd&, double, int)
 template int sphEstimateNB(int, const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, double);
 template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
+template stDelta<double> sphEstimateDelta(
+    const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
 
 /*
 extern template double mp_pi<double();
@@ -117,6 +125,7 @@ extern template unique_ptr<stIncEabnm<double>> vshGetIncidentCoeffs(int, const u
 */
 
 template vector<unique_ptr<stTR<double>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<double>>>&, bool);
+template vector<unique_ptr<stPQ<double>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<double>>>&, int);
 template vector<unique_ptr<stTR<double>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<double>>>&, int);
 template vector<unique_ptr<stTR<double>>> rvhGetSymmetricMat(const vector<unique_ptr<stTR<double>>>&, vector<string>);
 template unique_ptr<stAbcdnm<double>> rvhGetFieldCoefficients(int, const vector<unique_ptr<stTR<double>>>&,
@@ -129,6 +138,7 @@ extern template int sphEstimateNB(int, const unique_ptr<stRtfunc<double>>&,
     const unique_ptr<stParams<double>>&, double);
 extern template vector<unique_ptr<stPQ<double>>> sphCalculatePQ(int, const ArrayXi&,
     const unique_ptr<stRtfunc<double>>&, const unique_ptr<stParams<double>>&, int);
+extern template stDelta<double> sphEstimateDelta(unique_ptr<stRtfunc<double>>, unique_ptr<stParams<double>>, int);
 
 extern template vector<unique_ptr<stTR<double>>> rvhGetTRfromPQ(vector<unique_ptr<stPQ<double>>>&, bool);
 extern template vector<unique_ptr<stTR<double>>> rvhTruncateMatrices(const vector<unique_ptr<stTR<double>>>&, int);

@@ -109,7 +109,7 @@ Run the command `make utils` to compile the binary, then execute the file `store
 
 ## Reading the code
 
-`lib` contains some third-party libraries; all original code is in the `src` folder. The original functions from the SMARTIES MATLAB package are listed in files by their prefix. These SMARTIES files include the `.hpp` files `smarties_aux`, `vsh`, `sph`, `rvh`, `slv` and `pst`. Common typedefs, structs and functions are stored in the `core.hpp`, `core_mp.hpp`, `misc.hpp` and `misc.cpp` files, so it's worth reading those ones first. Template functions are all instantiated within `defs_*.cpp` files. The functions specifically for Raman scattering is in the `raman_elastic_scattering` files, and the main functions are located in the files `main.cpp`, `main_mp.cpp` and `utils.cpp`.
+`lib` contains some third-party libraries; all original code is in the `src` folder. The original functions from the SMARTIES MATLAB package are listed in files by their prefix. These SMARTIES files include the `.hpp` files `smarties_aux`, `vsh`, `sph`, `rvh`, `slv` and `pst`. However, `sphEstimateDelta` is located in `rvh.hpp`, as otherwise, `sph.hpp` and `rvh.hpp` would depend on each other. Common typedefs, structs and functions are stored in the `core.hpp`, `core_mp.hpp`, `misc.hpp` and `misc.cpp` files, so it's worth reading those ones first. Template functions are all instantiated within `defs_*.cpp` files. The functions specifically for Raman scattering is in the `raman_elastic_scattering` files, and the main functions are located in the files `main.cpp`, `main_mp.cpp` and `utils.cpp`.
 
 Much of the code makes reference to equations from [`Mishchenko 2002`][3] or [`JQSRT 2013`][2], which can be found in the references section. A smaller user-guide for a more concise explanation of the theories and terminologies used can be found as the file ["SMARTIES User Guide.pdf"][2] with the original SMARTIES code. Most functions also return structs. The definition of these structs are given at the top of the file (sometimes of a different file), so more details for each struct can usually be found there. Functions or structs may also return or contain mathematical functions; this is done so by calculating the result of the function for many parameter values and tabulating these results in an Eigen::Array or Eigen::Tensor. The exact number of dimensions used depends on how many parameters there are to the function, but usually there are just 1 or 2 parameters for Arrays and sometimes 3 for Tensors.
 
@@ -136,11 +136,12 @@ Some functions (especially the ones relating to the individual terms and coeffic
 
 ## Future directions of the project
 
-If this project were to continue, here are a few ideas for ways to improve or speed up the code:
+If this project were to continue, here are a few ideas for ways to improve or speed up the code, or do something else related:
 
 - In the source code `sphMakeGeometry`, half of the terms that are calculated in some parts are always zero. This wasn't optimised in the orginal MATLAB code, since the way MATLAB ran the script made it so that it would take roughly equal time to calculate anyway. In C++, optimising this part of the code may or may not give some slight speed improvements (it's possible that these zero cases are optimised out during compile time anyway).
 - Implement multi-processing and/or GPU acceleration at a low-level and throughout the entire code. Since much of the code involves doing computations with a lot of data, having them done simultaneously via multi-processing and/or GPU acceleration may significantly improve the computation speeds. NVIDIA CUDA already has a C++ library as well and Eigen has some support for CUDA.
 - Analytically reduce/simplify the maths required to get the desired results. Spheroids have many rotation and reflection symmetries that could still be exploited to help simplify the maths. This would especially be helpful for the field calculation parts, where the triple integral could be reduced down to a double integral. Out of all methods, this could give the greatest improvement for the least amount of effort.
+- Convert the whole SMARTIES package to a C++ or FORTRAN library. Of course, this would mean that a lot of restructuring would need to be done to ensure cohesiveness of code, and many functions would have to be re-analysed to make them work well with C++/FORTRAN.
 
 ## Notable differences from SMARTIES
 
@@ -164,12 +165,11 @@ If this project were to continue, here are a few ideas for ways to improve or sp
   - stEforPhi
   - stAbcdnm
 - auxPrepareIntegrals reads from binary `.dat` files instead of `.mat` files. It can only read files made using `storeGLquadrature`.
-- sphCalculatePQ doesn't try to access stParams.output, since stParams is expected to be the same struct type as the one given in the specification, in which case 'output' is not a member of stParams. Such a member does exist in stOptions however, so future implementations may take stOptions as an argument type. (For calculating Raman scattering, this option is true by default.)
 - The slvGetOptionsFromStruct function cannot be called on its own and is instead implemented into the stOptions constructors.
 - The pstMakeStructForField function currently puts stIncPar into returning struct stRes by using std::move(); this means that the stIncPar will be made empty after pstMakeStructForField is used. This is done, since in the final program, the input stIncPar doesn't need to be kept.
-- sphEstimateDelta doesn't get called in slvForT in the original Raman scattering MATLAB program, so this function isn't implemented.
-- rvhTruncateMatrices, rvhGetSymmetricMat, rvhGetFieldCoefficients, rvhGetAverageCrossSections can only take stTR vectors as arguments and not stPR vectors. (Overloading these functions with versions that can take stPR vectors is relatively simple however.)
+- rvhGetSymmetricMat, rvhGetFieldCoefficients, rvhGetAverageCrossSections can only take stTR vectors as arguments and not stPR vectors. (Overloading these functions with versions that can take stPR vectors is relatively simple however.)
 - Many of the original functions had extra functionality for when the code is ran on Octave instead of MATLAB. Since this is only C++, such code (including the `isOctave` function itself) is not implemented.
+- sphEstimateDelta may give different values of Delta between the MATLAB version and the C++ version. This is because sphEstimateNB is very sensitive to rounding errors, and exactly how and when floating-points are rounded differ between different implementations even in the same language. Although this shouldn't matter in the expected use cases and in this program, where Delta is just added on to some maximum multipole order `N` to get an even larger multipole order to compute the P, Q, T and R matrices with, before those same matrices get truncated down to a maximum multipole of order `N` anyway. If it absolutely matters, manually specifying a value of Delta is easy to do anyway.
 
 ## Dependencies
 
@@ -209,11 +209,20 @@ Parts of the Eigen 3.4.0 library have been included under the MPL2 license and p
 6. Von Winckel G. Legendre-Gauss Quadrature Weights and Nodes [Internet]. MATLAB Central File Exchange. 2004 May 11. Available from: https://au.mathworks.com/matlabcentral/fileexchange/4540-legendre-gauss-quadrature-weights-and-nodes
 7. Eigen unsupported Tensor to Eigen matrix [Internet]. Stack Overflow; 2021 Dec 17. Available from: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix
 8. How to write/read an Eigen matrix from binary file [Internet]. Stack Overflow; 2022 Jan 24. Available from: https://stackoverflow.com/questions/25389480/how-to-write-read-an-eigen-matrix-from-binary-file
+
+## External Links
 [1]: https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties "SMARTIES page"
+
 [2]: https://doi.org/10.1016/j.jqsrt.2016.01.005 "SMARTIES user guide"
+
 [3]: https://www.sciencedirect.com/science/article/abs/pii/S0022407313000423 "JQSRT 2013"
+
 [4]: https://scholar.google.com/scholar_lookup?title=Scattering%2C%20absorption%20and%20emission%20of%20light%20by%20small%20particles&author=M.I.%20Mishchenko&publication_year=2002 "Mishchenko 2002"
+
 [5]: https://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html "Mishchenko Fortran"
+
 [6]: https://au.mathworks.com/matlabcentral/fileexchange/4540-legendre-gauss-quadrature-weights-and-nodes "lgwt.m"
+
 [7]: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix "Eigen tensor/matrix casting"
+
 [8]: https://stackoverflow.com/questions/25389480/how-to-write-read-an-eigen-matrix-from-binary-file "Eigen matrix I/O"

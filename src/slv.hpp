@@ -50,7 +50,7 @@ namespace Smarties {
     st_C_oa and st_TR_list with size M = abs_m_vec.size().
   Dependencies:
     rvhGetAverageCrossSections, rvhGetSymmetricMat, rvhGetTRfromPQ,
-    rvhTruncateMatrices, sphCalculatePQ, sphEstimateNB, sphMakeGeometry
+    rvhTruncateMatrices, sphCalculatePQ, sphEstimateNB, sphMakeGeometry, sphEstimateDelta
   */
   template <class Real>
   unique_ptr<stTmatrix<Real>> slvForT(const unique_ptr<stParams<Real>>& params,
@@ -59,32 +59,47 @@ namespace Smarties {
     Real c = params->c;
     Real a = params->a;
 
+    ArrayXr<Real> s = params->s;
+    ArrayXr<Real> k1 = params->k1;
+
+    auto st_k1_s = make_unique<stParams<Real>>();
+    st_k1_s->k1 = k1;
+    st_k1_s->s = s;
+
     int N = params->N;
     int Nb_theta = params->Nb_theta;
     // If `options` member `abs_m_vec` is non-zero in size, i.e. is defined, then use member `abs_m_vec`.
     // Otherwise construct a new Eigen::Array.
     ArrayXi abs_m_vec = options->abs_m_vec.size() ? options->abs_m_vec : ArrayXi::LinSpaced(N + 1, 0, N);
 
+    st_k1_s->output = options->output;
+
     // Make structure describing spheroidal geometry and quadrature points for numerical integrations
     if (!st_geometry)
       st_geometry = sphMakeGeometry(Nb_theta, a, c);
 
-    // We won't be estimating delta for the Raman scattering code
-    // if (options->delta < 0) {
-    //  sphEstimateDelta(st_geometry, params);
-    // }
+    if (options->delta < 0) { // then need to estimate delta
+      stDelta<Real> st_delta = sphEstimateDelta(st_geometry, st_k1_s);
+      if (st_delta.delta == -1) {
+        throw runtime_error(string("ERROR: Delta could not be found. Results are likely to be non-converged. ") +
+            string("Try choosing Delta manually instead."));
+      }
+      options->delta = st_delta.delta;
+      cout << "Delta estimated to Delta = " << st_delta.delta <<
+          " with relative error in T_{11}^{22,m=1} of " << st_delta.err << endl;
+    }
 
     int NQ = N + options->delta; // NQ>=N: Maximum multipole order for computing P and Q matrices
     int NB = options->NB;
 
     // Estimating NB, the number of multipoles to compute the Bessel functions (NB >= NQ)
     if (NB <= 0)
-      NB = sphEstimateNB(NQ, st_geometry, params);
+      NB = sphEstimateNB(NQ, st_geometry, st_k1_s);
     if (NB < NQ)
-      NB = NQ;
+      NB = NQ; // NB must be at least NQ
 
     // Calculate P and Q matrices
-    vector<unique_ptr<stPQ<Real>>> st_PQ_list = sphCalculatePQ(NQ, abs_m_vec, st_geometry, params, NB);
+    vector<unique_ptr<stPQ<Real>>> st_PQ_list = sphCalculatePQ(NQ, abs_m_vec, st_geometry, st_k1_s, NB);
     // Calculate T (and possibly R) matrices
     vector<unique_ptr<stTR<Real>>> st_TR_list = rvhGetTRfromPQ(st_PQ_list, options->get_R);
 

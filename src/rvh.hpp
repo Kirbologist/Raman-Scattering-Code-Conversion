@@ -23,23 +23,12 @@ Henceforth, such symmetry shall be called rvh symmetry.
 #include "sph.hpp"
 #include "vsh.hpp"
 #include "misc.hpp"
+#include <Eigen/SVD>
 
 using namespace Eigen;
 using namespace std;
 
 namespace Smarties {
-
-  /* Specialisation of stMat for a describing a T, R matrix pair */
-  template <class Real>
-  struct stTR : stMat<Real> {
-    using stMat<Real>::stMat;
-    // Two non-zero submatrices of a T-matrix
-    inline st4M<Real>& st_4M_T_eo() { return this->st_4M_list[0]; }
-    inline st4M<Real>& st_4M_T_oe() { return this->st_4M_list[1]; }
-    // Two non-zero submatrices of an R-matrix
-    inline st4M<Real>& st_4M_R_eo() { return this->st_4M_list[2]; }
-    inline st4M<Real>& st_4M_R_oe() { return this->st_4M_list[3]; }
-  };
 
   /* Struct containing vectors of expansion coefficients of the multipole expansions of a set of electric fields */
   template <class Real>
@@ -210,12 +199,59 @@ namespace Smarties {
   }
 
   /*
+  Truncate P and Q matrices in st_mat_list such that the maximum number of multipoles N is now N_max.
+  This also removes values of m that are larger than N_max.
+  This function works on st_mat_list which makes use of rvh symmetry.
+  Inputs:
+    st_mat_list - a vector of unique pointers to stPQ structs, with one entry for each m of abs_m_vec.
+    N_max - The maximum value of N (and m) that is desired in the output.
+  Output:
+    returns a deep copy of the same st_mat_list vector, but where all M11, M12, M21 and M22 members
+    have been truncated to N = N_max and values of m > N_max are removed.
+  Dependencies:
+    LogicalIndices
+  */
+  template <class Real>
+  vector<unique_ptr<stPQ<Real>>> rvhTruncateMatrices(const vector<unique_ptr<stPQ<Real>>>& st_mat_list, int N_max) {
+    vector<unique_ptr<stPQ<Real>>> output;
+    int num_entries = st_mat_list.size();
+    for (int i = 0 ; i < num_entries; i++) {
+      int num_st_4M = st_mat_list[i]->mat_list.size() * 2; // Count how many matrices in the struct are defined
+      int m;
+      if (num_st_4M > 0 && (m = st_mat_list[i]->st_4M_list[0].m) <= N_max) {
+        auto output_st_TR = make_unique<stPQ<Real>>();
+        output_st_TR->mat_list = st_mat_list[i]->mat_list;
+        for (int j = 0; j < num_st_4M; j++) {
+          int new_size = N_max - max(1, m);
+          ArrayXb ind1_valid = st_mat_list[i]->st_4M_list[j].ind1 <= new_size;
+          ArrayXb ind2_valid = st_mat_list[i]->st_4M_list[j].ind2 <= new_size;
+
+          ArrayXi new_ind1 = LogicalIndices(ind1_valid);
+          ArrayXi new_ind2 = LogicalIndices(ind2_valid);
+
+          output_st_TR->st_4M_list[j].ind1 = st_mat_list[i]->st_4M_list[j].ind1(new_ind1);
+          output_st_TR->st_4M_list[j].ind2 = st_mat_list[i]->st_4M_list[j].ind2(new_ind2);
+          output_st_TR->st_4M_list[j].m = m;
+
+          ArrayXXc<Real> current_matrix = st_mat_list[i]->st_4M_list[j].M11;
+          output_st_TR->st_4M_list[j].M11 = current_matrix(new_ind1, new_ind1);
+          current_matrix = st_mat_list[i]->st_4M_list[j].M12;
+          output_st_TR->st_4M_list[j].M12 = current_matrix(new_ind1, new_ind2);
+          current_matrix = st_mat_list[i]->st_4M_list[j].M21;
+          output_st_TR->st_4M_list[j].M21 = current_matrix(new_ind2, new_ind1);
+          current_matrix = st_mat_list[i]->st_4M_list[j].M22;
+          output_st_TR->st_4M_list[j].M22 = current_matrix(new_ind2, new_ind2);
+        }
+        output.push_back(move(output_st_TR));
+      }
+    }
+    return output;
+  }
+
+  /*
   Truncate T and R matrices in st_mat_list such that the maximum number of multipoles N is now N_max.
   This also removes values of m that are larger than N_max.
   This function works on st_mat_list which makes use of rvh symmetry.
-  Note that this function has only been implemented for T and R matrices, whereas the original MATLAB
-  code also allows truncation of P and Q matrices. Although this could supposedly be implemented in
-  by overloading the function or adding another template argument.
   Inputs:
     st_mat_list - a vector of unique pointers to stTR structs, with one entry for each m of abs_m_vec.
     N_max - The maximum value of N (and m) that is desired in the output.
@@ -236,7 +272,7 @@ namespace Smarties {
         auto output_st_TR = make_unique<stTR<Real>>();
         output_st_TR->mat_list = st_mat_list[i]->mat_list;
         for (int j = 0; j < num_st_4M; j++) {
-          int new_size = N_max - max(1, m) + 1;
+          int new_size = N_max - max(1, m);
           ArrayXb ind1_valid = st_mat_list[i]->st_4M_list[j].ind1 <= new_size;
           ArrayXb ind2_valid = st_mat_list[i]->st_4M_list[j].ind2 <= new_size;
 
@@ -548,10 +584,12 @@ namespace Smarties {
 
     for (int l = 0; l < L; l++) { // Loop on lambda
       if (st_TR_list[l][0]->st_4M_T_eo().ind1.size() + st_TR_list[l][0]->st_4M_T_eo().ind2.size() + 1 != M)
-        cout << "Warning in rvhGetAverageCrossSections: CstTRa does not seem to contain T-matrices for all m" << endl;
+        cout << "Warning in rvhGetAverageCrossSections: " <<
+            "st_TR_list does not seem to contain T-matrices for all m" << endl;
       for (int m = 0; m < M; m++) {
         if (st_TR_list[l][m]->st_4M_T_eo().m != m || st_TR_list[l][m]->st_4M_T_oe().m != m)
-          cout << "Warning in rvhGetAverageCrossSections: CstTRa does not seem to contain T-matrices for all m" << endl;
+          cout << "Warning in rvhGetAverageCrossSections: " <<
+              "st_TR_list does not seem to contain T-matrices for all m" << endl;
         Real m_factor = m ? 1 : 0.5;
 
         // From eq. 5.107 of Mishchenko 2002
@@ -579,6 +617,77 @@ namespace Smarties {
     output->C_sca = 4*mp_pi<Real>()/k1.pow(2) * sca_sum.real(); // [L X 1]
     output->C_abs = -4*mp_pi<Real>()/k1.pow(2) * (ext_sum.real() + sca_sum.real()); // [L X 1]
 
+    return output;
+  }
+
+  /*
+  Finds an estimate for delta by studying the convergence of the T^{22,m=1}_{11} matrix element.
+  Delta + 1 is the NQ for which this element has reached convergence.
+  See JQSRT 160, 29 *2015) for further details. Also returns the estimated converged precision.
+  Inputs:
+    st_geometry - unique pointer to struct containing geometric information, as from sphMakeGeometry
+    params - unique pointer to struct containing simulation parameters (only the first lambda is considered)
+    NQ_max - maximum number of multipoles
+  Output:
+    Returns a struct containing an estimate for delta and estimated converged precision.
+    If delta still could not be found, it returns output->delta = 0 and output->err = NaN.
+  Dependencies:
+    rvhGetTRfromPQ, rvhTruncateMatrices, sphCalculatePQ
+  */
+  template <class Real>
+  stDelta<Real> sphEstimateDelta(const unique_ptr<stRtfunc<Real>>& st_geometry,
+      const unique_ptr<stParams<Real>>& params, int NQ_max = 80) {
+    stDelta<Real> output;
+    Real min_acc = 1e-4;
+    ArrayXi abs_m_vec = ArrayXi::Ones(1); // only one m
+
+    // This works on only one wavelength, so we choose the largest k1 * s as representative of the worst case.
+    // Find max and min relative refractive index
+    int max_ind;
+    (params->k1 * params->s).maxCoeff(&max_ind);
+    auto param1 = make_unique<stParams<Real>>();
+    param1->s = ArrayXr<Real>::Constant(1, params->s(max_ind));
+    param1->k1 = ArrayXr<Real>::Constant(1, params->k1(max_ind));
+
+    // Number of pointer used for linear fit to check if error has reached a plateau
+    int N_for_conv = 5;
+    MatrixXr<Real> A_fit(N_for_conv, 2);
+    A_fit.col(0) = VectorXr<Real>::Ones(N_for_conv);
+    A_fit.col(1) = VectorXr<Real>::LinSpaced(N_for_conv, 1, N_for_conv);
+    // Store errors
+    ArrayXr<Real> T_2211_err = ArrayXr<Real>::Zero((NQ_max + 1)/2);
+    // Calculate P,Q matrices
+    vector<unique_ptr<stPQ<Real>>> st_PQ_list = sphCalculatePQ(NQ_max, abs_m_vec, st_geometry, param1, NQ_max);
+    complex<Real> T_2211 = 0;
+
+    for (int N = 1; N <= NQ_max; N += 2) { // Loop over truncation (only odd numbers)
+      // Truncate P,Q to N and get corresponding T
+      int n_count = (N - 1)/2; // Expression is always mathematically an integer
+      vector<unique_ptr<stPQ<Real>>> trunc_st_PQ_list = rvhTruncateMatrices(st_PQ_list, N);
+      vector<unique_ptr<stTR<Real>>> st_TR_list = rvhGetTRfromPQ(trunc_st_PQ_list, false);
+      complex<Real> T_2211_new = st_TR_list[0]->st_4M_T_eo().M22(0, 0);
+
+      // Relative error
+      T_2211_err(n_count) = abs(T_2211/T_2211_new - static_cast<complex<Real>>(1));
+
+      T_2211 = T_2211_new;
+      // Minimum requirement for convergence
+      if (n_count >= N_for_conv && T_2211_err(n_count) < min_acc) {
+        // Then test if the last N_for_conv errors have flattened out by a
+        // linear regression to the last N_for_conv points
+        VectorXr<Real> b_vec = log10(abs(T_2211_err(seq(n_count - N_for_conv + 1, n_count))));
+        MatrixXr<Real> coeff = A_fit.bdcSvd(ComputeThinU | ComputeThinV).solve(b_vec);
+        Real slope = coeff(1);
+        // if slope < 0, then still converging
+        if (slope > -0.5) { // this means less than one digit better over 2*N_for_conv steps
+          output.delta = N - 2*N_for_conv + 2; // N = 2*n_count - 1 > 2*N_for_conv - 1
+          output.err = (T_2211_err(seq(n_count - N_for_conv + 1, n_count))).mean();
+          return output;
+        }
+      }
+    }
+    output.delta = -1;
+    output.err = 0;
     return output;
   }
 }

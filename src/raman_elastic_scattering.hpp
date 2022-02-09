@@ -416,7 +416,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
 
   auto options = make_unique<stOptions>();
   options->get_R = true; // Needed for near fields and will be overridden in any case
-  options->delta = 0; // In the future, when it has been implemented, use delta=-1 to estimate it automatically.
+  options->delta = 0; // Use delta=-1 to estimate it automatically.
   options->NB = 0; // NB will be estimated automatically
   options->get_symmetric_T = false;
   Real2 phi_p = raman_params2->phi_p;
@@ -510,7 +510,7 @@ void RamanElasticScattering(string in_file_name, string out_dir = "") {
       C_sca(k) = T_mat->st_C_oa->C_sca(0); // st_C_oa->sca should only contain 1 element
       C_ext(k) = T_mat->st_C_oa->C_ext(0); // st_C_oa->ext should only contain 1 element
       C_abs(k) = T_mat->st_C_oa->C_abs(0); // st_C_oa->abs should only contain 1 element
-      out_stream.precision(6);
+      out_stream.precision(10);
       out_stream << "C_sca " << C_sca(k) << endl;
       out_stream << "C_ext " << C_ext(k) << endl;
       out_stream << "C_abs " << C_abs(k) << endl;

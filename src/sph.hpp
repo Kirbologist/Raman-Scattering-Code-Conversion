@@ -122,6 +122,24 @@ namespace Smarties {
     inline st4M<Real>& st_4M_Q_oe() { return this->st_4M_list[3]; }
   };
 
+  /* Specialisation of stMat for a describing a T, R matrix pair */
+  template <class Real>
+  struct stTR : stMat<Real> {
+    using stMat<Real>::stMat;
+    // Two non-zero submatrices of a T-matrix
+    inline st4M<Real>& st_4M_T_eo() { return this->st_4M_list[0]; }
+    inline st4M<Real>& st_4M_T_oe() { return this->st_4M_list[1]; }
+    // Two non-zero submatrices of an R-matrix
+    inline st4M<Real>& st_4M_R_eo() { return this->st_4M_list[2]; }
+    inline st4M<Real>& st_4M_R_oe() { return this->st_4M_list[3]; }
+  };
+
+  template <class Real>
+  struct stDelta {
+    int delta; // estimated delta
+    Real err; // estimated converged precision
+  };
+
   /*
   Calculates the matrix u, for one value of n, for the series implementation of the Bessel function product.
   This is valid for all k up to k = n.
@@ -771,9 +789,9 @@ namespace Smarties {
     if (NB < N_max)
       NB = N_max;
     int M = abs_m_vec.size();
-    //if (params->output) (params shouldn't have an output member, perhaps use stOptions instead)
-    cout << "sphCalculatePQ: Calculate P, Q for " << M << " m-values with N_Q = " <<
-        N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
+    if (params->output)
+      cout << "sphCalculatePQ: Calculate P, Q for " << M << " m-values with N_Q = " <<
+          N_max << ", NB = " << NB << ", N_Theta = " << Rt_func->Nb_theta << endl;
 
     vector<unique_ptr<stPQ<Real>>> output(M);
     for (int i = 0; i < M; i++)
