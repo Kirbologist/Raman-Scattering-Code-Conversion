@@ -15,14 +15,17 @@ Raman scattering is the inelastic scattering of light, i.e. a form of scattering
 
 ### Setup
 
-Open the terminal to the Raman-Scattering-Code-Conversion directory. For calculating using C++'s inbuilt floating point types, simply run the following command to compile the `raman_elastic_scattering` binaries:
+For running the code using just single, double or quadruple-precision floating points, getting the basic, portable version from the list of releases is enough. The binaries can directly be executed as is.
+
+If your computer doesn't use x86_64 architecture, or if you want to use floating points of arbitrary precision, you must get the source code yourself, either by cloning this repo or getting the advanced version from the list of releases, and then build the code. The code uses the GMP and MPFR libraries for doing multi-precision. Arbitrary-precision functionality must to be installed manually, since these two libraries have to be configured and compiled to the machine to fully work, and changing the amount of precision requires recompiling the Raman code. To install them, download both libraries using the links in [the dependencies section](#dependencies), extract the files and follow the instructions given in their respective 'INSTALL' files.
+
+Open the terminal to the Raman-Scattering-Code-Conversion directory. Then simply run the following command to compile the `raman_elastic_scattering` binaries:
 ```bash
 make [OPTIONS]
 ```
 
 `[OPTIONS]` can contain any of the following parameters:
-- `mp`: `raman_elastic_scattering` will have the option to do calculations using customised arbitrary-precision floating points. By default, 113 bits of precision are used. GMP and MPFR must be manually installed for this option to work. (To install them, download both libraries using the links in the 'Dependencies' section below, extract the files and follow the instructions given in their respective 'INSTALL' files.)
-- `PRECISION=<value>`: if used with `mp`, `raman_elastic_scattering` will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer.
+- `PRECISION=<value>`: `raman_elastic_scattering` will customise the custom arbitrary type to use `<value>` many bits. The precision allowed is only limited by the amount of memory available on your computer. If this option isn't specified, the binary will compile with a precision of 113 bits by default.
 
 To change the number of threads or bits of precision used, `raman_elastic_scattering` must be recompiled. This as simple as running
 
@@ -30,7 +33,7 @@ To change the number of threads or bits of precision used, `raman_elastic_scatte
 make clean-mp
 ```
 
-to clean remove the existing multiprecision binaries, then running `make` again, specifying the amount of precision with the `PRECISION` flag.
+to remove the existing multiprecision binaries, then running `make` again, specifying the amount of precision with the `PRECISION` flag.
 
 ### Running `raman_elastic_scattering`
 
@@ -40,12 +43,12 @@ raman_elastic_scattering [OPTIONS]
 ```
 
 `[OPTIONS]` can contain any of the following parameters:
-- `--input=</path/to/file>` means that `raman_elastic_scattering` reads the parameters from the file specified by `<path/to/file>`. More information about these parameters can be found in the 'Configuration' subsection. By default, the input file is `config.txt`.
+- `--input=</path/to/file>` means that `raman_elastic_scattering` reads the parameters from the file specified by `<path/to/file>`. More information about these parameters can be found in the [Configuration subsection](#configuration). By default, the input file is `config.txt`.
 - `--output-dir=</path/to/directory` means that `raman_elastic_scattering` writes the program output to the directory specified by `<path/to/drectory>`, in parallel with printing them to the terminal. Each top-level thread prints to its own output file. By default, this directory is `output`.
 
 ### Configuration
 
-You can change the calculation parameters by editing the `config.txt` file, or the file specified under the flag `--input=</path/to/file>`. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, `raman_elastic_scattering` uses the default value. Otherwise if invalid values are given, it will fall back to the default values in the best case, or interpret the value in unexpected ways in the worst case. Examples of allowable formats for numerical values are given in its own subsection.
+You can change the calculation parameters by editing the `config.txt` file, or the file specified under the flag `--input=</path/to/file>`. Parameters must be entered in the format `Parameter:<value>`, where `<value>` is either a number or a fully lower-case word, no spaces. If no value is given, `raman_elastic_scattering` uses the default value. Otherwise if invalid values are given, it will fall back to the default values in the best case, or interpret the value in unexpected ways in the worst case. Examples of allowable formats for numerical values are given in [its own subsection](#examples-of-valid-numerical-values).
 
 Here's what each 'run' parameter does:
 - `No. of CPUs` is a non-negative integer representing the number of CPUs (threads) to be used to run the calculations. Some algorithms like matrix products can take advantage of the extra threads to parallelise calculations. If `<value>` is 0, `raman_elastic_scattering` will run with the maximum number of CPUs. By default, this parameter is 1.
@@ -119,7 +122,7 @@ Run the command `make utils` to compile the binary, then execute the file `store
 
 `lib` contains some third-party libraries; all original code is in the `src` folder. The original functions from the SMARTIES MATLAB package are listed in files by their prefix. These SMARTIES files include the `.hpp` files `smarties_aux`, `vsh`, `sph`, `rvh`, `slv` and `pst`. However, `sphEstimateDelta` is located in `rvh.hpp`, as otherwise, `sph.hpp` and `rvh.hpp` would depend on each other. Common typedefs, structs and functions are stored in the `core.hpp`, `core_mp.hpp`, `misc.hpp` and `misc.cpp` files, so it's worth reading those ones first. Template functions are all instantiated within `defs_*.cpp` files. The functions specifically for Raman scattering is in the `raman_elastic_scattering` files, and the main functions are located in the files `main.cpp`, `main_mp.cpp` and `utils.cpp`.
 
-Much of the code makes reference to equations from [`Mishchenko 2002`][3] or [`JQSRT 2013`][2], which can be found in the references section. A smaller user-guide for a more concise explanation of the theories and terminologies used can be found as the file ["SMARTIES User Guide.pdf"][2] with the original SMARTIES code. Most functions also return structs. The definition of these structs are given at the top of the file (sometimes of a different file), so more details for each struct can usually be found there. Functions or structs may also return or contain mathematical functions; this is done so by calculating the result of the function for many parameter values and tabulating these results in an Eigen::Array or Eigen::Tensor. The exact number of dimensions used depends on how many parameters there are to the function, but usually there are just 1 or 2 parameters for Arrays and sometimes 3 for Tensors.
+Much of the code makes reference to equations from [`Mishchenko 2002`][5], [`JQSRT 2013`][3] or [`JQSRT 2015`][4], which can be found in [the references section](#references). A smaller user-guide for a more concise explanation of the theories and terminologies used can be found as the file ["SMARTIES User Guide.pdf"][2] with the original SMARTIES code. Most functions also return structs. The definition of these structs are given at the top of the file (sometimes of a different file), so more details for each struct can usually be found there. Functions or structs may also return or contain mathematical functions; this is done so by calculating the result of the function for many parameter values and tabulating these results in an Eigen::Array or Eigen::Tensor. The exact number of dimensions used depends on how many parameters there are to the function, but usually there are just 1 or 2 parameters for Arrays and sometimes 3 for Tensors.
 
 Some functions (especially the ones relating to the individual terms and coefficients of the multipole expansion of the electric fields) have parameters `n` and `m`, where `n` goes from 1 to `N` for some specified value of `N`, and `|m| <= n`. The two parameters are usually compressed down to one parameter, using what's called the 'p-index', where `p = n*(n+1) + m`. This also reduces the amount of dimensions needed to represent the function in an Eigen::Array or Eigen::Tensor. Unlike the original MATLAB code, and in this C++ code however, the case where `(n,m) = (0,0)` is included as padding. This case gives a p-index of 0 and makes it so that `P` (the number of possible p-indices) is equal to `(N+1)^2` instead of `N*(N+2)`. This case is included in C++ so that in the arrays/tensors representing these functions, the indices `0, 1, 2, ..., N` actually correspond to the value `n = 0, 1, 2, ..., N` and the indices `0, 1, 2, ..., P-1` actually corresponds to the indices the value `p = 0, 1, 2, ..., P-1`. In the original MATLAB code, this case wasn't included, since MATLAB uses index-from-1 instead of index-from-0.
 
@@ -140,7 +143,7 @@ Some functions (especially the ones relating to the individual terms and coeffic
   - [x] Make the code more readable
   - [x] Run more rigorous tests
   - [x] Optimise code
-  - [ ] Create a release
+  - [x] Create a release
 
 ## Future directions of the project
 
@@ -181,11 +184,12 @@ If this project were to continue, here are a few ideas for ways to improve or sp
 
 ## Dependencies
 
-- A compiler with C++17 support (tested with gcc 9.3.0-17 and clang 10.0.0-4 targeting a x86_64 Ubuntu-based gnu-linux PC)
-- Eigen 3.4.0, a free, open-source, efficient and comprehensive linear algebra library made for C++. Website: https://eigen.tuxfamily.org/index.php
-- Boost (C++ Libraries) 1.77.0, a free, open-source set of libraries with applications in a wide variety of areas. Used for some template maths functions and its MPFR class wrapper. Website: https://www.boost.org
-- The GNU Multi Precision Arithmetic Library (GMP), a C library that provides support for arbitrary precision arithmetic. While it has arbitrary-precision floating-point types, MPFR is preferred. This library is a prerequisite for MPFR. Website: https://gmplib.org/
-- The GNU Multiple Precision Floating-Point Reliable Library (GNU MPFR), a C library that provides support for arbitrary-precision floating-point computation. Website: https://www.mpfr.org
+- The basic, portable executable requires glibc version 2.17 or above to work.
+- Building from source code requires a compiler with proper C++17 support (tested with gcc 9.3.0-17 and clang 10.0.0-4 targeting a x86_64 Ubuntu-based gnu-linux PC)
+- [Eigen 3.4.0][https://eigen.tuxfamily.org/index.php], a free, open-source, efficient and comprehensive linear algebra library made for C++. The necessary files from this library are already included with the source code.
+- [Boost (C++ Libraries) 1.77.0][https://www.boost.org], a free, open-source set of libraries with applications in a wide variety of areas. Used for some template maths functions and its MPFR class wrapper. The necessary files from this library are already included with the source code.
+- [The GNU Multi Precision Arithmetic Library (GMP)][https://gmplib.org/], a C library that provides support for arbitrary precision arithmetic. While it has arbitrary-precision floating-point types, MPFR is preferred. This library is a prerequisite for MPFR.
+- [The GNU Multiple Precision Floating-Point Reliable Library (GNU MPFR)][https://www.mpfr.org], a C library that provides support for arbitrary-precision floating-point computation.
 
 ## Notes
 
@@ -201,9 +205,9 @@ The following libraries are open-source and were written by their respective dev
 
 SMARTIES was written by Walter Somerville, Baptiste Auguié, and Eric Le Ru (copyright 2015). The package is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You may find the original SMARTIES package [here][1]
 
-SMARTIES itself contains converted/borrowed Fortran code originally written by Mishchenko, Travis and Mackowski ([accessible here][5]) and MATLAB code originally written by von Winckel ([accessible here][6]). Von Winckel's code is covered by the BSD license.
+SMARTIES itself contains converted/borrowed Fortran code originally written by Mishchenko, Travis and Mackowski ([accessible here][6]) and MATLAB code originally written by von Winckel ([accessible here][7]). Von Winckel's code is covered by the BSD license.
 
-The casting code in `misc.hpp` is based on code that was written by DavidAce on stackoverflow [in this thread][7] (accessed 17 Dec 2021). The binary I/O code in `smarties_aux.hpp` is based on code that was written by andrea also on stackoverflow [in this thread][8] (accessed 24 Jan 2022).
+The casting code in `misc.hpp` is based on code that was written by DavidAce on stackoverflow [in this thread][8] (accessed 17 Dec 2021). The binary I/O code in `smarties_aux.hpp` is based on code that was written by andrea also on stackoverflow [in this thread][9] (accessed 24 Jan 2022).
 
 Parts of the Eigen 3.4.0 library have been included under the MPL2 license and parts of the Boost 1.77.0 library have been included under the Boost license. Eigen and Boost were made by their respective developers listed on their websites.
 
@@ -212,25 +216,28 @@ Parts of the Eigen 3.4.0 library have been included under the MPL2 license and p
 1. SMARTIES [Internet]. Wellington: School of Chemical and Physical Sciences, Victoria University of Wellington; May 2016. Available from: https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties
 2. Somerville WRC, Auguié B, Le Ru EC. 2016 May. SMARTIES: User-friendly codes for fast and accurate calculations of light scattering by spheroids. Journal of Quantitative Spectroscopy and Radiative Transfer 174: 39-55
 3. Somerville WRC, Auguié B, Le Ru EC. 2013 July. A new numerically stable implementation of the T-matrix method for electromagnetic scattering by spheroidal particles. Journal of Quantitative Spectroscopy and Radiative Transfer 123: 153-168
-4. Mishchenko MI, Travis LD, Lacis AA. 2002. Scattering, absorption, and emission of light by small particles. Cambridge: Cambridge University Press. 445 p.
-5.  Mishchenko MI, Travis LD, Mackowski DW. T-Matrix Codes for Computing Electromagnetic Scattering by Nonspherical and Aggregated Particles [Internet]. New York City: NASA Goddard Institute for Space Studies; 2020 July. Available from: https://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html
-6. Von Winckel G. Legendre-Gauss Quadrature Weights and Nodes [Internet]. MATLAB Central File Exchange. 2004 May 11. Available from: https://au.mathworks.com/matlabcentral/fileexchange/4540-legendre-gauss-quadrature-weights-and-nodes
-7. Eigen unsupported Tensor to Eigen matrix [Internet]. Stack Overflow; 2021 Dec 17. Available from: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix
-8. How to write/read an Eigen matrix from binary file [Internet]. Stack Overflow; 2022 Jan 24. Available from: https://stackoverflow.com/questions/25389480/how-to-write-read-an-eigen-matrix-from-binary-file
+4. Somerville WRC, Auguié B, Le Ru EC. 2015 July. Accurate and convergent T-matrix calculations of light scattering by spheroids. Journal of Quantitative Spectroscopy and Radiative Transfer 160: 29-35
+5. Mishchenko MI, Travis LD, Lacis AA. 2002. Scattering, absorption, and emission of light by small particles. Cambridge: Cambridge University Press. 445 p.
+6.  Mishchenko MI, Travis LD, Mackowski DW. T-Matrix Codes for Computing Electromagnetic Scattering by Nonspherical and Aggregated Particles [Internet]. New York City: NASA Goddard Institute for Space Studies; 2020 July. Available from: https://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html
+7. Von Winckel G. Legendre-Gauss Quadrature Weights and Nodes [Internet]. MATLAB Central File Exchange. 2004 May 11. Available from: https://au.mathworks.com/matlabcentral/fileexchange/4540-legendre-gauss-quadrature-weights-and-nodes
+8. Eigen unsupported Tensor to Eigen matrix [Internet]. Stack Overflow; 2021 Dec 17. Available from: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix
+9. How to write/read an Eigen matrix from binary file [Internet]. Stack Overflow; 2022 Jan 24. Available from: https://stackoverflow.com/questions/25389480/how-to-write-read-an-eigen-matrix-from-binary-file
 
 ## External Links
 [1]: https://www.wgtn.ac.nz/scps/research/research-groups/raman-lab/numerical-tools/smarties "SMARTIES page"
 
 [2]: https://doi.org/10.1016/j.jqsrt.2016.01.005 "SMARTIES user guide"
 
-[3]: https://www.sciencedirect.com/science/article/abs/pii/S0022407313000423 "JQSRT 2013"
+[3]: https://www.sciencedirect.com/science/article/pii/S0022407313000423 "JQSRT 2013"
 
-[4]: https://scholar.google.com/scholar_lookup?title=Scattering%2C%20absorption%20and%20emission%20of%20light%20by%20small%20particles&author=M.I.%20Mishchenko&publication_year=2002 "Mishchenko 2002"
+[4]: https://www.sciencedirect.com/science/article/pii/S0022407315001120 "JQSRT 2015"
 
-[5]: https://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html "Mishchenko Fortran"
+[5]: https://scholar.google.com/scholar_lookup?title=Scattering%2C%20absorption%20and%20emission%20of%20light%20by%20small%20particles&author=M.I.%20Mishchenko&publication_year=2002 "Mishchenko 2002"
 
-[6]: https://au.mathworks.com/matlabcentral/fileexchange/4540-legendre-gauss-quadrature-weights-and-nodes "lgwt.m"
+[6]: https://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html "Mishchenko Fortran"
 
-[7]: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix "Eigen tensor/matrix casting"
+[7]: https://au.mathworks.com/matlabcentral/fileexchange/4540-legendre-gauss-quadrature-weights-and-nodes "lgwt.m"
 
-[8]: https://stackoverflow.com/questions/25389480/how-to-write-read-an-eigen-matrix-from-binary-file "Eigen matrix I/O"
+[8]: https://stackoverflow.com/questions/48795789/eigen-unsupported-tensor-to-eigen-matrix "Eigen tensor/matrix casting"
+
+[9]: https://stackoverflow.com/questions/25389480/how-to-write-read-an-eigen-matrix-from-binary-file "Eigen matrix I/O"

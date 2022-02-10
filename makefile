@@ -11,8 +11,8 @@ CC=g++
 CPPFLAGS=-std=c++17 -Wall -msse2 -O2 -fopenmp
 CPPFLAGS+=$(UNSUPPORTED_FLAG) $(EIGEN_FLAG) $(BOOST_FLAG)
 MP_FLAGS=-DPRECISION=$(PRECISION)
-PRODUCT_NAME=raman_elastic_scattering
-PRODUCT=$(PRODUCT_NAME)
+PRODUCT=raman_elastic_scattering
+UTILS_PRODUCT=store_GL_quadrature
 DEF_OBJS=$(BUILDDIR)/misc.o $(BUILDDIR)/raman_elastic_scattering.o
 DEF_OBJS+=$(BUILDDIR)/defs_single.o $(BUILDDIR)/defs_double.o $(BUILDDIR)/defs_quad.o
 MP_OBJS=$(BUILDDIR)/defs_custom.o
@@ -28,14 +28,16 @@ regular : $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/main.o
 mp : $(BUILDDIR) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o
 	$(CC) -o $(PRODUCT) $(DEF_OBJS) $(MP_OBJS) $(BUILDDIR)/main_mp.o $(CPPFLAGS) $(MP_LIBS)
 
-utils: $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/store_GL_quadrature.o
-	$(CC) -o store_GL_quadrature $(DEF_OBJS) $(BUILDDIR)/store_GL_quadrature.o $(CPPFLAGS)
+utils: $(BUILDDIR) $(DEF_OBJS) $(BUILDDIR)/utils.o
+	$(CC) -o $(UTILS_PRODUCT) $(DEF_OBJS) $(BUILDDIR)/utils.o $(CPPFLAGS)
 
 clean :
 	@rm -f $(DEF_OBJS)
 	@rm -f $(MP_OBJS)
 	@rm -f $(BUILDDIR)/main.o
 	@rm -f $(BUILDDIR)/main_mp.o
+	@rm -f $(BUILDDIR)/utils.o
+	@rm -f $(UTILS_PRODUCT)
 	@rm -f $(PRODUCT)
 
 clean-mp :
@@ -47,20 +49,17 @@ info :
 	@echo "EIGEN FLAG:" $(EIGEN_FLAG)
 	@echo "BOOST FLAG:" $(BOOST_FLAG)
 	@echo "COMPILER:" $(CC)
-	@echo "COMPILER FLAGS:" $(CPPFLAGS)
-	@echo "COMPILER MP FLAGS:" $(MP_FLAGS)
+	@echo "COMPILER REGULAR FLAGS:" $(CPPFLAGS)
+	@echo "COMPILER MP FLAGS:" $(CPPFLAGS) $(MP_FLAGS)
 	@echo "LIBRARIES:" $(MP_LIBS)
-	@echo "PRODUCT:" $(PRODUCT)
-	@echo "DEFAULT OBJS:" $(DEF_OBJS)
-	@echo "MP OBJS:" $(MP_OBJS)
+	@echo "PRODUCTS:" $(PRODUCT) $(UTILS_PRODUCT)
+	@echo "REGULAR OBJS:" $(DEF_OBJS)
+	@echo "MP OBJS:" $(DEF_OBJS) $(MP_OBJS)
 
 
 ### Prerequisites
 $(BUILDDIR) :
 	@mkdir $@
-
-$(BUILDDIR)/store_GL_quadrature.o : src/utils.cpp
-	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
 
 $(BUILDDIR)/defs_custom.o : src/defs_custom.cpp
 	$(CC) -c -o $@ $< $(CPPFLAGS) $(MP_FLAGS) $(MP_LIBS)
